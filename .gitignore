@@ -1,0 +1,77 @@
+# Build directories
+build*/
+Build*/
+debug/
+release/
+out/
+bin/
+lib/
+
+# Qt Creator user files
+*.pro.user
+*.pro.user.*
+*.pri.user
+*.qbs.user
+*.qbs.user.*
+
+# Qt Creator CMake build
+CMakeLists.txt.user
+CMakeCache.txt
+CMakeFiles/
+cmake_install.cmake
+
+# qmake
+Makefile
+Makefile.*
+*.o
+*.obj
+*.lo
+*.la
+
+# moc / rcc / uic generated files
+moc_*.cpp
+moc_*.h
+qrc_*.cpp
+ui_*.h
+
+# Qt resource compiler
+*.qmlc
+*.jsc
+
+# Compiled libraries / executables
+*.exe
+*.dll
+*.so
+*.so.*
+*.dylib
+*.app
+
+# Debug symbols
+*.dSYM/
+*.pdb
+
+# Temporary files
+*.tmp
+*.temp
+*.log
+*.cache
+*.autosave
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Qt Creator CMake build folders
+cmake-build-*/
+
+# Test output
+*.gcno
+*.gcda
+*.gcov
+
+# Coverage
+coverage/
+
+# Qt Installer Framework
+packages/*/data/*.7z
+packages/*/data/*.tar
