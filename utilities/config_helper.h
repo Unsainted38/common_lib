@@ -10,6 +10,7 @@ class ConfigHelper : public QObject {
 public:
     explicit ConfigHelper(QObject *parent = nullptr);
     static void loadTransportConfig(QString path, QString section);
+    static quint8 loadModBusDeviceAddress(QString path, QString section);
 
 
 signals:
