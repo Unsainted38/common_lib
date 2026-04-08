@@ -9,59 +9,35 @@ SerialCircularRequester::SerialCircularRequester(MyAbstractConnect *transport, N
     connect(timer, &QTimer::timeout, this, &SerialCircularRequester::processNext);
     connect(m_connect, &MyAbstractConnect::readyToProcessData, this, &SerialCircularRequester::translateData);
     connect(m_connect, SIGNAL(readyToProcessData(QByteArray)), this, SLOT(unlock()), Qt::UniqueConnection);
-    memTimer = new QTimer(this);
-    connect(memTimer, &QTimer::timeout, this, [this]() {
-
-        qDebug()
-        << "this" << this
-        << "Memory MB:" << currentMemoryUsage()/1024.0/1024.0
-        << "writeQueue:" << m_writeCommands.size()
-        << "readCommands:" << m_readCommands.size();
-
-    });
-    memTimer->start(1000);
-
 }
 #else
 SerialCircularRequester::SerialCircularRequester(AbstractNetworkTransport *transport, NetworkTransportLocker *locker, int pollIntervalMs, QObject *parent)
     : QObject(parent),
       m_transport(transport),
-      m_locker(locker),
-      timer(new QTimer(this)) {
+      timer(new QTimer(this)),
+      m_locker(locker) {
     timer->setInterval(pollIntervalMs);
     connect(timer, &QTimer::timeout, this, &SerialCircularRequester::processNext);
     connect(m_transport, &AbstractNetworkTransport::translateData, this, &SerialCircularRequester::translateData);
     connect(m_transport, SIGNAL(translateData), this, SLOT(unlock()), Qt::UniqueConnection);
-    memTimer = new QTimer(this);
-    connect(memTimer, &QTimer::timeout, this, [this]() {
-
-        qDebug()
-        << "this" << this
-        << "Memory MB:" << currentMemoryUsage()/1024.0/1024.0
-        << "writeQueue:" << m_writeCommands.size()
-        << "readCommands:" << m_readCommands.size();
-
-    });
-    memTimer->start(1000);
 }
 #endif
 
-void SerialCircularRequester::addCommand(AbstractCommand *cmd) {
-    if(m_readCommands.contains(cmd)) {
+void SerialCircularRequester::addCircularCommand(AbstractCommand *cmd) {
+    if(m_circularCommands.contains(cmd)) {
         return;
     }
 
-    m_readCommands.append(cmd);
+    m_circularCommands.append(cmd);
 }
 
-void SerialCircularRequester::addExtraCommand(AbstractCommand *cmd) {
-    m_writeCommands.enqueue(cmd);
+void SerialCircularRequester::addDisposableCommand(AbstractCommand *cmd) {
+    m_disposableCommands.enqueue(cmd);
 }
 
 void SerialCircularRequester::removeCommands() {
-    qDeleteAll(m_readCommands);
-    m_readCommands.clear();
-    //m_writeCommands.clear();
+    qDeleteAll(m_circularCommands);
+    m_circularCommands.clear();
 }
 
 void SerialCircularRequester::startRequest() {
@@ -86,39 +62,34 @@ void SerialCircularRequester::processNext() {
     if(m_locker->isLocked()) {
         return;
     }
-
+    static bool concurent_flag = true;
     AbstractCommand *cmd = nullptr;
 
-    if(!m_writeCommands.isEmpty()) {
-        cmd = m_writeCommands.dequeue();
+    if(!m_disposableCommands.isEmpty() || concurent_flag) {
+
+        cmd = m_disposableCommands.dequeue();
 
         if(cmd) {
             m_locker->lock();
+            concurent_flag = false;
 #ifdef MYABSTRACTCONNECT_H
-            m_connect->writeData(cmd->makeWriteCommand());
-            // disconnect(m_connect, &MyAbstractConnect::readyToProcessData, this, &SerialCircularRequester::unlock);
-            // connect(m_connect, &MyAbstractConnect::readyToProcessData, this, &SerialCircularRequester::unlock);
+            m_connect->writeData(cmd->makeCommand());
 #else
-            m_transport->write(cmd->makeWriteCommand());
-            //disconnect(m_transport, &AbstractNetworkTransport::translateData, this, &SerialCircularRequester::unlock);
-            //connect(m_transport, &AbstractNetworkTransport::translateData, this, &SerialCircularRequester::unlock);
+            m_transport->write(cmd->makeCommand());
 #endif
 
         }
-    } else if(!m_readCommands.isEmpty()) {
-        cmd = m_readCommands[m_readIndex];
-        m_readIndex = (m_readIndex + 1) % m_readCommands.size();
+    } else if(!m_circularCommands.isEmpty()) {
+        cmd = m_circularCommands[m_readIndex];
+        m_readIndex = (m_readIndex + 1) % m_circularCommands.size();
 
         if(cmd) {
             m_locker->lock();
+            concurent_flag = true;
 #ifdef MYABSTRACTCONNECT_H
             m_connect->writeData(cmd->makeReadCommand());
-            // disconnect(m_connect, &MyAbstractConnect::readyToProcessData, this, &SerialCircularRequester::unlock);
-            // connect(m_connect,  &MyAbstractConnect::readyToProcessData, this, &SerialCircularRequester::unlock);
 #else
-            m_transport->write(cmd->makeReadCommand());
-            //disconnect(m_transport, &AbstractNetworkTransport::translateData, this, &SerialCircularRequester::unlock);
-            //connect(m_transport, &AbstractNetworkTransport::translateData, this, &SerialCircularRequester::unlock);
+            m_transport->write(cmd->makeCommand());
 #endif
 
         }
@@ -130,9 +101,4 @@ void SerialCircularRequester::unlock() {
     if(m_locker->isLocked()) {
         m_locker->unlock();
     }
-#ifdef MYABSTRACTCONNECT_H
-    //disconnect(m_connect, &MyAbstractConnect::readyToProcessData, this, &SerialCircularRequester::unlock);
-#else
-    //disconnect(m_transport, &AbstractNetworkTransport::translateData, this, &SerialCircularRequester::unlock);
-#endif
 }

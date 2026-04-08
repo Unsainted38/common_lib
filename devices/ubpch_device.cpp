@@ -2,29 +2,29 @@
 
 UBPChDevice::UBPChDevice(SerialCircularRequester *requester, QString configPath, QString section, QObject *parent)
     : QObject(parent),
-      m_requester(requester),
+      m_configPath(configPath),
       m_section(section),
-      m_configPath(configPath) {
+      m_requester(requester) {
     loadConfig();
     m_timer = new QTimer(this);
     m_timer->start(1000);
     m_parser = new UBPChParser();
-    EnableCommand = new UBPChCommand(m_deviceAddr, m_masterAddr, 0x0000, ValueType::QUINT8);
-    AttenuationCommand = new UBPChCommand(m_deviceAddr, m_masterAddr, 0x0005, ValueType::QUINT8);
-    ErrorStatusCommand = new UBPChCommand(m_deviceAddr, m_masterAddr, 0x0037, ValueType::QUINT8);
-    DeviceStatusCommand = new UBPChCommand(m_deviceAddr, m_masterAddr, 0x0014, ValueType::QUINT8);
-    OutputPowerCommand = new UBPChCommand(m_deviceAddr, m_masterAddr, 0x0019, ValueType::QUINT16);
-    EmpowerCommand = new UBPChCommand(m_deviceAddr, m_masterAddr, 0x001E, ValueType::QUINT16);
-    TemperatureCommand = new UBPChCommand(m_deviceAddr, m_masterAddr, 0x0023, ValueType::QINT8);
-    VoltageCommand = new UBPChCommand(m_deviceAddr, m_masterAddr, 0x002D, ValueType::QUINT16);
-    m_requester->addCommand(EnableCommand);
-    m_requester->addCommand(AttenuationCommand);
-    m_requester->addCommand(ErrorStatusCommand);
-    m_requester->addCommand(DeviceStatusCommand);
-    m_requester->addCommand(OutputPowerCommand);
-    m_requester->addCommand(EmpowerCommand);
-    m_requester->addCommand(TemperatureCommand);
-    m_requester->addCommand(VoltageCommand);
+    EnableCommand = new UBPChCommand(m_deviceAddr, m_masterAddr, 0x0000, ValueType::QUINT8, CommandType::READ);
+    AttenuationCommand = new UBPChCommand(m_deviceAddr, m_masterAddr, 0x0005, ValueType::QUINT8, CommandType::READ);
+    ErrorStatusCommand = new UBPChCommand(m_deviceAddr, m_masterAddr, 0x0037, ValueType::QUINT8, CommandType::READ);
+    DeviceStatusCommand = new UBPChCommand(m_deviceAddr, m_masterAddr, 0x0014, ValueType::QUINT8, CommandType::READ);
+    OutputPowerCommand = new UBPChCommand(m_deviceAddr, m_masterAddr, 0x0019, ValueType::QUINT16, CommandType::READ);
+    EmpowerCommand = new UBPChCommand(m_deviceAddr, m_masterAddr, 0x001E, ValueType::QUINT16, CommandType::READ);
+    TemperatureCommand = new UBPChCommand(m_deviceAddr, m_masterAddr, 0x0023, ValueType::QINT8, CommandType::READ);
+    VoltageCommand = new UBPChCommand(m_deviceAddr, m_masterAddr, 0x002D, ValueType::QUINT16, CommandType::READ);
+    m_requester->addCircularCommand(EnableCommand);
+    m_requester->addCircularCommand(AttenuationCommand);
+    m_requester->addCircularCommand(ErrorStatusCommand);
+    m_requester->addCircularCommand(DeviceStatusCommand);
+    m_requester->addCircularCommand(OutputPowerCommand);
+    m_requester->addCircularCommand(EmpowerCommand);
+    m_requester->addCircularCommand(TemperatureCommand);
+    m_requester->addCircularCommand(VoltageCommand);
     m_requester->startRequest();
 
     connect(m_requester, SIGNAL(translateData(QByteArray)), m_parser, SLOT(parseReply(QByteArray)));
@@ -51,7 +51,7 @@ void UBPChDevice::loadConfig() {
 
 void UBPChDevice::setEnabled(quint8 value) {
     EnableCommand->setV<quint8>(value);
-    m_requester->addExtraCommand(EnableCommand);
+    m_requester->addDisposableCommand(EnableCommand);
 }
 
 quint8 UBPChDevice::getEnabled() {
@@ -60,7 +60,7 @@ quint8 UBPChDevice::getEnabled() {
 
 void UBPChDevice::setAttenuation(quint8 value) {
     AttenuationCommand->setV<quint8>(value);
-    m_requester->addExtraCommand(AttenuationCommand);
+    m_requester->addDisposableCommand(AttenuationCommand);
 }
 
 quint32 UBPChDevice::getAttenuation() {

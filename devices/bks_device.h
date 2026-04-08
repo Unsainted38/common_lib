@@ -7,7 +7,6 @@
 #include "requesters/serial_circular_requester.h"
 #include "cmd/abstract_command.h"
 #include "parsers/mshpr_parser.h"
-#include "abstract_network_transport.h"
 
 enum BksBaud {
     Baud4800 = 0,
@@ -33,7 +32,6 @@ class BksDevice : public QObject {
     QString m_section;
     SerialCircularRequester *m_requester;
     MShPRParser *m_parser;
-    AbstractNetworkTransport *m_transport;
     AbstractCommand *StatusCommand, *FC1Command, *FC2Command, *FX1Command, *FX2Command, *AddressCommand, *BaudCommand;
     QString m_deviceAddr = "00";
     bool m_statusOnline = false;

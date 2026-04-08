@@ -1,7 +1,7 @@
 #include "mshpr_command.h"
 
-MShPRCommand::MShPRCommand(QString addr, QString cmd, ValueType type)
-    : AbstractCommand(type),
+MShPRCommand::MShPRCommand(QString addr, QString cmd, ValueType value_type, CommandType cmd_type)
+    : AbstractCommand(value_type, cmd_type),
       m_addr(addr),
       m_cmd(cmd) {
 
@@ -59,4 +59,14 @@ const QByteArray &MShPRCommand::makeReadCommand() {
 
 void MShPRCommand::setAddress(QString addr) {
     m_addr = addr;
+}
+
+const QByteArray &MShPRCommand::makeCommand()
+{
+    switch (cmdType) {
+        case CommandType::READ:
+            return makeReadCommand();
+        case CommandType::WRITE:
+            return makeWriteCommand();
+    }
 }

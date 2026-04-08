@@ -30,8 +30,16 @@ HEADERS += \
     cmd/ubpch_command.h \
     devices/bks_device.h \
     devices/compass_lcc5000_device.h \
+    devices/dvt_device.h \
     devices/mshpr_device.h \
     devices/ubpch_device.h \
+    modbus/ModBusCmdTypes.h \
+    modbus/ModBusDto.h \
+    modbus/abstract_modbus_device.h \
+    modbus/abstractmodbuscommand.h \
+    modbus/modbus_parser.h \
+    modbus/modbusrtucommand.h \
+    modbus/modbustcpcommand.h \
     network_transport/abstract_network_transport.h \
     network_transport/abstract_network_transport_factory.h \
     network_transport/network_transport_locker.h \
@@ -41,7 +49,6 @@ HEADERS += \
     parsers/mshpr_parser.h \
     parsers/ubpch_parser.h \
     requesters/serial_circular_requester.h \
-    requesters/serial_requester.h \
     uacs_network_transport/myabstractconnect.h \
     uacs_network_transport/serialconnect.h \
     uacs_network_transport/tcpconnect.h \
@@ -57,8 +64,14 @@ SOURCES += \
     cmd/ubpch_command.cpp \
     devices/bks_device.cpp \
     devices/compass_lcc5000_device.cpp \
+    devices/dvt_device.cpp \
     devices/mshpr_device.cpp \
     devices/ubpch_device.cpp \
+    modbus/abstract_modbus_device.cpp \
+    modbus/abstractmodbuscommand.cpp \
+    modbus/modbus_parser.cpp \
+    modbus/modbusrtucommand.cpp \
+    modbus/modbustcpcommand.cpp \
     network_transport/abstract_network_transport.cpp \
     network_transport/abstract_network_transport_factory.cpp \
     network_transport/serial_transport.cpp \
@@ -67,7 +80,6 @@ SOURCES += \
     parsers/mshpr_parser.cpp \
     parsers/ubpch_parser.cpp \
     requesters/serial_circular_requester.cpp \
-    requesters/serial_requester.cpp \
     uacs_network_transport/myabstractconnect.cpp \
     uacs_network_transport/serialconnect.cpp \
     uacs_network_transport/tcpconnect.cpp \

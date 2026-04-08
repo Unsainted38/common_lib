@@ -3,27 +3,27 @@
 CompassLCC5000Device::CompassLCC5000Device(SerialCircularRequester *requester, QString configPath, QString section, QObject *parent)
     : QObject(parent),
       m_requester(requester),
-      m_configPath(configPath),
-      m_section(section) {
+      m_section(section),
+      m_configPath(configPath) {
     loadConfig();
     m_parser = new CompassLCC5000Parser(m_deviceAddr);
     m_timer = new QTimer(this);
     m_timer->start(1000);
-    AllAnglesRequest = new CompassLCC5000Command(m_deviceAddr, CompassCommands::ALLANGLE, 0x04, ValueType::DOUBLE);
-    PitchRequest = new CompassLCC5000Command(m_deviceAddr, CompassCommands::PITCH, 0x04, ValueType::DOUBLE);
-    RollRequest = new CompassLCC5000Command(m_deviceAddr, CompassCommands::ROLL, 0x04, ValueType::DOUBLE);
-    HeadingRequest = new CompassLCC5000Command(m_deviceAddr, CompassCommands::HEADING, 0x04, ValueType::DOUBLE);
-    MagneticDeclinationCommand = new CompassLCC5000Command(m_deviceAddr, CompassCommands::SETMAGNETICDECLINATION, 0x06, ValueType::DOUBLE);
-    MagneticDeclinationRequest = new CompassLCC5000Command(m_deviceAddr, CompassCommands::MAGNETICDECLINATION, 0x04, ValueType::DOUBLE);
-    BaudRateCommand = new CompassLCC5000Command(m_deviceAddr, CompassCommands::BAUDRATE, 0x05, ValueType::QUINT8);
-    ModuleAddressCommand = new CompassLCC5000Command(m_deviceAddr, CompassCommands::SETMODULEADDRESS, 0x05, ValueType::QUINT8);
-    CurrentAddressRequest = new CompassLCC5000Command(m_deviceAddr, CompassCommands::MODULEADDRESS, 0x04, ValueType::QUINT8);
-    OutputAngleModeCommand = new CompassLCC5000Command(m_deviceAddr, CompassCommands::SETOUTPUTANGLEMODE, 0x05, ValueType::QUINT8);
-    SaveSettingsCommand = new CompassLCC5000Command(m_deviceAddr, CompassCommands::SAVESETTINGS, 0x04, ValueType::QUINT8);
-    SwitchCalibrationOutpuRequest = new CompassLCC5000Command(m_deviceAddr, CompassCommands::SWITCHCALIBRATIONOUTPUT, 0x04, ValueType::QUINT8);
+    AllAnglesRequest = new CompassLCC5000Command(m_deviceAddr, CompassCommands::ALLANGLE, 0x04, ValueType::DOUBLE, CommandType::READ);
+    PitchRequest = new CompassLCC5000Command(m_deviceAddr, CompassCommands::PITCH, 0x04, ValueType::DOUBLE, CommandType::READ);
+    RollRequest = new CompassLCC5000Command(m_deviceAddr, CompassCommands::ROLL, 0x04, ValueType::DOUBLE, CommandType::READ);
+    HeadingRequest = new CompassLCC5000Command(m_deviceAddr, CompassCommands::HEADING, 0x04, ValueType::DOUBLE, CommandType::READ);
+    MagneticDeclinationCommand = new CompassLCC5000Command(m_deviceAddr, CompassCommands::SETMAGNETICDECLINATION, 0x06, ValueType::DOUBLE, CommandType::WRITE);
+    MagneticDeclinationRequest = new CompassLCC5000Command(m_deviceAddr, CompassCommands::MAGNETICDECLINATION, 0x04, ValueType::DOUBLE, CommandType::READ);
+    BaudRateCommand = new CompassLCC5000Command(m_deviceAddr, CompassCommands::BAUDRATE, 0x05, ValueType::QUINT8, CommandType::WRITE);
+    ModuleAddressCommand = new CompassLCC5000Command(m_deviceAddr, CompassCommands::SETMODULEADDRESS, 0x05, ValueType::QUINT8, CommandType::WRITE);
+    CurrentAddressRequest = new CompassLCC5000Command(m_deviceAddr, CompassCommands::MODULEADDRESS, 0x04, ValueType::QUINT8, CommandType::READ);
+    OutputAngleModeCommand = new CompassLCC5000Command(m_deviceAddr, CompassCommands::SETOUTPUTANGLEMODE, 0x05, ValueType::QUINT8, CommandType::WRITE);
+    SaveSettingsCommand = new CompassLCC5000Command(m_deviceAddr, CompassCommands::SAVESETTINGS, 0x04, ValueType::QUINT8, CommandType::WRITE);
+    SwitchCalibrationOutpuRequest = new CompassLCC5000Command(m_deviceAddr, CompassCommands::SWITCHCALIBRATIONOUTPUT, 0x04, ValueType::QUINT8, CommandType::READ);
 
-    m_requester->addCommand(AllAnglesRequest);
-    m_requester->addCommand(MagneticDeclinationRequest);
+    m_requester->addCircularCommand(AllAnglesRequest);
+    m_requester->addCircularCommand(MagneticDeclinationRequest);
     m_requester->startRequest();
 
     connect(m_requester, SIGNAL(translateData(QByteArray)), m_parser, SLOT(parseReply(QByteArray)));
@@ -54,14 +54,14 @@ quint32 CompassLCC5000Device::getBaudRate() {
 
 void CompassLCC5000Device::setBaudRate(quint32 baud) {
     BaudRateCommand->setV<quint32>(baud);
-    m_requester->addExtraCommand(BaudRateCommand);
-    m_requester->addExtraCommand(SaveSettingsCommand);
+    m_requester->addDisposableCommand(BaudRateCommand);
+    m_requester->addDisposableCommand(SaveSettingsCommand);
 }
 
 void CompassLCC5000Device::setMagneticDeclination(double value) {
     MagneticDeclinationCommand->setV<double>(value);
-    m_requester->addExtraCommand(MagneticDeclinationCommand);
-    m_requester->addExtraCommand(SaveSettingsCommand);
+    m_requester->addDisposableCommand(MagneticDeclinationCommand);
+    m_requester->addDisposableCommand(SaveSettingsCommand);
 }
 
 void CompassLCC5000Device::loadConfig() {

@@ -20,15 +20,12 @@ const quint16 END = 0xFCFC;
 class UBPChCommand : public AbstractCommand {
     Q_OBJECT
 public:
-    explicit UBPChCommand(quint8 deviceAddr, quint8 masterAddr, quint16 regAddr, ValueType type)
-        : AbstractCommand(type),
+    explicit UBPChCommand(quint8 deviceAddr, quint8 masterAddr, quint16 regAddr, ValueType value_type, CommandType cmd_type)
+        : AbstractCommand(value_type, cmd_type),
         m_regAddr(regAddr),
         m_deviceAddr(deviceAddr),
         m_masterAddr(masterAddr) {
-
     }
-    const QByteArray &makeReadCommand() override;
-    const QByteArray &makeWriteCommand() override;
     void processData(const QByteArray &data, quint16 regAddr) override;
 signals:
 private:
@@ -38,8 +35,14 @@ private:
     static QByteArray pack(const QByteArray &frame);
     QByteArray cachedRead;
     QByteArray cachedWrite;
+    const QByteArray &makeReadCommand();
+    const QByteArray &makeWriteCommand();
 private slots:
     //void onDataReady(QByteArray data, quint16 regAddr);
+
+    // AbstractCommand interface
+public:
+    const QByteArray &makeCommand() override;
 };
 
 #endif // UBPCHCOMMAND_H

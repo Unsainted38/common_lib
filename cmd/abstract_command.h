@@ -5,6 +5,7 @@
 #include <QIODevice>
 #include <QDataStream>
 #include <QDebug>
+#include <QList>
 
 enum ValueType {
     QINT8 = 7,
@@ -14,15 +15,23 @@ enum ValueType {
     QINT32 = 31,
     QSTRING = 25,
     FLOAT = 26,
-    DOUBLE = 27
+    DOUBLE = 27,
+    QBYTEARRAY = 28,
+    QLISTQUINT16 = 29,
+};
+
+enum class CommandType {
+    READ,
+    WRITE,
+    MODBUS,
+    READWRITE,
 };
 
 class AbstractCommand : public QObject {
     Q_OBJECT
 public:
-    explicit AbstractCommand(ValueType type, QObject *parent = nullptr);
-    virtual const QByteArray &makeReadCommand() = 0;
-    virtual const QByteArray &makeWriteCommand() = 0;
+    explicit AbstractCommand(ValueType value_type, CommandType cmd_type = CommandType::READWRITE, QObject *parent = nullptr);
+    virtual const QByteArray &makeCommand() = 0;
     template <typename T> T getV() {
         switch(m_type) {
             case ValueType::QINT8:
@@ -51,6 +60,7 @@ public:
         switch(m_type) {
             case ValueType::QINT8:
                 m_val8 = (qint8)v;
+                break;
 
             case ValueType::QUINT8:
                 m_valu8 = (quint8)v;
@@ -83,19 +93,51 @@ public:
     QString getS() {
         return m_valQStr;
     }
+    void setByteArray(QByteArray ba) {
+        m_valQByteArray = ba;
+    }
+    QByteArray getByteArray() {
+        return m_valQByteArray;
+    }
+
+    void setListQuint16(QList<quint16> list) {
+        m_valListQuint16 = list;
+    }
+    QList<quint16> getListQuint16() {
+        return m_valListQuint16;
+    }
+    void setListQuint8(QList<quint8> list) {
+        m_valListQuint8 = list;
+    }
+    QList<quint8> getListQuint8() {
+        return m_valListQuint8;
+    }
+
+    void setBool(bool b) {
+        m_valBool = b;
+    }
+
+    bool getBool() {
+        return m_valBool;
+    }
 public slots:
     virtual void processData(const QByteArray &data, quint16 regAddr);
 signals:
 protected:
     ValueType m_type;
+    CommandType cmdType;
     qint8 m_val8 = 0;
     quint8 m_valu8 = 0;
     quint16 m_valu16 = 0;
     quint32 m_valu32 = 0;
     qint32 m_val32 = 0;
     QString m_valQStr = "";
+    QByteArray m_valQByteArray = "";
+    QList<quint16> m_valListQuint16;
+    QList<quint8> m_valListQuint8;
     float m_valf = 0.0;
     double m_vald = 0.0;
+    bool m_valBool = false;
 };
 
 #endif // ABSTRACTCOMMAND_H

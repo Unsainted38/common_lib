@@ -10,12 +10,12 @@ MShPRDevice::MShPRDevice(SerialCircularRequester *requester, QString configPath,
     m_parser = new MShPRParser();
     m_timer = new QTimer(this);
     m_timer->start(1000);
-    StatusCommand = new MShPRCommand(m_deviceAddr, MShPR_COMMANDS::STATUS_CMD, ValueType::QSTRING);
-    AttenuationCommand = new MShPRCommand(m_deviceAddr, MShPR_COMMANDS::ATTENUATION_CMD, ValueType::QSTRING);
-    GeterodinCommand = new MShPRCommand(m_deviceAddr, MShPR_COMMANDS::GETERODIN_CMD, ValueType::QSTRING);
-    AddressCommand = new MShPRCommand(m_deviceAddr, MShPR_COMMANDS::ADDRESS_CMD, ValueType::QSTRING);
-    BaudCommand = new MShPRCommand(m_deviceAddr, MShPR_COMMANDS::BAUD_CMD, ValueType::QSTRING);
-    m_requester->addCommand(StatusCommand);
+    StatusCommand = new MShPRCommand(m_deviceAddr, MShPR_COMMANDS::STATUS_CMD, ValueType::QSTRING, CommandType::READ);
+    AttenuationCommand = new MShPRCommand(m_deviceAddr, MShPR_COMMANDS::ATTENUATION_CMD, ValueType::QSTRING, CommandType::WRITE);
+    GeterodinCommand = new MShPRCommand(m_deviceAddr, MShPR_COMMANDS::GETERODIN_CMD, ValueType::QSTRING, CommandType::WRITE);
+    AddressCommand = new MShPRCommand(m_deviceAddr, MShPR_COMMANDS::ADDRESS_CMD, ValueType::QSTRING, CommandType::WRITE);
+    BaudCommand = new MShPRCommand(m_deviceAddr, MShPR_COMMANDS::BAUD_CMD, ValueType::QSTRING, CommandType::WRITE);
+    m_requester->addCircularCommand(StatusCommand);
     m_requester->startRequest();
 
     connect(m_requester, SIGNAL(translateData(QByteArray)), m_parser, SLOT(parseReply(QByteArray)));
@@ -53,41 +53,41 @@ QString MShPRDevice::getLastAnswer() {
 
 void MShPRDevice::setAttenuation(quint8 value) {
     AttenuationCommand->setS(QString::number(value));
-    m_requester->addExtraCommand(AttenuationCommand);
+    m_requester->addDisposableCommand(AttenuationCommand);
 }
 
 void MShPRDevice::setGeterodin(quint8 value) {
     GeterodinCommand->setS(QString::number(value));
-    m_requester->addExtraCommand(GeterodinCommand);
+    m_requester->addDisposableCommand(GeterodinCommand);
 }
 
 void MShPRDevice::setAddress(quint8 value) {
     m_deviceAddr = QString::number(value);
 
     AddressCommand->setS(QString::number(value));
-    m_requester->addExtraCommand(AddressCommand);
+    m_requester->addDisposableCommand(AddressCommand);
 
     if(m_deviceAddr.size() == 1) {
         m_deviceAddr.push_front("0");
     }
 
     m_requester->removeCommands();
-    StatusCommand = new MShPRCommand(m_deviceAddr, MShPR_COMMANDS::STATUS_CMD, ValueType::QSTRING);
-    AttenuationCommand = new MShPRCommand(m_deviceAddr, MShPR_COMMANDS::ATTENUATION_CMD, ValueType::QSTRING);
-    GeterodinCommand = new MShPRCommand(m_deviceAddr, MShPR_COMMANDS::GETERODIN_CMD, ValueType::QSTRING);
-    AddressCommand = new MShPRCommand(m_deviceAddr, MShPR_COMMANDS::ADDRESS_CMD, ValueType::QSTRING);
-    BaudCommand = new MShPRCommand(m_deviceAddr, MShPR_COMMANDS::BAUD_CMD, ValueType::QSTRING);
-    m_requester->addCommand(StatusCommand);
+    StatusCommand = new MShPRCommand(m_deviceAddr, MShPR_COMMANDS::STATUS_CMD, ValueType::QSTRING, CommandType::READ);
+    AttenuationCommand = new MShPRCommand(m_deviceAddr, MShPR_COMMANDS::ATTENUATION_CMD, ValueType::QSTRING, CommandType::WRITE);
+    GeterodinCommand = new MShPRCommand(m_deviceAddr, MShPR_COMMANDS::GETERODIN_CMD, ValueType::QSTRING, CommandType::WRITE);
+    AddressCommand = new MShPRCommand(m_deviceAddr, MShPR_COMMANDS::ADDRESS_CMD, ValueType::QSTRING, CommandType::WRITE);
+    BaudCommand = new MShPRCommand(m_deviceAddr, MShPR_COMMANDS::BAUD_CMD, ValueType::QSTRING, CommandType::WRITE);
+    m_requester->addCircularCommand(StatusCommand);
 }
 
 void MShPRDevice::setBaud(MShPRBaud baud) {
     BaudCommand->setS(QString::number(baud));
-    m_requester->addExtraCommand(BaudCommand);
+    m_requester->addDisposableCommand(BaudCommand);
 }
 
 void MShPRDevice::setBaud(quint8 baud) {
     BaudCommand->setS(QString::number(baud));
-    m_requester->addExtraCommand(BaudCommand);
+    m_requester->addDisposableCommand(BaudCommand);
 }
 
 void MShPRDevice::processData(QString addr, QMap<QString, int> fieldsMap) {

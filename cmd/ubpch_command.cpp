@@ -61,6 +61,16 @@ const QByteArray &UBPChCommand::makeWriteCommand() {
     return cachedWrite;
 }
 
+const QByteArray &UBPChCommand::makeCommand()
+{
+    switch (cmdType) {
+    case CommandType::READ:
+        return makeReadCommand();
+    case CommandType::WRITE:
+        return makeWriteCommand();
+    }
+}
+
 void UBPChCommand::processData(const QByteArray &data, quint16 regAddr) {
     if(m_regAddr != regAddr) {
         return;

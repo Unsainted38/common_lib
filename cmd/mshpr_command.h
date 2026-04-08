@@ -14,13 +14,19 @@ class MShPRCommand : public AbstractCommand {
     QString m_cmd;
     QByteArray cachedRead;
     QByteArray cachedWrite;
+
+    const QByteArray &makeWriteCommand();
+    const QByteArray &makeReadCommand();
 public:
-    explicit MShPRCommand(QString addr, QString cmd, ValueType type);
-    const QByteArray &makeWriteCommand() override;
-    const QByteArray &makeReadCommand() override;
+    explicit MShPRCommand(QString addr, QString cmd, ValueType value_type, CommandType cmd_type);
+
     void setAddress(QString addr);
 signals:
 
+
+    // AbstractCommand interface
+public:
+    const QByteArray &makeCommand() override;
 };
 
 #endif // MSHPRCOMMAND_H

@@ -1,9 +1,9 @@
 #include "compass_lcc5000_command.h"
 
-CompassLCC5000Command::CompassLCC5000Command(quint8 deviceAddr, quint8 cmdId, quint8 length, ValueType type)
-    : AbstractCommand(type),
-      m_cmdId(cmdId),
+CompassLCC5000Command::CompassLCC5000Command(quint8 deviceAddr, quint8 cmdId, quint8 length, ValueType value_type, CommandType cmd_type)
+    : AbstractCommand(value_type, cmd_type),
       m_deviceAddr(deviceAddr),
+      m_cmdId(cmdId),
       m_length(length) {
 
 }
@@ -60,4 +60,14 @@ const QByteArray &CompassLCC5000Command::makeWriteCommand() {
     res.push_front(HEADERER);
     cachedWrite = res;
     return cachedWrite;
+}
+
+const QByteArray &CompassLCC5000Command::makeCommand()
+{
+    switch (cmdType) {
+    case CommandType::READ:
+        return makeReadCommand();
+    case CommandType::WRITE:
+        return makeWriteCommand();
+    }
 }
