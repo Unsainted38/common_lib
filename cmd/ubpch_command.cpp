@@ -32,25 +32,25 @@ const QByteArray &UBPChCommand::makeWriteCommand() {
       << writeCmd
       << m_regAddr;
 
-    switch(m_type) {
+    switch(valueType) {
         case ValueType::QINT8:
-            o << m_val8;
+            o << (qint8)value.toInt();
             break;
 
         case ValueType::QUINT8:
-            o << m_valu8;
+            o << (quint8)value.toUInt();
             break;
 
         case ValueType::QUINT16:
-            o << m_valu16;
+            o << (quint16)value.toUInt();
             break;
 
         case ValueType::QUINT32:
-            o << m_valu32;
+            o << (quint32)value.toUInt();
             break;
 
         case ValueType::QINT32:
-            o << m_val32;
+            o << (qint32)value.toInt();
             break;
     }
 
@@ -71,6 +71,16 @@ const QByteArray &UBPChCommand::makeCommand()
     }
 }
 
+QVariant UBPChCommand::getValue()
+{
+    return value;
+}
+
+void UBPChCommand::setValue(QVariant v)
+{
+    value = v;
+}
+
 void UBPChCommand::processData(const QByteArray &data, quint16 regAddr) {
     if(m_regAddr != regAddr) {
         return;
@@ -79,26 +89,36 @@ void UBPChCommand::processData(const QByteArray &data, quint16 regAddr) {
     QDataStream in(data);
     in.setByteOrder(QDataStream::LittleEndian);
 
-    switch(m_type) {
+    switch(valueType) {
         case ValueType::QUINT8:
-            in >> m_valu8;
+            quint8 valu8;
+            in >> valu8;
+            value = QVariant::fromValue(valu8);
             break;
 
         case ValueType::QINT8:
-            in >> m_val8;
+            qint8 val8;
+            in >> val8;
+            value = QVariant::fromValue(val8);
+            break;
 
         case ValueType::QUINT16:
-            in >> m_valu16;
+            quint16 valu16;
+            in >> valu16;
+            value = QVariant::fromValue(valu16);
             break;
 
         case ValueType::QUINT32:
-            in >> m_valu32;
+            quint32 valu32;
+            in >> valu32;
+            value = QVariant::fromValue(valu32);
             break;
 
         case ValueType::QINT32:
-            in >> m_val32;
+            quint32 val32;
+            in >> val32;
+            value = QVariant::fromValue(val32);
             break;
-
     };
 }
 QByteArray UBPChCommand::pack(const QByteArray &frame) {

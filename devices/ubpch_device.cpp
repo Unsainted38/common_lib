@@ -50,45 +50,45 @@ void UBPChDevice::loadConfig() {
 }
 
 void UBPChDevice::setEnabled(quint8 value) {
-    EnableCommand->setV<quint8>(value);
+    EnableCommand->setValue(value);
     m_requester->addDisposableCommand(EnableCommand);
 }
 
 quint8 UBPChDevice::getEnabled() {
-    return EnableCommand->getV<quint8>();
+    return EnableCommand->getValue().toUInt();
 }
 
 void UBPChDevice::setAttenuation(quint8 value) {
-    AttenuationCommand->setV<quint8>(value);
+    AttenuationCommand->setValue(value);
     m_requester->addDisposableCommand(AttenuationCommand);
 }
 
 quint32 UBPChDevice::getAttenuation() {
-    return AttenuationCommand->getV<quint32>();
+    return AttenuationCommand->getValue().toUInt();
 }
 
 quint8 UBPChDevice::getErrorStatus() {
-    return ErrorStatusCommand->getV<quint8>();
+    return ErrorStatusCommand->getValue().toUInt();
 }
 
 quint8 UBPChDevice::getDeviceStatus() {
-    return DeviceStatusCommand->getV<quint8>();
+    return DeviceStatusCommand->getValue().toUInt();
 }
 
 float UBPChDevice::getOutputPower() {
-    return OutputPowerCommand->getV<quint32>() / 10.0;
+    return OutputPowerCommand->getValue().toFloat() / 10.0;
 }
 
 float UBPChDevice::getEmpower() {
-    return EmpowerCommand->getV<quint32>() / 10.0;
+    return EmpowerCommand->getValue().toFloat() / 10.0;
 }
 
 qint32 UBPChDevice::getTemperature() {
-    return TemperatureCommand->getV<qint32>();
+    return TemperatureCommand->getValue().toInt();
 }
 
 float UBPChDevice::getVoltage() {
-    float res = VoltageCommand->getV<quint16>() / 10.0;
+    float res = VoltageCommand->getValue().toFloat() / 10.0;
     return res;
 }
 
