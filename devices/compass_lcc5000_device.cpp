@@ -53,13 +53,13 @@ quint32 CompassLCC5000Device::getBaudRate() {
 }
 
 void CompassLCC5000Device::setBaudRate(quint32 baud) {
-    BaudRateCommand->setV<quint32>(baud);
+    BaudRateCommand->setValue(baud);
     m_requester->addDisposableCommand(BaudRateCommand);
     m_requester->addDisposableCommand(SaveSettingsCommand);
 }
 
 void CompassLCC5000Device::setMagneticDeclination(double value) {
-    MagneticDeclinationCommand->setV<double>(value);
+    MagneticDeclinationCommand->setValue(value);
     m_requester->addDisposableCommand(MagneticDeclinationCommand);
     m_requester->addDisposableCommand(SaveSettingsCommand);
 }
@@ -91,9 +91,9 @@ void CompassLCC5000Device::processData(const QByteArray &data, quint8 cmdId) {
         m_pitch = BcdConverter::toDouble_SXXXYY(data.mid(0, 3));
     } else if(cmdId == CompassResponces::SETMAGNETICDECLINATION) {
         if(static_cast<quint8>(data[0]) == 0x00) {
-            m_magneticDeclination = MagneticDeclinationCommand->getV<double>();
+            m_magneticDeclination = MagneticDeclinationCommand->getValue().toDouble();
         } else if(static_cast<quint8>(data[0]) == 0xFF) {
-            qDebug() << "Error while writing Magnetic declination: " << MagneticDeclinationCommand->getV<double>();
+            qDebug() << "Error while writing Magnetic declination: " << MagneticDeclinationCommand->getValue().toDouble();
         }
     } else if(cmdId == CompassResponces::MAGNETICDECLINATION) {
         m_magneticDeclination = BcdConverter::toDouble_SXXY(data.mid(0, 2));
@@ -101,9 +101,9 @@ void CompassLCC5000Device::processData(const QByteArray &data, quint8 cmdId) {
         //m_baudRate = CompassBaud::CompassBaudMap.value(data[0]);
     } else if(cmdId == CompassResponces::SETMODULEADDRESS) {
         if(static_cast<quint8>(data[0]) == 0x00) {
-            m_deviceAddr = ModuleAddressCommand->getV<quint8>();
+            m_deviceAddr = ModuleAddressCommand->getValue().toUInt();
         } else if(static_cast<quint8>(data[0]) == 0xFF) {
-            qDebug() << "Error while writing module address: " << ModuleAddressCommand->getV<quint8>();
+            qDebug() << "Error while writing module address: " << ModuleAddressCommand->getValue().toUInt();
         }
     } else if(cmdId == CompassResponces::MODULEADDRESS) {
         m_deviceAddr = static_cast<quint8>(data[0]);

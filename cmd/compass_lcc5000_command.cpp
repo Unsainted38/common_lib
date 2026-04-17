@@ -1,8 +1,7 @@
 #include "compass_lcc5000_command.h"
 
-CompassLCC5000Command::CompassLCC5000Command(quint8 deviceAddr, quint8 cmdId, quint8 length, ValueType value_type, CommandType cmd_type)
-    : AbstractCommand(value_type, cmd_type),
-      m_deviceAddr(deviceAddr),
+CompassLCC5000Command::CompassLCC5000Command(quint8 deviceAddr, quint8 cmdId, quint8 length, ValueType valueType, CommandType cmdType)
+    : m_deviceAddr(deviceAddr),
       m_cmdId(cmdId),
       m_length(length) {
 
@@ -32,23 +31,23 @@ const QByteArray &CompassLCC5000Command::makeWriteCommand() {
       << m_deviceAddr
       << m_cmdId;
 
-    switch(m_type) {
+    switch(valueType) {
         case ValueType::QUINT8:
-            for(auto b : BcdConverter::fromQuint8_XX(m_valu8)) {
+            for(auto b : BcdConverter::fromQuint8_XX(data.toUInt())) {
                 o << static_cast<quint8>(b);
             }
 
             break;
 
         case ValueType::FLOAT:
-            for(auto b : BcdConverter::fromFloat_SXXY(m_valf)) {
+            for(auto b : BcdConverter::fromFloat_SXXY(data.toFloat())) {
                 o << static_cast<quint8>(b);
             }
 
             break;
 
         case ValueType::DOUBLE:
-            for(auto b : BcdConverter::fromDouble_SXXY(m_vald)) {
+            for(auto b : BcdConverter::fromDouble_SXXY(data.toDouble())) {
                 o << static_cast<quint8>(b);
             }
 
@@ -70,4 +69,14 @@ const QByteArray &CompassLCC5000Command::makeCommand()
     case CommandType::WRITE:
         return makeWriteCommand();
     }
+}
+
+QVariant CompassLCC5000Command::getValue()
+{
+    return data;
+}
+
+void CompassLCC5000Command::setValue(QVariant v)
+{
+    data = v;
 }
