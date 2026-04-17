@@ -2,10 +2,7 @@
 #define DVT_DEVICE_H
 
 #include <QObject>
-#include <modbus/modbusrtucommand.h>
-#include <requesters/serial_circular_requester.h>
 #include <modbus/abstract_modbus_device.h>
-#include <modbus/modbus_parser.h>
 
 struct DvtState {
     quint8 status;
@@ -14,7 +11,7 @@ struct DvtState {
     float humidity;
 };
 
-class dvt_device : public AbstractModbusDevice
+class DvtDevice : public AbstractModbusDevice
 {
 
     AbstractCommand *dvtStateCommand;
@@ -22,11 +19,13 @@ class dvt_device : public AbstractModbusDevice
     DvtState dvtInfo;
 
 public:
-    explicit dvt_device(SerialCircularRequester *requester, QString configPath, QString section, QObject *parent = nullptr);
-
+    explicit DvtDevice(SerialCircularRequester *requester, QString configPath, QString section, QObject *parent = nullptr);
+    quint8 status();
+    float pressure();
+    float temperature();
+    float humidity();
 signals:
 private slots:
-    void processData();
     void onTimer();
     void LastAnswer(QByteArray packet);
 };
