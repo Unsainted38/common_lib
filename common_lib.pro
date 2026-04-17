@@ -36,10 +36,18 @@ HEADERS += \
     modbus/ModBusCmdTypes.h \
     modbus/ModBusDto.h \
     modbus/abstract_modbus_device.h \
-    modbus/abstractmodbuscommand.h \
-    modbus/modbus_parser.h \
-    modbus/modbusrtucommand.h \
-    modbus/modbustcpcommand.h \
+    modbus/abstract_modbus_protocol.h \
+    modbus/modbus_protocol_factory.h \
+    modbus/modbus_rtu.h \
+    modbus/modbus_tcp.h \
+    modbus/read_coils.h \
+    modbus/read_descrete_inputs.h \
+    modbus/read_holding_registers.h \
+    modbus/read_input_registers.h \
+    modbus/write_multiple_coils.h \
+    modbus/write_multiple_registers.h \
+    modbus/write_single_coil.h \
+    modbus/write_single_register.h \
     network_transport/abstract_network_transport.h \
     network_transport/abstract_network_transport_factory.h \
     network_transport/network_transport_locker.h \
@@ -52,6 +60,7 @@ HEADERS += \
     uacs_network_transport/myabstractconnect.h \
     uacs_network_transport/serialconnect.h \
     uacs_network_transport/tcpconnect.h \
+    utilities/BitUtils.h \
     utilities/config_helper.h
 
 SOURCES += \
@@ -68,10 +77,18 @@ SOURCES += \
     devices/mshpr_device.cpp \
     devices/ubpch_device.cpp \
     modbus/abstract_modbus_device.cpp \
-    modbus/abstractmodbuscommand.cpp \
-    modbus/modbus_parser.cpp \
-    modbus/modbusrtucommand.cpp \
-    modbus/modbustcpcommand.cpp \
+    modbus/abstract_modbus_protocol.cpp \
+    modbus/modbus_protocol_factory.cpp \
+    modbus/modbus_rtu.cpp \
+    modbus/modbus_tcp.cpp \
+    modbus/read_coils.cpp \
+    modbus/read_descrete_inputs.cpp \
+    modbus/read_holding_registers.cpp \
+    modbus/read_input_registers.cpp \
+    modbus/write_multiple_coils.cpp \
+    modbus/write_multiple_registers.cpp \
+    modbus/write_single_coil.cpp \
+    modbus/write_single_register.cpp \
     network_transport/abstract_network_transport.cpp \
     network_transport/abstract_network_transport_factory.cpp \
     network_transport/serial_transport.cpp \

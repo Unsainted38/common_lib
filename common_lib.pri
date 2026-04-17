@@ -1,4 +1,6 @@
-INCLUDEPATH +=  $$PWD \
+include($$PWD/../common.pri)
+INCLUDEPATH +=  \
+                $$PWD \
                 $$PWD/cmd \
                 $$PWD/algorithm \
                 $$PWD/network_transport \
