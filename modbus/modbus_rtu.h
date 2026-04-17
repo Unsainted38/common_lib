@@ -1,34 +1,19 @@
-#ifndef MODBUSRTUCOMMAND_H
-#define MODBUSRTUCOMMAND_H
+#ifndef MODBUS_RTU_H
+#define MODBUS_RTU_H
 
-#include <QObject>
-#include <modbus/abstractmodbuscommand.h>
-#include <cmd/abstract_command.h>
+#include <modbus/abstract_modbus_protocol.h>
+#include <algorithm/crc16.h>
+#include <utilities/BitUtils.h>
 
-class ModBusRtuCommand : public AbstractModBusCommand
+class ModBusRtu : public AbstractModBusProtocol
 {
     Q_OBJECT
-    ModBusCmdTypes modbusType;
+    quint8 slaveID;
 public:
-    explicit ModBusRtuCommand(quint8 device_address, quint16 reg_address,
-                              quint16 regs_count,
-                              ModBusCmdTypes modbus_type, ValueType value_type);
-
+    explicit ModBusRtu(quint8 slaveID);
+    QByteArray pack(QByteArray &pdu) override;
+    quint8 deviceID() override;
 signals:
-
-private:
-    QByteArray readCoils() override;
-    QByteArray readDescreteInputs() override;
-    QByteArray readHoldingRegs() override;
-    QByteArray readInputRegs() override;
-    QByteArray writeSingleCoil() override;
-    QByteArray writeSingleReg() override;
-    QByteArray writeMultipleCoils() override;
-    QByteArray writeMultipleRegisters() override;
-
-    // AbstractCommand interface
-public:
-    const QByteArray &makeCommand() override;
 };
 
-#endif // MODBUSRTUCOMMAND_H
+#endif // MODBUS_RTU_H

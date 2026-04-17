@@ -1,32 +1,24 @@
-#ifndef MODBUSTCPCOMMAND_H
-#define MODBUSTCPCOMMAND_H
+#ifndef MODBUS_TCP_H
+#define MODBUS_TCP_H
 
 #include <QObject>
-#include <modbus/abstractmodbuscommand.h>
+#include <modbus/abstract_modbus_protocol.h>
 
-class ModBusTcpCommand : public AbstractModBusCommand
+class ModBusTcp : public AbstractModBusProtocol
 {
     Q_OBJECT
-    ModBusCmdTypes modbusType;
-
+    quint16 transactionID;
+    const quint16 protocolID = 0;
+    quint8 slaveID;
 public:
-    explicit ModBusTcpCommand(quint8 device_address, quint16 reg_address,
-                              quint16 regs_count,
-                              ModBusCmdTypes modbus_type, ValueType value_type);
-    QByteArray readCoils() override;
-    QByteArray readDescreteInputs() override;
-    QByteArray readHoldingRegs() override;
-    QByteArray readInputRegs() override;
-    QByteArray writeSingleCoil() override;
-    QByteArray writeSingleReg() override;
-    QByteArray writeMultipleCoils() override;
-    QByteArray writeMultipleRegisters() override;
+    explicit ModBusTcp(quint16 slaveID);
+    QByteArray pack(QByteArray &pdu) override;
 signals:
 
-    // AbstractCommand interface
-public:
-    const QByteArray &makeCommand() override;
 
+    // AbstractModBusProtocol interface
+public:
+    quint8 deviceID() override;
 };
 
-#endif // MODBUSTCPCOMMAND_H
+#endif // MODBUS_TCP_H

@@ -1,56 +1,21 @@
-#include "modbustcpcommand.h"
+#include "modbus_tcp.h"
 
-ModBusTcpCommand::ModBusTcpCommand(quint8 device_address, quint16 reg_address,
-                                   quint16 regs_count,
-                                   ModBusCmdTypes modbus_type, ValueType value_type)
-    :
-    AbstractModBusCommand(device_address, reg_address,
-                            regs_count,value_type),
-    modbusType(modbus_type)
+ModBusTcp::ModBusTcp(quint16 slaveID)
+    :   slaveID(slaveID)
 {}
 
-QByteArray ModBusTcpCommand::readCoils()
+QByteArray ModBusTcp::pack(QByteArray &pdu)
 {
+    QByteArray tcpPacket;
+    tcpPacket.append(transactionID);
 
+    tcpPacket.append(slaveID);
+    tcpPacket.append(pdu);
+    return tcpPacket;
 }
 
-QByteArray ModBusTcpCommand::readDescreteInputs()
+quint8 ModBusTcp::deviceID()
 {
-
-}
-
-QByteArray ModBusTcpCommand::readHoldingRegs()
-{
-
-}
-
-QByteArray ModBusTcpCommand::readInputRegs()
-{
-
-}
-
-QByteArray ModBusTcpCommand::writeSingleCoil()
-{
-
-}
-
-QByteArray ModBusTcpCommand::writeSingleReg()
-{
-
-}
-
-QByteArray ModBusTcpCommand::writeMultipleCoils()
-{
-
-}
-
-QByteArray ModBusTcpCommand::writeMultipleRegisters()
-{
-
-}
-
-const QByteArray &ModBusTcpCommand::makeCommand()
-{
-
+    return slaveID;
 }
 
