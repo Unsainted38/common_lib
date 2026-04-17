@@ -4,13 +4,22 @@ AbstractModbusDevice::AbstractModbusDevice(SerialCircularRequester *requester, Q
     : QObject(parent),
     requester(requester)
 {
-    parser = new ModBusParser();
-    address = ConfigHelper::loadModBusDeviceAddress(configPath, section);
-
-    connect()
+    protocol = ModBusProtocolFactory::getInstance(configPath, section);
+    deviceID = protocol->deviceID();
+    requester->startRequest();
 }
 
 quint8 AbstractModbusDevice::deviceAddress()
 {
-    return address;
+    return deviceID;
+}
+
+void AbstractModbusDevice::addCircularCommand(AbstractCommand *cmd)
+{
+    requester->addCircularCommand(cmd);
+}
+
+void AbstractModbusDevice::executeCommand(AbstractCommand *cmd)
+{
+    requester->addDisposableCommand(cmd);
 }
