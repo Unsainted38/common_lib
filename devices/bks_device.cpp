@@ -10,13 +10,13 @@ BksDevice::BksDevice(SerialCircularRequester *requester, QString configPath, QSt
     m_parser = new MShPRParser();
     m_timer = new QTimer(this);
     m_timer->start(1000);
-    StatusCommand = new MShPRCommand(m_deviceAddr, BKS_COMMANDS::STATUS_CMD, ValueType::QSTRING, CommandType::READ);
-    FC1Command = new MShPRCommand(m_deviceAddr, BKS_COMMANDS::FC_LOW_FREQ_CMD, ValueType::QSTRING, CommandType::WRITE);
-    FC2Command = new MShPRCommand(m_deviceAddr, BKS_COMMANDS::FC_HIGH_FREQ_CMD, ValueType::QSTRING, CommandType::WRITE);
-    FX1Command = new MShPRCommand(m_deviceAddr, BKS_COMMANDS::FX_LOW_FREQ_CMD, ValueType::QSTRING, CommandType::WRITE);
-    FX2Command = new MShPRCommand(m_deviceAddr, BKS_COMMANDS::FX_HIGH_FREQ_CMD, ValueType::QSTRING, CommandType::WRITE);
-    AddressCommand = new MShPRCommand(m_deviceAddr, BKS_COMMANDS::STATUS_CMD, ValueType::QSTRING, CommandType::WRITE);
-    BaudCommand = new MShPRCommand(m_deviceAddr, BKS_COMMANDS::STATUS_CMD, ValueType::QSTRING, CommandType::WRITE);
+    StatusCommand = new MShPRCommand(m_deviceAddr, BKS_COMMANDS::STATUS_CMD, CommandType::READ);
+    FC1Command = new MShPRCommand(m_deviceAddr, BKS_COMMANDS::FC_LOW_FREQ_CMD, CommandType::WRITE);
+    FC2Command = new MShPRCommand(m_deviceAddr, BKS_COMMANDS::FC_HIGH_FREQ_CMD, CommandType::WRITE);
+    FX1Command = new MShPRCommand(m_deviceAddr, BKS_COMMANDS::FX_LOW_FREQ_CMD, CommandType::WRITE);
+    FX2Command = new MShPRCommand(m_deviceAddr, BKS_COMMANDS::FX_HIGH_FREQ_CMD, CommandType::WRITE);
+    AddressCommand = new MShPRCommand(m_deviceAddr, BKS_COMMANDS::STATUS_CMD, CommandType::WRITE);
+    BaudCommand = new MShPRCommand(m_deviceAddr, BKS_COMMANDS::STATUS_CMD, CommandType::WRITE);
     m_requester->addCircularCommand(StatusCommand);
     m_requester->startRequest();
 
@@ -62,37 +62,37 @@ bool BksDevice::getStatusOnline() {
 }
 
 void BksDevice::setFC1(quint8 FC1) {
-    FC1Command->setS(QString::number(FC1));
+    FC1Command->setValue(QString::number(FC1));
     m_requester->addDisposableCommand(FC1Command);
 }
 
 void BksDevice::setFC2(quint8 FC2) {
-    FC2Command->setS(QString::number(FC2));
+    FC2Command->setValue(QString::number(FC2));
     m_requester->addDisposableCommand(FC2Command);
 }
 
 void BksDevice::setFX1(quint8 FX1) {
-    FX1Command->setS(QString::number(FX1));
+    FX1Command->setValue(QString::number(FX1));
     m_requester->addDisposableCommand(FX1Command);
 }
 
 void BksDevice::setFX2(quint8 FX2) {
-    FX2Command->setS(QString::number(FX2));
+    FX2Command->setValue(QString::number(FX2));
     m_requester->addDisposableCommand(FX2Command);
 }
 
 void BksDevice::setDeviceAddress(quint8 value) {
-    AddressCommand->setS(QString::number(value));
+    AddressCommand->setValue(QString::number(value));
     m_requester->addDisposableCommand(AddressCommand);
 }
 
 void BksDevice::setBaud(BksBaud baud) {
-    BaudCommand->setS(QString::number(baud));
+    BaudCommand->setValue(QString::number(baud));
     m_requester->addDisposableCommand(BaudCommand);
 }
 
 void BksDevice::setBaud(quint8 baud) {
-    BaudCommand->setS(QString::number(baud));
+    BaudCommand->setValue(QString::number(baud));
     m_requester->addDisposableCommand(BaudCommand);
 }
 
