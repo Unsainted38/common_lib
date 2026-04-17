@@ -1,20 +1,21 @@
 #include "mshpr_command.h"
 
-MShPRCommand::MShPRCommand(QString addr, QString cmd, ValueType value_type, CommandType cmd_type)
-    : AbstractCommand(value_type, cmd_type),
-      m_addr(addr),
-      m_cmd(cmd) {
+MShPRCommand::MShPRCommand(QString addr, QString cmd, CommandType cmdType)
+    :
+    m_addr(addr),
+    m_cmd(cmd),
+    cmdType(cmdType){
 
 }
 
 const QByteArray &MShPRCommand::makeWriteCommand() {
     QByteArray payload;
 
-    if((m_cmd == "AT1" || m_cmd == "ADR") && m_valQStr.size() == 1) {
-        m_valQStr.push_front("0");
+    if((m_cmd == "AT1" || m_cmd == "ADR") && data.size() == 1) {
+        data.push_front("0");
     }
 
-    payload = "<" + m_addr.toUtf8() + "/" + m_cmd.toUtf8() + "=" + m_valQStr.toUtf8() + "*";
+    payload = "<" + m_addr.toUtf8() + "/" + m_cmd.toUtf8() + "=" + data.toUtf8() + "*";
 
     quint8 checksum = 0;
 
@@ -64,9 +65,19 @@ void MShPRCommand::setAddress(QString addr) {
 const QByteArray &MShPRCommand::makeCommand()
 {
     switch (cmdType) {
-        case CommandType::READ:
-            return makeReadCommand();
-        case CommandType::WRITE:
-            return makeWriteCommand();
+    case CommandType::READ:
+        return makeReadCommand();
+    case CommandType::WRITE:
+        return makeWriteCommand();
     }
+}
+
+QVariant MShPRCommand::getValue()
+{
+    return QVariant(data);
+}
+
+void MShPRCommand::setValue(QVariant v)
+{
+    data = v.toString();
 }

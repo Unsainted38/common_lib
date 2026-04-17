@@ -10,11 +10,11 @@ MShPRDevice::MShPRDevice(SerialCircularRequester *requester, QString configPath,
     m_parser = new MShPRParser();
     m_timer = new QTimer(this);
     m_timer->start(1000);
-    StatusCommand = new MShPRCommand(m_deviceAddr, MShPR_COMMANDS::STATUS_CMD, ValueType::QSTRING, CommandType::READ);
-    AttenuationCommand = new MShPRCommand(m_deviceAddr, MShPR_COMMANDS::ATTENUATION_CMD, ValueType::QSTRING, CommandType::WRITE);
-    GeterodinCommand = new MShPRCommand(m_deviceAddr, MShPR_COMMANDS::GETERODIN_CMD, ValueType::QSTRING, CommandType::WRITE);
-    AddressCommand = new MShPRCommand(m_deviceAddr, MShPR_COMMANDS::ADDRESS_CMD, ValueType::QSTRING, CommandType::WRITE);
-    BaudCommand = new MShPRCommand(m_deviceAddr, MShPR_COMMANDS::BAUD_CMD, ValueType::QSTRING, CommandType::WRITE);
+    StatusCommand = new MShPRCommand(m_deviceAddr, MShPR_COMMANDS::STATUS_CMD, CommandType::READ);
+    AttenuationCommand = new MShPRCommand(m_deviceAddr, MShPR_COMMANDS::ATTENUATION_CMD, CommandType::WRITE);
+    GeterodinCommand = new MShPRCommand(m_deviceAddr, MShPR_COMMANDS::GETERODIN_CMD, CommandType::WRITE);
+    AddressCommand = new MShPRCommand(m_deviceAddr, MShPR_COMMANDS::ADDRESS_CMD, CommandType::WRITE);
+    BaudCommand = new MShPRCommand(m_deviceAddr, MShPR_COMMANDS::BAUD_CMD, CommandType::WRITE);
     m_requester->addCircularCommand(StatusCommand);
     m_requester->startRequest();
 
@@ -52,19 +52,19 @@ QString MShPRDevice::getLastAnswer() {
 }
 
 void MShPRDevice::setAttenuation(quint8 value) {
-    AttenuationCommand->setS(QString::number(value));
+    AttenuationCommand->setValue(QString::number(value));
     m_requester->addDisposableCommand(AttenuationCommand);
 }
 
 void MShPRDevice::setGeterodin(quint8 value) {
-    GeterodinCommand->setS(QString::number(value));
+    GeterodinCommand->setValue(QString::number(value));
     m_requester->addDisposableCommand(GeterodinCommand);
 }
 
 void MShPRDevice::setAddress(quint8 value) {
     m_deviceAddr = QString::number(value);
 
-    AddressCommand->setS(QString::number(value));
+    AddressCommand->setValue(QString::number(value));
     m_requester->addDisposableCommand(AddressCommand);
 
     if(m_deviceAddr.size() == 1) {
@@ -72,21 +72,21 @@ void MShPRDevice::setAddress(quint8 value) {
     }
 
     m_requester->removeCommands();
-    StatusCommand = new MShPRCommand(m_deviceAddr, MShPR_COMMANDS::STATUS_CMD, ValueType::QSTRING, CommandType::READ);
-    AttenuationCommand = new MShPRCommand(m_deviceAddr, MShPR_COMMANDS::ATTENUATION_CMD, ValueType::QSTRING, CommandType::WRITE);
-    GeterodinCommand = new MShPRCommand(m_deviceAddr, MShPR_COMMANDS::GETERODIN_CMD, ValueType::QSTRING, CommandType::WRITE);
-    AddressCommand = new MShPRCommand(m_deviceAddr, MShPR_COMMANDS::ADDRESS_CMD, ValueType::QSTRING, CommandType::WRITE);
-    BaudCommand = new MShPRCommand(m_deviceAddr, MShPR_COMMANDS::BAUD_CMD, ValueType::QSTRING, CommandType::WRITE);
+    StatusCommand = new MShPRCommand(m_deviceAddr, MShPR_COMMANDS::STATUS_CMD, CommandType::READ);
+    AttenuationCommand = new MShPRCommand(m_deviceAddr, MShPR_COMMANDS::ATTENUATION_CMD, CommandType::WRITE);
+    GeterodinCommand = new MShPRCommand(m_deviceAddr, MShPR_COMMANDS::GETERODIN_CMD, CommandType::WRITE);
+    AddressCommand = new MShPRCommand(m_deviceAddr, MShPR_COMMANDS::ADDRESS_CMD, CommandType::WRITE);
+    BaudCommand = new MShPRCommand(m_deviceAddr, MShPR_COMMANDS::BAUD_CMD, CommandType::WRITE);
     m_requester->addCircularCommand(StatusCommand);
 }
 
 void MShPRDevice::setBaud(MShPRBaud baud) {
-    BaudCommand->setS(QString::number(baud));
+    BaudCommand->setValue(QString::number(baud));
     m_requester->addDisposableCommand(BaudCommand);
 }
 
 void MShPRDevice::setBaud(quint8 baud) {
-    BaudCommand->setS(QString::number(baud));
+    BaudCommand->setValue(QString::number(baud));
     m_requester->addDisposableCommand(BaudCommand);
 }
 
