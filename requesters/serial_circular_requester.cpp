@@ -44,6 +44,11 @@ void SerialCircularRequester::startRequest() {
     timer->start();
 }
 
+void SerialCircularRequester::stopRequest()
+{
+    timer->stop();
+}
+
 size_t SerialCircularRequester::currentMemoryUsage()
 {
     mach_task_basic_info info;
@@ -65,31 +70,31 @@ void SerialCircularRequester::processNext() {
     static bool concurent_flag = true;
     AbstractCommand *cmd = nullptr;
 
-    if(!m_disposableCommands.isEmpty() || concurent_flag) {
+    if(!m_disposableCommands.isEmpty() && concurent_flag) {
 
-        cmd = m_disposableCommands.dequeue();
+        currentCmd = m_disposableCommands.dequeue();
 
         if(cmd) {
             m_locker->lock();
             concurent_flag = false;
 #ifdef MYABSTRACTCONNECT_H
-            m_connect->writeData(cmd->makeCommand());
+            m_connect->writeData(currentCmd->makeCommand());
 #else
-            m_transport->write(cmd->makeCommand());
+            m_transport->write(currentCmd->makeCommand());
 #endif
 
         }
     } else if(!m_circularCommands.isEmpty()) {
-        cmd = m_circularCommands[m_readIndex];
+        currentCmd = m_circularCommands[m_readIndex];
         m_readIndex = (m_readIndex + 1) % m_circularCommands.size();
 
         if(cmd) {
             m_locker->lock();
             concurent_flag = true;
 #ifdef MYABSTRACTCONNECT_H
-            m_connect->writeData(cmd->makeReadCommand());
+            m_connect->writeData(currentCmd->makeReadCommand());
 #else
-            m_transport->write(cmd->makeCommand());
+            m_transport->write(currentCmd->makeCommand());
 #endif
 
         }
@@ -97,8 +102,10 @@ void SerialCircularRequester::processNext() {
 
 }
 
-void SerialCircularRequester::unlock() {
-    if(m_locker->isLocked()) {
+void SerialCircularRequester::unlock(QByteArray data) {
+    bool tryParse = currentCmd->tryParse(data);
+    bool locked = m_locker->isLocked();
+    if(locked || tryParse) {
         m_locker->unlock();
     }
 }

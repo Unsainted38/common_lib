@@ -23,6 +23,7 @@ public:
     void addDisposableCommand(AbstractCommand *cmd);
     void removeCommands();
     void startRequest();
+    void stopRequest();
 signals:
     void translateData(QByteArray);
 private:
@@ -40,7 +41,7 @@ private:
     int m_readIndex = 0;
 private slots:
     void processNext();
-    void unlock();
+    void unlock(QByteArray data);
 };
 
 #endif // SERIALCIRCULARREQUESTER_H
