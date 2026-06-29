@@ -37,4 +37,5 @@ bool AbstractCommand::tryParse(const QByteArray &data)
 {
     Q_UNUSED(data);
     qDebug() << "[WARNING!!!] In AbstractCommand class tryParse() [WARNING!!!]";
+    return true;
 }
