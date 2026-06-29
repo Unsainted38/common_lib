@@ -3,8 +3,6 @@
 
 #include <QObject>
 #include "abstract_network_transport.h"
-#include "serial_transport.h"
-#include "tcp_transport.h"
 
 class AbstractNetworkTransportFactory : public QObject {
     Q_OBJECT

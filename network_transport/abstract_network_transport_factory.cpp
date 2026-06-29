@@ -1,4 +1,7 @@
 #include "abstract_network_transport_factory.h"
+#include "serial_transport.h"
+#include "tcp_transport.h"
+#include "udp_transport.h"
 
 AbstractNetworkTransportFactory::AbstractNetworkTransportFactory(QObject *parent)
     : QObject(parent) {
@@ -10,7 +13,7 @@ AbstractNetworkTransport *AbstractNetworkTransportFactory::getInstance(QString I
     } else if(InterfaceType == "tcp") {
         return new TcpTransport(fileName, section);
     } else if(InterfaceType == "udp") {
-
+        return new UdpTransport(fileName, section);
     }
 }
 

@@ -33,6 +33,7 @@ HEADERS += \
     devices/dvt_device.h \
     devices/mshpr_device.h \
     devices/ubpch_device.h \
+    devices/um2_13.h \
     modbus/ModBusCmdTypes.h \
     modbus/ModBusDto.h \
     modbus/abstract_modbus_device.h \
@@ -53,6 +54,7 @@ HEADERS += \
     network_transport/network_transport_locker.h \
     network_transport/serial_transport.h \
     network_transport/tcp_transport.h \
+    network_transport/udp_transport.h \
     parsers/compass_lcc5000_parser.h \
     parsers/mshpr_parser.h \
     parsers/ubpch_parser.h \
@@ -76,6 +78,7 @@ SOURCES += \
     devices/dvt_device.cpp \
     devices/mshpr_device.cpp \
     devices/ubpch_device.cpp \
+    devices/um2_13.cpp \
     modbus/abstract_modbus_device.cpp \
     modbus/abstract_modbus_protocol.cpp \
     modbus/modbus_protocol_factory.cpp \
@@ -93,6 +96,7 @@ SOURCES += \
     network_transport/abstract_network_transport_factory.cpp \
     network_transport/serial_transport.cpp \
     network_transport/tcp_transport.cpp \
+    network_transport/udp_transport.cpp \
     parsers/compass_lcc5000_parser.cpp \
     parsers/mshpr_parser.cpp \
     parsers/ubpch_parser.cpp \
