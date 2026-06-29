@@ -52,6 +52,9 @@ const QByteArray &UBPChCommand::makeWriteCommand() {
         case ValueType::QINT32:
             o << (qint32)value.toInt();
             break;
+        default:
+            qDebug() << "Unsupported value type!";
+            break;
     }
 
     o << GetCrc16_ubpch(res);
