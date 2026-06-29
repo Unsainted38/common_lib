@@ -105,7 +105,7 @@ void SerialCircularRequester::processNext() {
 void SerialCircularRequester::unlock(QByteArray data) {
     bool tryParse = currentCmd->tryParse(data);
     bool locked = m_locker->isLocked();
-    if(locked || tryParse) {
+    if(locked && tryParse) {
         m_locker->unlock();
     }
 }

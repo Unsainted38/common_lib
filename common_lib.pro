@@ -28,12 +28,13 @@ HEADERS += \
     cmd/compass_lcc5000_command.h \
     cmd/mshpr_command.h \
     cmd/ubpch_command.h \
+    cmd/um2_13_commnad.h \
     devices/bks_device.h \
     devices/compass_lcc5000_device.h \
     devices/dvt_device.h \
     devices/mshpr_device.h \
     devices/ubpch_device.h \
-    devices/um2_13.h \
+    devices/um2_13_device.h \
     modbus/ModBusCmdTypes.h \
     modbus/ModBusDto.h \
     modbus/abstract_modbus_device.h \
@@ -73,12 +74,13 @@ SOURCES += \
     cmd/compass_lcc5000_command.cpp \
     cmd/mshpr_command.cpp \
     cmd/ubpch_command.cpp \
+    cmd/um2_13_commnad.cpp \
     devices/bks_device.cpp \
     devices/compass_lcc5000_device.cpp \
     devices/dvt_device.cpp \
     devices/mshpr_device.cpp \
     devices/ubpch_device.cpp \
-    devices/um2_13.cpp \
+    devices/um2_13_device.cpp \
     modbus/abstract_modbus_device.cpp \
     modbus/abstract_modbus_protocol.cpp \
     modbus/modbus_protocol_factory.cpp \

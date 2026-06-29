@@ -2,14 +2,9 @@
 #define UBPCHDEVICE_H
 
 #include <QObject>
-#include "network_transport/abstract_network_transport_factory.h"
 #include "requesters/serial_circular_requester.h"
-#include "cmd/ubpch_command.h"
 #include "cmd/abstract_command.h"
 #include "parsers/ubpch_parser.h"
-#include <QCoreApplication>
-#include <QtEndian>
-#include <type_traits>
 #include <QTimer>
 
 class UBPChDevice : public QObject {

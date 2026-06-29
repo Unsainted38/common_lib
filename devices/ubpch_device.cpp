@@ -1,4 +1,5 @@
 #include "ubpch_device.h"
+#include "cmd/ubpch_command.h"
 
 UBPChDevice::UBPChDevice(SerialCircularRequester *requester, QString configPath, QString section, QObject *parent)
     : QObject(parent),
