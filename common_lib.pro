@@ -64,7 +64,8 @@ HEADERS += \
     uacs_network_transport/serialconnect.h \
     uacs_network_transport/tcpconnect.h \
     utilities/BitUtils.h \
-    utilities/config_helper.h
+    utilities/config_helper.h \
+    utilities/console_utilities.h
 
 SOURCES += \
     algorithm/binary_coded_decimals_converter.cpp \
