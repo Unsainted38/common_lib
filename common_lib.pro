@@ -60,12 +60,18 @@ HEADERS += \
     parsers/mshpr_parser.h \
     parsers/ubpch_parser.h \
     requesters/serial_circular_requester.h \
+    telemetry/i_telemetry_packet_builder.h \
+    telemetry/i_telemetry_packet_source.h \
+    telemetry/i_telemetry_provider.h \
+    telemetry/tcp_telemetry_server.h \
+    telemetry/telemetry_packet_source.h \
     uacs_network_transport/myabstractconnect.h \
     uacs_network_transport/serialconnect.h \
     uacs_network_transport/tcpconnect.h \
-    utilities/BitUtils.h \
+    utilities/bit_utils.h \
     utilities/config_helper.h \
-    utilities/console_utilities.h
+    utilities/console_utilities.h \
+    utilities/random_utils.h
 
 SOURCES += \
     algorithm/binary_coded_decimals_converter.cpp \
@@ -104,10 +110,12 @@ SOURCES += \
     parsers/mshpr_parser.cpp \
     parsers/ubpch_parser.cpp \
     requesters/serial_circular_requester.cpp \
+    telemetry/tcp_telemetry_server.cpp \
     uacs_network_transport/myabstractconnect.cpp \
     uacs_network_transport/serialconnect.cpp \
     uacs_network_transport/tcpconnect.cpp \
-    utilities/config_helper.cpp
+    utilities/config_helper.cpp \
+    utilities/console_utilities.cpp
 
 
 DEFINES += COMMON_LIBRARY

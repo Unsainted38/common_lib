@@ -1,5 +1,5 @@
-#ifndef BITUTILS_H
-#define BITUTILS_H
+#ifndef BIT_UTILS_H
+#define BIT_UTILS_H
 
 #include <QObject>
 
@@ -36,4 +36,4 @@ public:
     }
 };
 
-#endif // BITUTILS_H
+#endif // BIT_UTILS_H

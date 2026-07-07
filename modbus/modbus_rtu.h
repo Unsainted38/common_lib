@@ -3,7 +3,7 @@
 
 #include <modbus/abstract_modbus_protocol.h>
 #include <algorithm/crc16.h>
-#include <utilities/BitUtils.h>
+#include <utilities/bit_utils.h>
 
 class ModBusRtu : public AbstractModBusProtocol
 {
