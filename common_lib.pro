@@ -3,7 +3,7 @@ CONFIG += shared
 #CONFIG += staticlib
 TARGET = common_lib
 
-include($$PWD/../common.pri)
+include($$PWD/common.pri)
 
 QT += core
 QT += network
