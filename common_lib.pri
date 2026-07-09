@@ -1,4 +1,4 @@
-include($$PWD/../common.pri)
+include($$PWD/common.pri)
 INCLUDEPATH +=  \
                 $$PWD \
                 $$PWD/cmd \
