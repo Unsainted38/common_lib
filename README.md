@@ -38,6 +38,11 @@ Command / parser layer
    ↓
 Hardware device or external service
 
-## Usage
+## Used By
 
-The library is intended to be used as a shared codebase for C++/Qt services that communicate with hardware devices over TCP or serial interfaces.
+This library is used by hardware-oriented C++/Qt services and applications:
+
+- `bks_server` — TCP proxy server for hardware device control.
+- `Htra_console` — console service for spectrum analyzer control, telemetry publishing and command processing.
+
+These projects use `common_lib` as a shared foundation for transport abstractions, request/response processing, device communication and protocol-related utilities.
