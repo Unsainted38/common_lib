@@ -17,6 +17,20 @@ Reusable C++/Qt library for hardware-oriented applications, network communicatio
 - `utilities` — shared utility functions.
 - `algorithm` — common algorithms and helpers.
 
+## Typical Use Cases
+
+`common_lib` is designed for C++/Qt applications that communicate with hardware devices or external control systems.
+
+Typical use cases:
+
+- TCP proxy server between an external client and a hardware device.
+- Serial device communication with request/response processing.
+- UDP/TCP transport layer for telemetry and command exchange.
+- Modbus-based command processing.
+- Binary protocol parsing.
+- Shared device abstractions for multiple Qt services.
+- Telemetry data collection and packet building.
+
 ## Tech Stack
 
 - C++
