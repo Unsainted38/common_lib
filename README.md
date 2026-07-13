@@ -76,21 +76,35 @@ Conceptual example:
 #include "requesters/serial_circular_requester.h"
 #include "network_transport/abstract_network_transport_factory.h"
 
-// Project-specific includes depend on the selected transport/requester/device type.
-// This example demonstrates the intended usage pattern.
-
 int main(int argc, char *argv[])
 {
-   QCoreApplication app(argc, argv);
-   // AbstractNetworkTransport implements an interface for interacting with specific transport-layer network protocols.
-   AbstractNetworkTransport *transport = AbstractNetworkTransportFactory::getInstance("Path/to/config.ini", "NameOfConfigSection");
-   NetworkTransportLocker *locker = new NetworkTransportLocker(MaxResponceWaitingTime, MinTransportWritingTimeout);
-   // SerialCircularRequester contains List<AbstractCommand*> and provides consistent sending commands via AbstractNetworkTransport
-   SerialCircularRequester *requester = new SerialCircularRequester(transport, locker);
-   BksDevice *m_device = new BksDevice(requester, "/home/user/develop/playground/etc/device/config.ini", "BksDevice");
-   // Device contains AbstractCommand* type objects. Each of them represents information about specific command to write in transport
-   // and stores execution result.
+    QCoreApplication app(argc, argv);
 
-   return app.exec();
+    const QString transportConfigPath = "config/transport.example.ini";
+    const QString deviceConfigPath = "config/device.example.ini";
+
+    AbstractNetworkTransport *transport =
+        AbstractNetworkTransportFactory::getInstance(
+            transportConfigPath,
+            "Transport"
+        );
+
+    auto *locker = new NetworkTransportLocker(
+        maxResponseWaitingTime,
+        minTransportWritingTimeout
+    );
+
+    auto *requester = new SerialCircularRequester(transport, locker);
+
+    auto *device = new BksDevice(
+        requester,
+        deviceConfigPath,
+        "BksDevice"
+    );
+
+    Q_UNUSED(device)
+
+    return app.exec();
 }
 ```
+The following snippet is a conceptual example. Exact class names and configuration sections may differ depending on the target device.
