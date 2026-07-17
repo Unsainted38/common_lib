@@ -31,7 +31,6 @@ private:
     QString m_section;
     SerialCircularRequester *m_requester;
     UBPChParser *m_parser;
-    AbstractNetworkTransport *m_transport;
     AbstractCommand *EnableCommand, *AttenuationCommand, *ErrorStatusCommand, *DeviceStatusCommand,
                     *OutputPowerCommand, *EmpowerCommand, *TemperatureCommand, *VoltageCommand;
     quint32 m_attenuation;
