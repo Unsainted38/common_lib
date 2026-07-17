@@ -5,7 +5,6 @@
 #include "requesters/serial_circular_requester.h"
 #include "cmd/abstract_command.h"
 #include "parsers/mshpr_parser.h"
-#include "network_transport/abstract_network_transport.h"
 
 struct MShPR_COMMANDS {
     inline static const QString STATUS_CMD = "STA";
@@ -48,7 +47,6 @@ private:
     QString m_section;
     SerialCircularRequester *m_requester;
     MShPRParser *m_parser;
-    AbstractNetworkTransport *m_transport;
     AbstractCommand *StatusCommand, *AttenuationCommand, *GeterodinCommand, *AddressCommand, *BaudCommand;
     QString m_deviceAddr = "01";
     quint8 m_status = 0;
