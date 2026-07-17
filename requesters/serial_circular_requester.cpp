@@ -92,7 +92,7 @@ void SerialCircularRequester::processNext() {
             m_locker->lock();
             concurent_flag = true;
 #ifdef MYABSTRACTCONNECT_H
-            m_connect->writeData(currentCmd->makeReadCommand());
+            m_connect->writeData(currentCmd->makeCommand());
 #else
             m_transport->write(currentCmd->makeCommand());
 #endif
