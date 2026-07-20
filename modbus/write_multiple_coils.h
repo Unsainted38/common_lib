@@ -5,7 +5,6 @@
 #include <abstract_command.h>
 #include <modbus/abstract_modbus_protocol.h>
 
-const quint8 cmdID = 0x0F;
 
 class WriteMultipleCoils : public AbstractCommand
 {
@@ -20,6 +19,7 @@ class WriteMultipleCoils : public AbstractCommand
     QByteArray buffer;
     QByteArray replyHeader;
     bool commandStatus;
+    const quint8 cmdID = 0x0F;
 public:
     explicit WriteMultipleCoils(quint16 coilAddress, quint16 coilsCount, AbstractModBusProtocol *protocol, QObject *parent = nullptr);
 

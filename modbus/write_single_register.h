@@ -4,7 +4,7 @@
 #include <abstract_command.h>
 #include <modbus/abstract_modbus_protocol.h>
 
-const quint8 cmdID = 0x06;
+
 
 class WriteSingleRegister : public AbstractCommand
 {
@@ -19,7 +19,7 @@ class WriteSingleRegister : public AbstractCommand
     QByteArray buffer;
     QByteArray replyHeader;
     bool commandStatus;
-
+    const quint8 cmdID = 0x06;
 public:
     explicit WriteSingleRegister(quint16 regAddress, AbstractModBusProtocol *protocol, QObject *parent = nullptr);
 

@@ -5,7 +5,6 @@
 #include <abstract_command.h>
 #include <modbus/abstract_modbus_protocol.h>
 
-const quint8 cmdID = 0x01;
 
 class ReadCoils : public AbstractCommand
 {
@@ -18,6 +17,7 @@ class ReadCoils : public AbstractCommand
     QByteArray buffer;
     QByteArray replyHeader;
     QVector<quint8> coils;
+    const quint8 cmdID = 0x01;
 public:
     explicit ReadCoils(quint16 coilAddress, quint16 coilsCount, AbstractModBusProtocol *protocol, QObject *parent = nullptr);
 

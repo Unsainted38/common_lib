@@ -6,7 +6,6 @@
 #include <abstract_command.h>
 #include <modbus/abstract_modbus_protocol.h>
 
-const quint8 cmdID = 0x03;
 
 class ReadHoldingRegisters : public AbstractCommand
 {
@@ -18,6 +17,7 @@ class ReadHoldingRegisters : public AbstractCommand
     QByteArray buffer;
     QByteArray replyHeader;
     QVector<quint16> regs;
+    const quint8 cmdID = 0x03;
 public:
     explicit ReadHoldingRegisters(quint16 regAddress, quint16 regsCount, AbstractModBusProtocol *protocol, QObject *parent = nullptr);
 

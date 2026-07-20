@@ -4,7 +4,6 @@
 #include <abstract_command.h>
 #include <modbus/abstract_modbus_protocol.h>
 
-const quint8 cmdID = 0x05;
 
 class ReadDescreteInputs : public AbstractCommand
 {
@@ -17,6 +16,7 @@ class ReadDescreteInputs : public AbstractCommand
     QByteArray buffer;
     QByteArray replyHeader;
     QVector<quint8> inputs;
+    const quint8 cmdID = 0x02;
 public:
     explicit ReadDescreteInputs(quint16 inputAddress, quint16 inputsCount, AbstractModBusProtocol *protocol, QObject *parent = nullptr);
 

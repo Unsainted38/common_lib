@@ -5,7 +5,6 @@
 #include <abstract_command.h>
 #include <modbus/abstract_modbus_protocol.h>
 
-const quint8 cmdID = 0x10;
 
 class WriteMultipleRegisters : public AbstractCommand
 {
@@ -19,6 +18,7 @@ class WriteMultipleRegisters : public AbstractCommand
     QVector<quint16> regs;
     QVector<quint16> cachedRegs;
     bool commandStatus;
+    const quint8 cmdID = 0x10;
 public:
     explicit WriteMultipleRegisters(quint16 regAddress, quint16 regsCount, AbstractModBusProtocol *protocol, QObject *parent = nullptr);
 
