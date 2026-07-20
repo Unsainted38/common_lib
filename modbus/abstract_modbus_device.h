@@ -18,12 +18,12 @@ class AbstractModbusDevice : public QObject
 
 protected:
     AbstractModBusProtocol *protocol;
+    void addCircularCommand(AbstractCommand *cmd);
+    void executeCommand(AbstractCommand *cmd);
 
 public:
     explicit AbstractModbusDevice(SerialCircularRequester *requester, QString configPath, QString section, QObject *parent = nullptr);
     quint8 deviceAddress();
-    void addCircularCommand(AbstractCommand *cmd);
-    void executeCommand(AbstractCommand *cmd);
 
 signals:
 
