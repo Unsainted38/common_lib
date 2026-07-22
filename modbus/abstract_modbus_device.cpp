@@ -6,7 +6,6 @@ AbstractModbusDevice::AbstractModbusDevice(SerialCircularRequester *requester, Q
 {
     protocol = ModBusProtocolFactory::getInstance(configPath, section);
     deviceID = protocol->deviceID();
-    requester->startRequest();
 }
 
 quint8 AbstractModbusDevice::deviceAddress()
