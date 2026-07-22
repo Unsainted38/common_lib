@@ -16,8 +16,10 @@ class SerialCircularRequester : public QObject {
 public:
 #ifdef MYABSTRACTCONNECT_H
     explicit SerialCircularRequester(MyAbstractConnect *transport, NetworkTransportLocker *locker, int pollIntervalMs = 50, QObject *parent = nullptr);
+    MyAbstractConnect* getTransport();
 #else
     explicit SerialCircularRequester(AbstractNetworkTransport *transport, NetworkTransportLocker *locker, int pollIntervalMs = 50, QObject *parent = nullptr);
+    AbstractNetworkTransport* getTransport();
 #endif
     void addCircularCommand(AbstractCommand *cmd);
     void addDisposableCommand(AbstractCommand *cmd);

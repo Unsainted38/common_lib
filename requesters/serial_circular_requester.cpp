@@ -8,7 +8,12 @@ SerialCircularRequester::SerialCircularRequester(MyAbstractConnect *transport, N
     timer->setInterval(pollIntervalMs);
     connect(timer, &QTimer::timeout, this, &SerialCircularRequester::processNext);
     connect(m_connect, &MyAbstractConnect::readyToProcessData, this, &SerialCircularRequester::translateData);
-    connect(m_connect, SIGNAL(readyToProcessData(QByteArray)), this, SLOT(unlock()), Qt::UniqueConnection);
+    connect(m_connect, SIGNAL(readyToProcessData(QByteArray)), this, SLOT(unlock(QByteArray)), Qt::UniqueConnection);
+}
+
+MyAbstractConnect *SerialCircularRequester::getTransport()
+{
+    return m_connect;
 }
 #else
 SerialCircularRequester::SerialCircularRequester(AbstractNetworkTransport *transport, NetworkTransportLocker *locker, int pollIntervalMs, QObject *parent)
@@ -19,7 +24,12 @@ SerialCircularRequester::SerialCircularRequester(AbstractNetworkTransport *trans
     timer->setInterval(pollIntervalMs);
     connect(timer, &QTimer::timeout, this, &SerialCircularRequester::processNext);
     connect(m_transport, &AbstractNetworkTransport::translateData, this, &SerialCircularRequester::translateData);
-    connect(m_transport, SIGNAL(translateData), this, SLOT(unlock()), Qt::UniqueConnection);
+    connect(m_transport, SIGNAL(translateData(QByteArray)), this, SLOT(unlock(QByteArray)), Qt::UniqueConnection);
+}
+
+AbstractNetworkTransport *SerialCircularRequester::getTransport()
+{
+    return m_transport;
 }
 #endif
 
