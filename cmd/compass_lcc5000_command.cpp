@@ -1,9 +1,13 @@
 #include "compass_lcc5000_command.h"
+#include "algorithm/crc8.h"
+#include "algorithm/binary_coded_decimals_converter.h"
 
 CompassLCC5000Command::CompassLCC5000Command(quint8 deviceAddr, quint8 cmdId, quint8 length, ValueType valueType, CommandType cmdType)
     : m_deviceAddr(deviceAddr),
       m_cmdId(cmdId),
-      m_length(length) {
+      m_length(length),
+      valueType(valueType),
+      cmdType(cmdType) {
 
 }
 
