@@ -78,13 +78,13 @@ void SerialCircularRequester::processNext() {
         return;
     }
     static bool concurent_flag = true;
-    AbstractCommand *cmd = nullptr;
+    AbstractCommand *currentCmd = nullptr;
 
     if(!m_disposableCommands.isEmpty() && concurent_flag) {
 
         currentCmd = m_disposableCommands.dequeue();
 
-        if(cmd) {
+        if(currentCmd) {
             m_locker->lock();
             concurent_flag = false;
 #ifdef MYABSTRACTCONNECT_H
@@ -98,7 +98,7 @@ void SerialCircularRequester::processNext() {
         currentCmd = m_circularCommands[m_readIndex];
         m_readIndex = (m_readIndex + 1) % m_circularCommands.size();
 
-        if(cmd) {
+        if(currentCmd) {
             m_locker->lock();
             concurent_flag = true;
 #ifdef MYABSTRACTCONNECT_H
@@ -113,7 +113,10 @@ void SerialCircularRequester::processNext() {
 }
 
 void SerialCircularRequester::unlock(QByteArray data) {
-    bool tryParse = currentCmd->tryParse(data);
+    bool tryParse = false;
+    if (currentCmd) {
+        tryParse = currentCmd->tryParse(data);
+    }
     bool locked = m_locker->isLocked();
     if(locked && tryParse) {
         m_locker->unlock();
