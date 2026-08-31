@@ -10,7 +10,8 @@ SerialConnect::SerialConnect(QString nameport, int baundrate, int databits, QStr
 {
     serial = new QSerialPort(this);
     connect(serial, SIGNAL(readyRead()), this, SLOT(onReadyRead()));
-    //connect(serial, SIGNAL(bytesWritten(qint64)), this, SLOT(handleBytesWritten(qint64)));
+    connect(serial, &QSerialPort::bytesWritten,
+            this, &SerialConnect::handleBytesWritten);
     serial->setPortName(np);
     serial->setBaudRate(br);
 
@@ -45,41 +46,62 @@ SerialConnect::SerialConnect(QString nameport, int baundrate, int databits, QStr
 
 void SerialConnect::writeNext()
 {
-    if (packetQueue.isEmpty()) return;
-    currentPacket = packetQueue.dequeue();
-    serial->write(currentPacket);
-    isBusy = true;
+    if (!serial->isOpen() || packetQueue.isEmpty()) {
+        return;
+    }
+
+    if (!isBusy) {
+        currentPacket = packetQueue.head();
+        currentOffset = 0;
+        isBusy = true;
+    }
+
+    if (currentOffset >= currentPacket.size()) {
+        return;
+    }
+
+    const qint64 written = serial->write(
+        currentPacket.constData() + currentOffset,
+        currentPacket.size() - currentOffset);
+    if (written > 0) {
+        currentOffset += static_cast<qsizetype>(written);
+    } else if (written == 0) {
+        QTimer::singleShot(10, this, &SerialConnect::writeNext);
+    } else {
+        qWarning() << "Serial write failed:" << serial->errorString();
+        QTimer::singleShot(100, this, &SerialConnect::writeNext);
+    }
 }
 
 void SerialConnect::onReadyRead()
 {
     QByteArray data = serial->readAll();
-    isBusy = false;
     emit readyToProcessData(data);
-    if (!packetQueue.isEmpty())
-    {
-        QTimer::singleShot(10, this, SLOT(writeNext()));
-    }
 }
 
 void SerialConnect::handleBytesWritten(qint64 bytes)
 {
     Q_UNUSED(bytes);
-    // When finished writing all bytes of currentPacket
-    if (serial->bytesToWrite() == 0) {
-        isBusy = false;
+    if (isBusy && currentOffset == currentPacket.size() &&
+        serial->bytesToWrite() == 0) {
         if (!packetQueue.isEmpty()) {
-            writeNext();
+            packetQueue.dequeue();
         }
+        currentPacket.clear();
+        currentOffset = 0;
+        isBusy = false;
     }
+
+    writeNext();
 }
 
 void SerialConnect::writeData(const QByteArray &data)
 {
-    // serial->write(data);
-    // serial->flush();
-    // serial->waitForBytesWritten(40);
+    if (data.isEmpty()) {
+        return;
+    }
+
     packetQueue.enqueue(data);
-    if (!isBusy) writeNext();
+    writeNext();
 
 }

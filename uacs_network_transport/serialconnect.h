@@ -25,10 +25,11 @@ public:
     QSerialPort *serial;
     QQueue<QByteArray> packetQueue;
     QByteArray currentPacket;
+    qsizetype currentOffset = 0;
     bool isBusy = false;
 
 
-    void writeData(const QByteArray &data);
+    void writeData(const QByteArray &data) override;
 
 public slots:
     void onReadyRead() override;

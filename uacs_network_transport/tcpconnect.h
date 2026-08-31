@@ -5,7 +5,6 @@
 #include <QDebug>
 #include <QQueue>
 #include <QTimer>
-#include <QElapsedTimer>
 
 #include "myabstractconnect.h"
 
@@ -18,17 +17,17 @@ public:
 
     QTcpSocket *socket;
 
-    QElapsedTimer *elapsedTimer;
     QQueue<QByteArray> packetQueue;
     QByteArray currentPacket;
+    qsizetype currentOffset = 0;
     bool isBusy = false;
 
     void writeData(const QByteArray &data) override;
 
 public slots:
     void onReadyRead() override;
-    void handleBytesWritten(qint64 bytes);
-    void writeNext();
+    void handleBytesWritten(qint64 bytes) override;
+    void writeNext() override;
 };
 
 #endif // TCPCONNECT_H

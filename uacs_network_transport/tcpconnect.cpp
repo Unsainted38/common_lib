@@ -5,52 +5,80 @@ TcpConnect::TcpConnect(QString ip, quint16 port) :
     portConnect(port)
 {
 
-    elapsedTimer = new QElapsedTimer();
     socket = new QTcpSocket(this);
     connect(socket, SIGNAL(readyRead()), this, SLOT(onReadyRead()));
+    connect(socket, &QTcpSocket::bytesWritten,
+            this, &TcpConnect::handleBytesWritten);
+    connect(socket, &QTcpSocket::connected,
+            this, &TcpConnect::writeNext);
+    connect(socket, &QTcpSocket::disconnected, this, [this]() {
+        // В новом TCP-потоке частично переданный кадр нужно начать заново.
+        currentPacket.clear();
+        currentOffset = 0;
+        isBusy = false;
+    });
     socket->connectToHost(ipConnect, portConnect);
 }
 
 void TcpConnect::writeData(const QByteArray &data)
 {
-    socket->write(data);
-    // if(socket->isOpen())
-    // {
-    //     packetQueue.enqueue(data);
-    //     if (!isBusy || (elapsedTimer->elapsed() >= 50)) {
-    //         writeNext();
-    //         elapsedTimer->restart();
-    //     }
-    // }
+    if (data.isEmpty()) {
+        return;
+    }
+
+    packetQueue.enqueue(data);
+    writeNext();
 }
 
 void TcpConnect::onReadyRead()
 {
     QByteArray data = socket->readAll();
-    isBusy = false;
     emit readyToProcessData(data);
-    if (!packetQueue.isEmpty())
-    {
-        QTimer::singleShot(10, this, SLOT(writeNext()));
-    }
 }
 
 void TcpConnect::handleBytesWritten(qint64 bytes)
 {
     Q_UNUSED(bytes);
-    // When finished writing all bytes of currentPacket
-    if (socket->bytesToWrite() == 0) {
-        isBusy = false;
+
+    if (isBusy && currentOffset == currentPacket.size() &&
+        socket->bytesToWrite() == 0) {
         if (!packetQueue.isEmpty()) {
-            writeNext();
+            packetQueue.dequeue();
         }
+        currentPacket.clear();
+        currentOffset = 0;
+        isBusy = false;
     }
+
+    writeNext();
 }
 
 void TcpConnect::writeNext()
 {
-    if (packetQueue.isEmpty()) return;
-    currentPacket = packetQueue.dequeue();
-    socket->write(currentPacket);
-    isBusy = true;
+    if (socket->state() != QAbstractSocket::ConnectedState ||
+        packetQueue.isEmpty()) {
+        return;
+    }
+
+    if (!isBusy) {
+        currentPacket = packetQueue.head();
+        currentOffset = 0;
+        isBusy = true;
+    }
+
+    if (currentOffset >= currentPacket.size()) {
+        return;
+    }
+
+    const qint64 written = socket->write(
+        currentPacket.constData() + currentOffset,
+        currentPacket.size() - currentOffset);
+    if (written > 0) {
+        currentOffset += static_cast<qsizetype>(written);
+    } else if (written == 0) {
+        QTimer::singleShot(10, this, &TcpConnect::writeNext);
+    } else {
+        qWarning() << "TCP write failed:" << socket->errorString();
+        QTimer::singleShot(100, this, &TcpConnect::writeNext);
+    }
 }
