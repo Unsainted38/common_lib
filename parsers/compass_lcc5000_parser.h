@@ -19,7 +19,7 @@ signals:
     void lastAnswer(QByteArray);
 private:
     QByteArray m_buffer;
-    quint8 m_deviceAddr;
+    quint8 m_deviceAddr = 0;
 };
 
 #endif // COMPASSLCC5000PARSER_H

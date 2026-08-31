@@ -8,72 +8,73 @@ MShPRParser::MShPRParser(QObject *parent)
 
 bool MShPRParser::parseReply(const QByteArray &reply) {
     m_buffer.append(reply);
-    int beginIndex = m_buffer.indexOf('>');
-    int endIndex = m_buffer.indexOf("\r\n", beginIndex);
+    bool parsedAny = false;
 
-    if(beginIndex < 0 || endIndex < 0) {
-        return false;
-    }
+    while (true) {
+        const qsizetype beginIndex = m_buffer.indexOf('>');
+        if (beginIndex < 0) {
+            m_buffer.clear();
+            return parsedAny;
+        }
 
-    QByteArray packet = m_buffer.mid(beginIndex, endIndex - beginIndex + 2);
-    m_buffer.remove(0, endIndex + 2);
-    QByteArray body = packet.mid(0, packet.size() - 2);
-    emit lastAnswer(body);
-    int lastStar = body.lastIndexOf('*');
+        if (beginIndex > 0) {
+            m_buffer.remove(0, beginIndex);
+        }
 
-    if(lastStar < 0) {
-        return false;
-    }
+        const qsizetype endIndex = m_buffer.indexOf("\r\n");
+        if (endIndex < 0) {
+            return parsedAny;
+        }
 
-    QByteArray payload = body.left(lastStar + 1);
-    QByteArray csBytes = body.mid(lastStar + 1, 1);
+        const QByteArray body = m_buffer.left(endIndex);
+        m_buffer.remove(0, endIndex + 2);
+        emit lastAnswer(body);
 
-    quint8 sum = 0;
+        const qsizetype lastStar = body.lastIndexOf('*');
+        if (lastStar < 0 || lastStar + 1 >= body.size()) {
+            continue;
+        }
 
-    for(const auto& b : std::as_const(payload)) {
-        sum += static_cast<quint8>(b);
-    }
+        QByteArray payload = body.first(lastStar + 1);
+        quint8 sum = 0;
+        for (const char byte : std::as_const(payload)) {
+            sum += static_cast<quint8>(byte);
+        }
 
-    quint8 csCalc = sum & 0x7F;
+        const quint8 csCalc = sum & 0x7F;
+        const quint8 csPacket =
+            static_cast<quint8>(body.at(lastStar + 1));
+        if (csPacket != csCalc) {
+            qDebug() << "Checksum error";
+            continue;
+        }
 
-    bool ok;
-    quint8 csPacket = static_cast<quint8>(csBytes[0]);
+        payload.remove(0, 1); // Символ '>'.
+        const qsizetype slashIndex = payload.indexOf('/');
+        if (slashIndex < 0) {
+            continue;
+        }
 
-    if(csPacket != csCalc) {
-        qDebug() << "Checksum error";
-        return false;
-    }
+        const QString addr = QString::fromUtf8(payload.first(slashIndex));
+        const QStringList fieldList =
+            QString::fromUtf8(payload.sliced(slashIndex + 1))
+                .split('*', Qt::SkipEmptyParts);
 
-    int slashIndex = payload.remove(0, 1).indexOf('/');
+        QMap<QString, int> fieldsMap;
+        for (const QString &field : fieldList) {
+            const qsizetype equalsIndex = field.indexOf('=');
+            if (equalsIndex <= 0) {
+                continue;
+            }
 
-    if(slashIndex < 0) {
-        return false;
-    }
-
-    QString addr = QString::fromUtf8(payload.left(slashIndex));
-    QByteArray dataFields = payload.mid(slashIndex + 1);
-    const QStringList fieldList = QString::fromUtf8(dataFields).split('*', Qt::SkipEmptyParts);
-
-    QMap<QString, int> fieldsMap;
-
-    for(const QString &f : fieldList) {
-        QString key;
-        int value = 0;
-        int eq = f.indexOf('=');
-
-        if(eq > 0) {
-            key = f.left(eq);
-            value = f.mid(eq + 1).toInt(&ok);
-
-            if(!ok) {
-                value = 0;
+            bool ok = false;
+            const int value = field.sliced(equalsIndex + 1).toInt(&ok);
+            if (ok) {
+                fieldsMap.insert(field.first(equalsIndex), value);
             }
         }
 
-        fieldsMap[key] = value;
+        emit dataReady(addr, fieldsMap);
+        parsedAny = true;
     }
-
-    emit dataReady(addr, fieldsMap);
-
-    return true;
 }

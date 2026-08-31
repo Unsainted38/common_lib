@@ -14,54 +14,57 @@ CompassLCC5000Parser::CompassLCC5000Parser(quint8 deviceAddr, QObject *parent)
 
 bool CompassLCC5000Parser::parseReply(const QByteArray &reply) {
     m_buffer.append(reply);
-    int beginIndex = m_buffer.indexOf(PACKET_BEGIN);
+    bool parsedAny = false;
 
+    while (true) {
+        const qsizetype beginIndex = m_buffer.indexOf(PACKET_BEGIN);
+        if (beginIndex < 0) {
+            m_buffer.clear();
+            return parsedAny;
+        }
 
-    if(beginIndex < 0) {
-        return false;
+        m_buffer.remove(0, beginIndex);
+        if (m_buffer.size() < 2) {
+            return parsedAny;
+        }
+
+        const quint8 packetLength =
+            static_cast<quint8>(m_buffer.at(1));
+        constexpr quint8 minimumPacketLength = 4;
+        if (packetLength < minimumPacketLength) {
+            m_buffer.remove(0, 1);
+            continue;
+        }
+
+        const qsizetype frameSize =
+            static_cast<qsizetype>(packetLength) + 1;
+        if (m_buffer.size() < frameSize) {
+            return parsedAny;
+        }
+
+        const QByteArray packet = m_buffer.mid(1, packetLength);
+        m_buffer.remove(0, frameSize);
+
+        const quint8 calculatedCrc8 =
+            BytesSumCrc(packet.first(packetLength - 1));
+        const quint8 addr = static_cast<quint8>(packet.at(1));
+        const quint8 cmdId = static_cast<quint8>(packet.at(2));
+        const quint8 crc8 =
+            static_cast<quint8>(packet.at(packetLength - 1));
+
+        if (m_deviceAddr != addr) {
+            continue;
+        }
+
+        emit lastAnswer(packet);
+
+        if (crc8 != calculatedCrc8) {
+            qDebug() << "CompassLCC5000 address:"
+                     << addr << "checksum error!";
+            continue;
+        }
+
+        emit dataReady(packet.mid(3, packetLength - 4), cmdId);
+        parsedAny = true;
     }
-
-    m_buffer.remove(0, beginIndex);
-    beginIndex = 0;
-
-    if(m_buffer.size() < 2) {
-        return false;
-    }
-
-    quint8 packetLength = m_buffer[1];
-
-    if(m_buffer.size() < packetLength + 1) {
-        return false;
-    }
-
-    QByteArray packet = m_buffer.mid(beginIndex + 1, packetLength);
-    quint8 calculatedCrc8 = BytesSumCrc(packet.mid(0, packetLength - 1));
-    QDataStream i(&packet, QIODevice::ReadOnly);
-    i.setByteOrder(QDataStream::BigEndian);
-    quint8 addr;
-    quint8 cmdId;
-    QByteArray data;
-    i >> packetLength
-      >> addr
-      >> cmdId;
-
-
-    data = packet.mid(3, packetLength - 4);
-    quint8 crc8 = packet[packetLength - 1];
-
-    m_buffer.remove(0, packetLength + 1);
-
-    if(m_deviceAddr != addr) {
-        return false;
-    }
-
-    emit lastAnswer(packet);
-
-    if(crc8 == calculatedCrc8) {
-        emit dataReady(data, cmdId);
-        return true;
-    }
-
-    qDebug() << "CompassLCC5000 address:" << addr << "checksum error!";
-    return false;
 }
