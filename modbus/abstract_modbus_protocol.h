@@ -10,7 +10,7 @@ class AbstractModBusProtocol : public QObject
     Q_OBJECT
 public:
     explicit AbstractModBusProtocol(QObject *parent = nullptr);
-    virtual QByteArray pack(QByteArray &pdu) = 0;
+    virtual QByteArray pack(const QByteArray &pdu) = 0;
     virtual quint8 deviceID() = 0;
 signals:
 };

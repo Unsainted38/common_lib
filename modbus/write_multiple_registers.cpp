@@ -28,7 +28,7 @@ const QByteArray &WriteMultipleRegisters::makeCommand()
     out << cmdID
         << registerAddress
         << registersCount
-        << static_cast<quint16>(cachedRegs.size());
+        << static_cast<quint8>(cachedRegs.size());
     for (const quint16 &word : cachedRegs) {
         out << word;
     }

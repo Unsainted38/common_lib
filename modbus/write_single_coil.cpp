@@ -26,7 +26,7 @@ const QByteArray &WriteSingleCoil::makeCommand()
     out.setFloatingPointPrecision(QDataStream::SinglePrecision);
     out << cmdID
         << coilAddress
-        << (cachedCoil ? 0xFF00 : 0x0000);
+        << static_cast<quint16>(cachedCoil ? 0xFF00 : 0x0000);
     cachedCommand = protocol->pack(cachedCommand);
     return cachedCommand;
 }

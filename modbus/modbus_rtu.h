@@ -11,7 +11,7 @@ class ModBusRtu : public AbstractModBusProtocol
     quint8 slaveID;
 public:
     explicit ModBusRtu(quint8 slaveID);
-    QByteArray pack(QByteArray &pdu) override;
+    QByteArray pack(const QByteArray &pdu) override;
     quint8 deviceID() override;
 signals:
 };

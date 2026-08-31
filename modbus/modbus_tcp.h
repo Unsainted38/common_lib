@@ -7,12 +7,12 @@
 class ModBusTcp : public AbstractModBusProtocol
 {
     Q_OBJECT
-    quint16 transactionID;
+    quint16 transactionID = 0;
     const quint16 protocolID = 0;
     quint8 slaveID;
 public:
     explicit ModBusTcp(quint16 slaveID);
-    QByteArray pack(QByteArray &pdu) override;
+    QByteArray pack(const QByteArray &pdu) override;
 signals:
 
 
