@@ -2,6 +2,7 @@
 #define DVT_DEVICE_H
 
 #include <QObject>
+#include <QTimer>
 #include <modbus/abstract_modbus_device.h>
 
 struct DvtState {
@@ -17,6 +18,7 @@ class DvtDevice : public AbstractModbusDevice
     AbstractCommand *dvtStateCommand;
     quint8 deviceAddress;
     DvtState dvtInfo;
+    QTimer *m_timer;
 
 public:
     explicit DvtDevice(SerialCircularRequester *requester, QString configPath, QString section, QObject *parent = nullptr);

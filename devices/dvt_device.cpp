@@ -1,10 +1,15 @@
 #include "dvt_device.h"
 
 DvtDevice::DvtDevice(SerialCircularRequester *requester, QString configPath, QString section, QObject *parent)
-    : AbstractModbusDevice(requester, configPath, section)
+    : AbstractModbusDevice(requester, configPath, section, parent)
 {
     dvtStateCommand = new ReadHoldingRegisters(0, 60, protocol);
     addCircularCommand(dvtStateCommand);
+
+    m_timer = new QTimer();
+    m_timer->start(100);
+
+    connect(m_timer, SIGNAL(timeout()), this, SLOT(onTimer()));
 }
 
 quint8 DvtDevice::status()
