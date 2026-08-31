@@ -6,33 +6,47 @@ WriteMultipleRegisters::WriteMultipleRegisters(quint16 regAddress, quint16 regsC
     registerAddress(regAddress),
     registersCount(regsCount)
 {
-    byteCount = regsCount * sizeof(quint16);
 }
 
-const QByteArray &WriteMultipleRegisters::makeCommand()
+const QByteArray& WriteMultipleRegisters::makeCommand()
 {
-    if (!cachedCommand.isEmpty() && (regs == cachedRegs)) {
+    constexpr quint16 maxRegistersPerRequest = 123;
+    buffer.clear();
+    commandStatus = false;
+
+    if (registersCount == 0 ||
+        registersCount > maxRegistersPerRequest ||
+        static_cast<quint32>(registerAddress) + registersCount > 0x10000U ||
+        regs.size() != static_cast<qsizetype>(registersCount)) {
+        qWarning() << "Invalid Write Multiple Registers request:"
+                   << "registersCount =" << registersCount
+                   << "values count =" << regs.size();
+
+        cachedCommand.clear();
         return cachedCommand;
     }
-    QDataStream HEADER(&replyHeader, QDataStream::WriteOnly);
-    HEADER.setByteOrder(QDataStream::BigEndian);
-    HEADER.setFloatingPointPrecision(QDataStream::SinglePrecision);
-    HEADER  << protocol->deviceID()
-           << cmdID
-           << byteCount;
 
-    cachedRegs = regs;
-    QDataStream out(&cachedCommand, QDataStream::WriteOnly);
-    out.setByteOrder(QDataStream::BigEndian);
-    out.setFloatingPointPrecision(QDataStream::SinglePrecision);
-    out << cmdID
-        << registerAddress
-        << registersCount
-        << static_cast<quint8>(cachedRegs.size());
-    for (const quint16 &word : cachedRegs) {
-        out << word;
+    if (cachedPdu.isEmpty() || regs != cachedRegs) {
+        const quint8 payloadByteCount =
+            static_cast<quint8>(registersCount * sizeof(quint16));
+
+        cachedPdu.clear();
+        QDataStream out(&cachedPdu, QIODevice::WriteOnly);
+        out.setByteOrder(QDataStream::BigEndian);
+
+        out << cmdID
+            << registerAddress
+            << registersCount
+            << payloadByteCount;
+
+        for (const quint16 value : std::as_const(regs)) {
+            out << value;
+        }
+
+        cachedRegs = regs;
     }
-    cachedCommand = protocol->pack(cachedCommand);
+
+    cachedCommand = protocol->pack(cachedPdu);
     return cachedCommand;
 }
 
@@ -48,43 +62,62 @@ bool WriteMultipleRegisters::isSuccess()
 
 bool WriteMultipleRegisters::tryParse(const QByteArray &data)
 {
-    quint16 packetLength;
-    QByteArray packet;
-    QDataStream in(&packet, QIODevice::ReadOnly);
-    quint16 packetCrc;
-    quint16 calculatedCrc;
-    bool finded = false;
+    buffer.append(data);
     commandStatus = false;
 
-    if (replyHeader.size() == 0) {
-        return false;
-    }
+    while (true) {
+        ModbusFrame frame;
 
-    buffer.append(data);
-    int replyHeaderIndex = buffer.indexOf(replyHeader);
-    if (replyHeaderIndex < 0 && (buffer.size() > replyHeader.size())) {
-        buffer.remove(0, buffer.size() - replyHeader.size());
-        return finded;
-    }
+        const ModbusParseStatus status =
+            protocol->tryExtractFrame(buffer, frame);
 
-    while (replyHeaderIndex >=0) {
-        packetLength = replyHeader.size() + byteCount + 2;
-        if (buffer.size() >= replyHeaderIndex + packetLength) {
-            packet = buffer.mid(replyHeaderIndex, packetLength);
-            in.setByteOrder(QDataStream::LittleEndian);
-            in.device()->seek(packet.size() - 2);
-            in >> packetCrc;
-            calculatedCrc = GetCrc16(packet);
-            if (packetCrc == calculatedCrc) {
-                commandStatus = true;
-                finded = true;
-            }
-
-        } else {
-            break;
+        if (status == ModbusParseStatus::Incomplete) {
+            return false;
         }
-        buffer.remove(0, replyHeaderIndex + packetLength);
-        replyHeaderIndex = buffer.indexOf(replyHeader);
+
+        if (status == ModbusParseStatus::Invalid) {
+            continue;
+        }
+
+        if (frame.pdu.isEmpty()) {
+            continue;
+        }
+
+        QDataStream in(frame.pdu);
+        in.setByteOrder(QDataStream::BigEndian);
+
+        quint8 function = 0;
+        in >> function;
+
+        // Exception-ответ тоже завершает ожидание.
+        if (function == (cmdID | 0x80)) {
+            quint8 exceptionCode = 0;
+            in >> exceptionCode;
+
+            qWarning() << "Modbus exception:"
+                       << exceptionCode;
+
+            commandStatus = false;
+            return true;
+        }
+
+        if (function != cmdID) {
+            qWarning() << "Unexpected Modbus function:" << function;
+            return true;
+        }
+
+        quint16 responseAddress = 0;
+        quint16 responseCount = 0;
+
+        in >> responseAddress
+            >> responseCount;
+
+        commandStatus = in.status() == QDataStream::Ok &&
+                        frame.pdu.size() == 5 &&
+                        responseAddress == registerAddress &&
+                        responseCount == registersCount;
+
+        // Ответ получен, requester может снять блокировку.
+        return true;
     }
-    return finded;
 }

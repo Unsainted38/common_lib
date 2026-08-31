@@ -4,30 +4,24 @@ WriteSingleCoil::WriteSingleCoil(quint16 coilAddress, AbstractModBusProtocol *pr
     : AbstractCommand(parent),
     protocol(protocol),
     coilAddress(coilAddress)
-{
-    byteCount = sizeof(quint8);
-}
+{}
 
 const QByteArray &WriteSingleCoil::makeCommand()
 {
-    if (!cachedCommand.isEmpty() && (coil == cachedCoil)) {
-        return cachedCommand;
-    }
-    QDataStream HEADER(&replyHeader, QDataStream::WriteOnly);
-    HEADER.setByteOrder(QDataStream::BigEndian);
-    HEADER.setFloatingPointPrecision(QDataStream::SinglePrecision);
-    HEADER  << protocol->deviceID()
-           << cmdID
-           << byteCount;
+    buffer.clear();
+    commandStatus = false;
 
-    cachedCoil = coil;
-    QDataStream out(&cachedCommand, QDataStream::WriteOnly);
-    out.setByteOrder(QDataStream::BigEndian);
-    out.setFloatingPointPrecision(QDataStream::SinglePrecision);
-    out << cmdID
-        << coilAddress
-        << static_cast<quint16>(cachedCoil ? 0xFF00 : 0x0000);
-    cachedCommand = protocol->pack(cachedCommand);
+    if (cachedPdu.isEmpty() || coil != cachedCoil) {
+        cachedPdu.clear();
+        QDataStream out(&cachedPdu, QIODevice::WriteOnly);
+        out.setByteOrder(QDataStream::BigEndian);
+        out << cmdID
+            << coilAddress
+            << static_cast<quint16>(coil ? 0xFF00 : 0x0000);
+        cachedCoil = coil;
+    }
+
+    cachedCommand = protocol->pack(cachedPdu);
     return cachedCommand;
 }
 
@@ -43,49 +37,48 @@ bool WriteSingleCoil::isSuccess()
 
 bool WriteSingleCoil::tryParse(const QByteArray &data)
 {
-    quint16 packetLength;
-    QByteArray packet;
-    QDataStream in(&packet, QIODevice::ReadOnly);
-    quint16 packetCrc;
-    quint16 calculatedCrc;
-    bool finded = false;
     commandStatus = false;
-
-    if (replyHeader.size() == 0) {
-        return false;
-    }
-
     buffer.append(data);
-    int replyHeaderIndex = buffer.indexOf(replyHeader);
-    if (replyHeaderIndex < 0 && (buffer.size() > replyHeader.size())) {
-        buffer.remove(0, buffer.size() - replyHeader.size());
-        return finded;
-    }
 
-    while (replyHeaderIndex >=0) {
-        packetLength = replyHeader.size() + byteCount + 2;
-        if (buffer.size() >= replyHeaderIndex + packetLength) {
-            packet = buffer.mid(replyHeaderIndex, packetLength);
-            in.setByteOrder(QDataStream::LittleEndian);
-            in.device()->seek(packet.size() - 2);
-            in >> packetCrc;
-            calculatedCrc = GetCrc16(packet);
-            if (packetCrc == calculatedCrc) {
-                in.device()->seek(0);
-                in.device()->seek(replyHeader.size());
-                in.setByteOrder(QDataStream::BigEndian);
-                    in >> coil;
-                if (coil == cachedCoil) {
-                    commandStatus = true;
-                }
-                finded = true;
-            }
+    while (true) {
+        ModbusFrame frame;
+        const auto status = protocol->tryExtractFrame(buffer, frame);
 
-        } else {
-            break;
+        if (status == ModbusParseStatus::Incomplete) {
+            return false;
         }
-        buffer.remove(0, replyHeaderIndex + packetLength);
-        replyHeaderIndex = buffer.indexOf(replyHeader);
+
+        if (status == ModbusParseStatus::Invalid || frame.pdu.isEmpty()) {
+            continue;
+        }
+
+        QDataStream in(frame.pdu);
+        in.setByteOrder(QDataStream::BigEndian);
+
+        quint8 function = 0;
+        in >> function;
+
+        if (function == (cmdID | 0x80)) {
+            quint8 exceptionCode = 0;
+            in >> exceptionCode;
+            qWarning() << "Modbus exception:" << exceptionCode;
+            return true;
+        }
+
+        if (function != cmdID) {
+            qWarning() << "Unexpected Modbus function:" << function;
+            return true;
+        }
+
+        quint16 responseAddress = 0;
+        quint16 responseValue = 0;
+        in >> responseAddress >> responseValue;
+
+        const quint16 expectedValue = cachedCoil ? 0xFF00 : 0x0000;
+        commandStatus = in.status() == QDataStream::Ok &&
+                        frame.pdu.size() == 5 &&
+                        responseAddress == coilAddress &&
+                        responseValue == expectedValue;
+        return true;
     }
-    return finded;
 }

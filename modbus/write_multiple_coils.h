@@ -11,14 +11,13 @@ class WriteMultipleCoils : public AbstractCommand
     Q_OBJECT
     AbstractModBusProtocol *protocol;
     QByteArray cachedCommand;
+    QByteArray cachedPdu;
     quint16 coilAddress;
     quint16 coilsCount;
     QVector<quint8> coils;
     QVector<quint8> cachedCoils;
-    quint8 byteCount;
     QByteArray buffer;
-    QByteArray replyHeader;
-    bool commandStatus;
+    bool commandStatus = false;
     const quint8 cmdID = 0x0F;
 public:
     explicit WriteMultipleCoils(quint16 coilAddress, quint16 coilsCount, AbstractModBusProtocol *protocol, QObject *parent = nullptr);

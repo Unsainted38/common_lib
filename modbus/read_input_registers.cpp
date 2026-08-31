@@ -6,28 +6,32 @@ ReadInputRegisters::ReadInputRegisters(quint16 regAddress, quint16 regsCount, Ab
     registerAddress(regAddress),
     registersCount(regsCount)
 {
-    byteCount = registersCount * sizeof(registersCount);
+    byteCount = static_cast<quint8>(registersCount * sizeof(quint16));
 }
 
 const QByteArray &ReadInputRegisters::makeCommand()
 {
-    if (!cachedCommand.isEmpty()) {
+    constexpr quint16 maxRegistersPerRequest = 125;
+    buffer.clear();
+
+    if (registersCount == 0 || registersCount > maxRegistersPerRequest ||
+        static_cast<quint32>(registerAddress) + registersCount > 0x10000U) {
+        qWarning() << "Invalid Read Input Registers request:"
+                   << "address =" << registerAddress
+                   << "count =" << registersCount;
+        cachedCommand.clear();
         return cachedCommand;
     }
-    QDataStream HEADER(&replyHeader, QDataStream::WriteOnly);
-    HEADER.setByteOrder(QDataStream::BigEndian);
-    HEADER.setFloatingPointPrecision(QDataStream::SinglePrecision);
-    HEADER  << protocol->deviceID()
-           << cmdID
-           << byteCount;
 
-    QDataStream out(&cachedCommand, QDataStream::WriteOnly);
-    out.setByteOrder(QDataStream::BigEndian);
-    out.setFloatingPointPrecision(QDataStream::SinglePrecision);
-    out << cmdID
-        << registerAddress
-        << registersCount;
-    cachedCommand = protocol->pack(cachedCommand);
+    if (cachedPdu.isEmpty()) {
+        QDataStream out(&cachedPdu, QIODevice::WriteOnly);
+        out.setByteOrder(QDataStream::BigEndian);
+        out << cmdID
+            << registerAddress
+            << registersCount;
+    }
+
+    cachedCommand = protocol->pack(cachedPdu);
     return cachedCommand;
 }
 
@@ -38,49 +42,62 @@ QVariant ReadInputRegisters::getValue()
 
 bool ReadInputRegisters::tryParse(const QByteArray &data)
 {
-    quint16 packetLength;
-    QByteArray packet;
-    QDataStream in(&packet, QIODevice::ReadOnly);
-    quint16 packetCrc;
-    quint16 calculatedCrc;
-    bool finded = false;
-
-    if (replyHeader.size() == 0) {
-        return false;
-    }
-
     buffer.append(data);
-    int replyHeaderIndex = buffer.indexOf(replyHeader);
-    if (replyHeaderIndex < 0 && (buffer.size() > replyHeader.size())) {
-        buffer.remove(0, buffer.size() - replyHeader.size());
-        return finded;
-    }
 
-    while (replyHeaderIndex >=0) {
-        packetLength = replyHeader.size() + byteCount + 2;
-        if (buffer.size() >= replyHeaderIndex + packetLength) {
-            packet = buffer.mid(replyHeaderIndex, packetLength);
-            in.setByteOrder(QDataStream::LittleEndian);
-            in.device()->seek(packet.size() - 2);
-            in >> packetCrc;
-            calculatedCrc = GetCrc16(packet);
-            if (packetCrc == calculatedCrc) {
-                in.device()->seek(0);
-                in.device()->seek(replyHeader.size());
-                in.setByteOrder(QDataStream::BigEndian);
-                for (int i = 0; i < registersCount; i++) {
-                    quint16 reg;
-                    in >> reg;
-                    regs.append(reg);
-                }
-                finded = true;
-            }
+    while (true) {
+        ModbusFrame frame;
+        const auto status = protocol->tryExtractFrame(buffer, frame);
 
-        } else {
-            break;
+        if (status == ModbusParseStatus::Incomplete) {
+            return false;
         }
-        buffer.remove(0, replyHeaderIndex + packetLength);
-        replyHeaderIndex = buffer.indexOf(replyHeader);
+
+        if (status == ModbusParseStatus::Invalid || frame.pdu.isEmpty()) {
+            continue;
+        }
+
+        QDataStream in(frame.pdu);
+        in.setByteOrder(QDataStream::BigEndian);
+
+        quint8 function = 0;
+        in >> function;
+
+        if (function == (cmdID | 0x80)) {
+            quint8 exceptionCode = 0;
+            in >> exceptionCode;
+            qWarning() << "Modbus exception:" << exceptionCode;
+            return true;
+        }
+
+        if (function != cmdID) {
+            qWarning() << "Unexpected Modbus function:" << function;
+            return true;
+        }
+
+        quint8 responseByteCount = 0;
+        in >> responseByteCount;
+
+        if (in.status() != QDataStream::Ok ||
+            responseByteCount != byteCount ||
+            frame.pdu.size() != static_cast<qsizetype>(2 + responseByteCount)) {
+            qWarning() << "Invalid Read Input Registers response byte count:"
+                       << responseByteCount;
+            return true;
+        }
+
+        QVector<quint16> parsedRegs;
+        parsedRegs.reserve(registersCount);
+        for (quint16 i = 0; i < registersCount; ++i) {
+            quint16 value = 0;
+            in >> value;
+            parsedRegs.append(value);
+        }
+
+        if (in.status() != QDataStream::Ok) {
+            return true;
+        }
+
+        regs = std::move(parsedRegs);
+        return true;
     }
-    return finded;
 }

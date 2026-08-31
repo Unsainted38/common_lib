@@ -11,14 +11,12 @@ class WriteSingleRegister : public AbstractCommand
     Q_OBJECT
     AbstractModBusProtocol *protocol;
     QByteArray cachedCommand;
+    QByteArray cachedPdu;
     quint16 registerAddress;
-    quint16 registersCount;
-    quint16 reg;
-    quint16 cachedReg;
-    quint8 byteCount;
+    quint16 reg = 0;
+    quint16 cachedReg = 0;
     QByteArray buffer;
-    QByteArray replyHeader;
-    bool commandStatus;
+    bool commandStatus = false;
     const quint8 cmdID = 0x06;
 public:
     explicit WriteSingleRegister(quint16 regAddress, AbstractModBusProtocol *protocol, QObject *parent = nullptr);

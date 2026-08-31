@@ -89,7 +89,6 @@ SOURCES += \
     devices/ubpch_device.cpp \
     devices/um2_13_device.cpp \
     modbus/abstract_modbus_device.cpp \
-    modbus/abstract_modbus_protocol.cpp \
     modbus/modbus_protocol_factory.cpp \
     modbus/modbus_rtu.cpp \
     modbus/modbus_tcp.cpp \

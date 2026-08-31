@@ -5,34 +5,51 @@ WriteMultipleCoils::WriteMultipleCoils(quint16 coilAddress, quint16 coilsCount, 
     protocol(protocol),
     coilAddress(coilAddress),
     coilsCount(coilsCount)
-{
-    byteCount = coilsCount * sizeof(quint8);
-}
+{}
 
 const QByteArray &WriteMultipleCoils::makeCommand()
 {
-    if (!cachedCommand.isEmpty() && (coils == cachedCoils)) {
+    constexpr quint16 maxCoilsPerRequest = 1968;
+    buffer.clear();
+    commandStatus = false;
+
+    if (coilsCount == 0 ||
+        coilsCount > maxCoilsPerRequest ||
+        static_cast<quint32>(coilAddress) + coilsCount > 0x10000U ||
+        coils.size() != static_cast<qsizetype>(coilsCount)) {
+        qWarning() << "Invalid Write Multiple Coils request:"
+                   << "coilsCount =" << coilsCount
+                   << "values count =" << coils.size();
+        cachedCommand.clear();
         return cachedCommand;
     }
-    QDataStream HEADER(&replyHeader, QDataStream::WriteOnly);
-    HEADER.setByteOrder(QDataStream::BigEndian);
-    HEADER.setFloatingPointPrecision(QDataStream::SinglePrecision);
-    HEADER  << protocol->deviceID()
-           << cmdID
-           << byteCount;
 
-    cachedCoils = coils;
-    QDataStream out(&cachedCommand, QDataStream::WriteOnly);
-    out.setByteOrder(QDataStream::BigEndian);
-    out.setFloatingPointPrecision(QDataStream::SinglePrecision);
-    out << cmdID
-        << coilAddress
-        << coilsCount
-        << static_cast<quint8>((coilsCount + 7) / 8);
-    for (const quint8 &word : cachedCoils) {
-        out << word;
+    if (cachedPdu.isEmpty() || coils != cachedCoils) {
+        const quint8 payloadByteCount =
+            static_cast<quint8>((coilsCount + 7) / 8);
+
+        QByteArray packedCoils(payloadByteCount, '\0');
+        for (quint16 i = 0; i < coilsCount; ++i) {
+            if (coils.at(i) != 0) {
+                packedCoils[i / 8] = static_cast<char>(
+                    static_cast<quint8>(packedCoils.at(i / 8)) |
+                    static_cast<quint8>(1U << (i % 8)));
+            }
+        }
+
+        cachedPdu.clear();
+        QDataStream out(&cachedPdu, QIODevice::WriteOnly);
+        out.setByteOrder(QDataStream::BigEndian);
+        out << cmdID
+            << coilAddress
+            << coilsCount
+            << payloadByteCount;
+        out.writeRawData(packedCoils.constData(),
+                         static_cast<int>(packedCoils.size()));
+        cachedCoils = coils;
     }
-    cachedCommand = protocol->pack(cachedCommand);
+
+    cachedCommand = protocol->pack(cachedPdu);
     return cachedCommand;
 }
 
@@ -48,43 +65,47 @@ bool WriteMultipleCoils::isSuccess()
 
 bool WriteMultipleCoils::tryParse(const QByteArray &data)
 {
-    quint16 packetLength;
-    QByteArray packet;
-    QDataStream in(&packet, QIODevice::ReadOnly);
-    quint16 packetCrc;
-    quint16 calculatedCrc;
-    bool finded = false;
     commandStatus = false;
-
-    if (replyHeader.size() == 0) {
-        return false;
-    }
-
     buffer.append(data);
-    int replyHeaderIndex = buffer.indexOf(replyHeader);
-    if (replyHeaderIndex < 0 && (buffer.size() > replyHeader.size())) {
-        buffer.remove(0, buffer.size() - replyHeader.size());
-        return finded;
-    }
 
-    while (replyHeaderIndex >=0) {
-        packetLength = replyHeader.size() + byteCount + 2;
-        if (buffer.size() >= replyHeaderIndex + packetLength) {
-            packet = buffer.mid(replyHeaderIndex, packetLength);
-            in.setByteOrder(QDataStream::LittleEndian);
-            in.device()->seek(packet.size() - 2);
-            in >> packetCrc;
-            calculatedCrc = GetCrc16(packet);
-            if (packetCrc == calculatedCrc) {
-                commandStatus = true;
-                finded = true;
-            }
+    while (true) {
+        ModbusFrame frame;
+        const auto status = protocol->tryExtractFrame(buffer, frame);
 
-        } else {
-            break;
+        if (status == ModbusParseStatus::Incomplete) {
+            return false;
         }
-        buffer.remove(0, replyHeaderIndex + packetLength);
-        replyHeaderIndex = buffer.indexOf(replyHeader);
+
+        if (status == ModbusParseStatus::Invalid || frame.pdu.isEmpty()) {
+            continue;
+        }
+
+        QDataStream in(frame.pdu);
+        in.setByteOrder(QDataStream::BigEndian);
+
+        quint8 function = 0;
+        in >> function;
+
+        if (function == (cmdID | 0x80)) {
+            quint8 exceptionCode = 0;
+            in >> exceptionCode;
+            qWarning() << "Modbus exception:" << exceptionCode;
+            return true;
+        }
+
+        if (function != cmdID) {
+            qWarning() << "Unexpected Modbus function:" << function;
+            return true;
+        }
+
+        quint16 responseAddress = 0;
+        quint16 responseCount = 0;
+        in >> responseAddress >> responseCount;
+
+        commandStatus = in.status() == QDataStream::Ok &&
+                        frame.pdu.size() == 5 &&
+                        responseAddress == coilAddress &&
+                        responseCount == coilsCount;
+        return true;
     }
-    return finded;
 }

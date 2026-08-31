@@ -9,12 +9,12 @@ class ReadInputRegisters : public AbstractCommand
 {
     Q_OBJECT
     QByteArray cachedCommand;
+    QByteArray cachedPdu;
     AbstractModBusProtocol *protocol;
     quint16 registerAddress;
     quint16 registersCount;
     quint8 byteCount;
     QByteArray buffer;
-    QByteArray replyHeader;
     QVector<quint16> regs;
     const quint8 cmdID = 0x04;
 

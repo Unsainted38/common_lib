@@ -10,12 +10,12 @@ class ReadCoils : public AbstractCommand
 {
     Q_OBJECT
     QByteArray cachedCommand;
+    QByteArray cachedPdu;
     AbstractModBusProtocol *protocol;
     quint16 coilAddress;
     quint16 coilsCount;
     quint8 byteCount;
     QByteArray buffer;
-    QByteArray replyHeader;
     QVector<quint8> coils;
     const quint8 cmdID = 0x01;
 public:

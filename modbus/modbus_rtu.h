@@ -13,7 +13,7 @@ public:
     explicit ModBusRtu(quint8 slaveID);
     QByteArray pack(const QByteArray &pdu) override;
     quint8 deviceID() override;
-signals:
+    ModbusParseStatus tryExtractFrame(QByteArray &buffer, ModbusFrame &frame) override;
 };
 
 #endif // MODBUS_RTU_H

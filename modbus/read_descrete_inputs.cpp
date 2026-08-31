@@ -7,28 +7,32 @@ ReadDescreteInputs::ReadDescreteInputs(quint16 inputAddress, quint16 inputsCount
     inputsCount(inputsCount)
 
 {
-    byteCount = inputsCount * sizeof(quint8);
+    byteCount = static_cast<quint8>((inputsCount + 7) / 8);
 }
 
 const QByteArray &ReadDescreteInputs::makeCommand()
 {
-    if (!cachedCommand.isEmpty()) {
+    constexpr quint16 maxInputsPerRequest = 2000;
+    buffer.clear();
+
+    if (inputsCount == 0 || inputsCount > maxInputsPerRequest ||
+        static_cast<quint32>(inputAddress) + inputsCount > 0x10000U) {
+        qWarning() << "Invalid Read Discrete Inputs request:"
+                   << "address =" << inputAddress
+                   << "count =" << inputsCount;
+        cachedCommand.clear();
         return cachedCommand;
     }
-    QDataStream HEADER(&replyHeader, QDataStream::WriteOnly);
-    HEADER.setByteOrder(QDataStream::BigEndian);
-    HEADER.setFloatingPointPrecision(QDataStream::SinglePrecision);
-    HEADER  << protocol->deviceID()
-           << cmdID
-           << byteCount;
 
-    QDataStream out(&cachedCommand, QDataStream::WriteOnly);
-    out.setByteOrder(QDataStream::BigEndian);
-    out.setFloatingPointPrecision(QDataStream::SinglePrecision);
-    out << cmdID
-        << inputAddress
-        << inputsCount;
-    cachedCommand = protocol->pack(cachedCommand);
+    if (cachedPdu.isEmpty()) {
+        QDataStream out(&cachedPdu, QIODevice::WriteOnly);
+        out.setByteOrder(QDataStream::BigEndian);
+        out << cmdID
+            << inputAddress
+            << inputsCount;
+    }
+
+    cachedCommand = protocol->pack(cachedPdu);
     return cachedCommand;
 }
 
@@ -39,50 +43,68 @@ QVariant ReadDescreteInputs::getValue()
 
 bool ReadDescreteInputs::tryParse(const QByteArray &data)
 {
-    quint16 packetLength;
-    QByteArray packet;
-    QDataStream in(&packet, QIODevice::ReadOnly);
-    quint16 packetCrc;
-    quint16 calculatedCrc;
-    bool finded = false;
-
-    if (replyHeader.size() == 0) {
-        return false;
-    }
-
     buffer.append(data);
-    int replyHeaderIndex = buffer.indexOf(replyHeader);
-    if (replyHeaderIndex < 0 && (buffer.size() > replyHeader.size())) {
-        buffer.remove(0, buffer.size() - replyHeader.size());
-        return finded;
-    }
 
-    while (replyHeaderIndex >=0) {
-        packetLength = replyHeader.size() + byteCount + 2;
-        if (buffer.size() >= replyHeaderIndex + packetLength) {
-            packet = buffer.mid(replyHeaderIndex, packetLength);
-            in.setByteOrder(QDataStream::LittleEndian);
-            in.device()->seek(packet.size() - 2);
-            in >> packetCrc;
-            calculatedCrc = GetCrc16(packet);
-            if (packetCrc == calculatedCrc) {
-                in.device()->seek(0);
-                in.device()->seek(replyHeader.size());
-                in.setByteOrder(QDataStream::BigEndian);
-                for (int i = 0; i < inputsCount; i++) {
-                    quint8 input;
-                    in >> input;
-                    inputs.append(input);
-                }
-                finded = true;
-            }
+    while (true) {
+        ModbusFrame frame;
+        const auto status = protocol->tryExtractFrame(buffer, frame);
 
-        } else {
-            break;
+        if (status == ModbusParseStatus::Incomplete) {
+            return false;
         }
-        buffer.remove(0, replyHeaderIndex + packetLength);
-        replyHeaderIndex = buffer.indexOf(replyHeader);
-    }
-    return finded;
-}
 
+        if (status == ModbusParseStatus::Invalid || frame.pdu.isEmpty()) {
+            continue;
+        }
+
+        QDataStream in(frame.pdu);
+        in.setByteOrder(QDataStream::BigEndian);
+
+        quint8 function = 0;
+        in >> function;
+
+        if (function == (cmdID | 0x80)) {
+            quint8 exceptionCode = 0;
+            in >> exceptionCode;
+            qWarning() << "Modbus exception:" << exceptionCode;
+            return true;
+        }
+
+        if (function != cmdID) {
+            qWarning() << "Unexpected Modbus function:" << function;
+            return true;
+        }
+
+        quint8 responseByteCount = 0;
+        in >> responseByteCount;
+
+        if (in.status() != QDataStream::Ok ||
+            responseByteCount != byteCount ||
+            frame.pdu.size() != static_cast<qsizetype>(2 + responseByteCount)) {
+            qWarning() << "Invalid Read Discrete Inputs response byte count:"
+                       << responseByteCount;
+            return true;
+        }
+
+        QVector<quint8> parsedInputs;
+        parsedInputs.reserve(inputsCount);
+
+        for (quint16 byteIndex = 0; byteIndex < responseByteCount; ++byteIndex) {
+            quint8 packedByte = 0;
+            in >> packedByte;
+
+            for (quint8 bitIndex = 0;
+                 bitIndex < 8 && parsedInputs.size() < inputsCount;
+                 ++bitIndex) {
+                parsedInputs.append((packedByte >> bitIndex) & 0x01);
+            }
+        }
+
+        if (in.status() != QDataStream::Ok) {
+            return true;
+        }
+
+        inputs = std::move(parsedInputs);
+        return true;
+    }
+}

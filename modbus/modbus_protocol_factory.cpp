@@ -13,6 +13,7 @@ AbstractModBusProtocol *ModBusProtocolFactory::getInstance(QString protocolType,
     } else if (protocolType == "viatcp") {
 
     }
+    return nullptr;
 }
 
 AbstractModBusProtocol *ModBusProtocolFactory::getInstance(QString configPath, QString section)

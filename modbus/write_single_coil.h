@@ -10,15 +10,14 @@
 class WriteSingleCoil : public AbstractCommand
 {
     Q_OBJECT
-    bool coil;
-    bool cachedCoil;
+    bool coil = false;
+    bool cachedCoil = false;
     QByteArray cachedCommand;
+    QByteArray cachedPdu;
     AbstractModBusProtocol *protocol;
     quint16 coilAddress;
-    quint8 byteCount;
     QByteArray buffer;
-    QByteArray replyHeader;
-    bool commandStatus;
+    bool commandStatus = false;
     const quint8 cmdID = 0x05;
 public:
     explicit WriteSingleCoil(quint16 coilAddress, AbstractModBusProtocol *protocol, QObject *parent = nullptr);

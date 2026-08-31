@@ -10,11 +10,11 @@ class ReadDescreteInputs : public AbstractCommand
     Q_OBJECT
     AbstractModBusProtocol *protocol;
     QByteArray cachedCommand;
+    QByteArray cachedPdu;
     quint16 inputAddress;
     quint16 inputsCount;
     quint8 byteCount;
     QByteArray buffer;
-    QByteArray replyHeader;
     QVector<quint8> inputs;
     const quint8 cmdID = 0x02;
 public:

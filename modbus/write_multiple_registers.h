@@ -10,14 +10,13 @@ class WriteMultipleRegisters : public AbstractCommand
 {
     AbstractModBusProtocol *protocol;
     QByteArray cachedCommand;
+    QByteArray cachedPdu;
     quint16 registerAddress;
     quint16 registersCount;
-    quint8 byteCount;
     QByteArray buffer;
-    QByteArray replyHeader;
     QVector<quint16> regs;
     QVector<quint16> cachedRegs;
-    bool commandStatus;
+    bool commandStatus = false;
     const quint8 cmdID = 0x10;
 public:
     explicit WriteMultipleRegisters(quint16 regAddress, quint16 regsCount, AbstractModBusProtocol *protocol, QObject *parent = nullptr);
