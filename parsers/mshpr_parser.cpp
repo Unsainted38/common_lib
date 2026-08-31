@@ -30,7 +30,7 @@ bool MShPRParser::parseReply(const QByteArray &reply) {
 
     quint8 sum = 0;
 
-    for(auto b : payload) {
+    for(const auto& b : std::as_const(payload)) {
         sum += static_cast<quint8>(b);
     }
 
@@ -52,7 +52,7 @@ bool MShPRParser::parseReply(const QByteArray &reply) {
 
     QString addr = QString::fromUtf8(payload.left(slashIndex));
     QByteArray dataFields = payload.mid(slashIndex + 1);
-    QStringList fieldList = QString::fromUtf8(dataFields).split('*', Qt::SkipEmptyParts);
+    const QStringList fieldList = QString::fromUtf8(dataFields).split('*', Qt::SkipEmptyParts);
 
     QMap<QString, int> fieldsMap;
 
