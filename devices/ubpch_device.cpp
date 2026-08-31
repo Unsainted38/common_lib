@@ -9,7 +9,7 @@ UBPChDevice::UBPChDevice(SerialCircularRequester *requester, QString configPath,
     loadConfig();
     m_timer = new QTimer(this);
     m_timer->start(1000);
-    m_parser = new UBPChParser();
+    m_parser = new UBPChParser(m_deviceAddr, m_masterAddr, this);
     EnableCommand = new UBPChCommand(m_deviceAddr, m_masterAddr, 0x0000, ValueType::QUINT8, CommandType::READ);
     AttenuationCommand = new UBPChCommand(m_deviceAddr, m_masterAddr, 0x0005, ValueType::QUINT8, CommandType::READ);
     ErrorStatusCommand = new UBPChCommand(m_deviceAddr, m_masterAddr, 0x0037, ValueType::QUINT8, CommandType::READ);
@@ -18,6 +18,8 @@ UBPChDevice::UBPChDevice(SerialCircularRequester *requester, QString configPath,
     EmpowerCommand = new UBPChCommand(m_deviceAddr, m_masterAddr, 0x001E, ValueType::QUINT16, CommandType::READ);
     TemperatureCommand = new UBPChCommand(m_deviceAddr, m_masterAddr, 0x0023, ValueType::QINT8, CommandType::READ);
     VoltageCommand = new UBPChCommand(m_deviceAddr, m_masterAddr, 0x002D, ValueType::QUINT16, CommandType::READ);
+    EnableWriteCommand = new UBPChCommand(m_deviceAddr, m_masterAddr, 0x0000, ValueType::QUINT8, CommandType::WRITE);
+    AttenuationWriteCommand = new UBPChCommand(m_deviceAddr, m_masterAddr, 0x0005, ValueType::QUINT8, CommandType::WRITE);
     m_requester->addCircularCommand(EnableCommand);
     m_requester->addCircularCommand(AttenuationCommand);
     m_requester->addCircularCommand(ErrorStatusCommand);
@@ -51,8 +53,8 @@ void UBPChDevice::loadConfig() {
 }
 
 void UBPChDevice::setEnabled(quint8 value) {
-    EnableCommand->setValue(value);
-    m_requester->addDisposableCommand(EnableCommand);
+    EnableWriteCommand->setValue(value);
+    m_requester->addDisposableCommand(EnableWriteCommand);
 }
 
 quint8 UBPChDevice::getEnabled() {
@@ -60,8 +62,8 @@ quint8 UBPChDevice::getEnabled() {
 }
 
 void UBPChDevice::setAttenuation(quint8 value) {
-    AttenuationCommand->setValue(value);
-    m_requester->addDisposableCommand(AttenuationCommand);
+    AttenuationWriteCommand->setValue(value);
+    m_requester->addDisposableCommand(AttenuationWriteCommand);
 }
 
 quint32 UBPChDevice::getAttenuation() {

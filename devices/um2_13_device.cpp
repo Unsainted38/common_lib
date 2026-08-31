@@ -27,6 +27,23 @@ UM2_13Device::UM2_13Device(SerialCircularRequester *requester, QObject *parent)
     m_requester->addCircularCommand(RPathSelect);
     m_requester->startRequest();
 
+    const QList<UM2_13Commnad *> commands = {
+        static_cast<UM2_13Commnad *>(RStatus),
+        static_cast<UM2_13Commnad *>(RErrors),
+        static_cast<UM2_13Commnad *>(RL1Attenuation),
+        static_cast<UM2_13Commnad *>(RL3Attenuation),
+        static_cast<UM2_13Commnad *>(RL5Attenuation),
+        static_cast<UM2_13Commnad *>(RPathSelect),
+        static_cast<UM2_13Commnad *>(WL1Attenuation),
+        static_cast<UM2_13Commnad *>(WL3Attenuation),
+        static_cast<UM2_13Commnad *>(WL5Attenuation),
+        static_cast<UM2_13Commnad *>(WPathSelect)
+    };
+    for (UM2_13Commnad *command : commands) {
+        connect(command, &UM2_13Commnad::translateLastAnswer,
+                this, &UM2_13Device::LastAnswer);
+    }
+
     connect(m_timer, SIGNAL(timeout()), this, SLOT(onTimer()));
 }
 
@@ -87,4 +104,6 @@ void UM2_13Device::onTimer()
 void UM2_13Device::LastAnswer(QByteArray packet)
 {
     m_lastAnswer = packet;
+    m_statusOnline = true;
+    m_timer->start(1000);
 }

@@ -33,6 +33,7 @@ private:
     UBPChParser *m_parser;
     AbstractCommand *EnableCommand, *AttenuationCommand, *ErrorStatusCommand, *DeviceStatusCommand,
                     *OutputPowerCommand, *EmpowerCommand, *TemperatureCommand, *VoltageCommand;
+    AbstractCommand *EnableWriteCommand, *AttenuationWriteCommand;
     quint32 m_attenuation;
     quint8 m_enabled;
     quint8 m_deviceStatus;

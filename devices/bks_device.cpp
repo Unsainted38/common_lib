@@ -8,7 +8,7 @@ BksDevice::BksDevice(SerialCircularRequester *requester, QString configPath, QSt
       m_section(section),
       m_requester(requester) {
     loadConfig();
-    m_parser = new MShPRParser();
+    m_parser = new MShPRParser(this);
     m_timer = new QTimer(this);
     m_timer->start(1000);
     StatusCommand = new MShPRCommand(m_deviceAddr, BKS_COMMANDS::STATUS_CMD, CommandType::READ);

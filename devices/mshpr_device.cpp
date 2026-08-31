@@ -7,7 +7,7 @@ MShPRDevice::MShPRDevice(SerialCircularRequester *requester, QString configPath,
       m_section(section),
       m_requester(requester) {
     loadConfig();
-    m_parser = new MShPRParser();
+    m_parser = new MShPRParser(this);
     m_timer = new QTimer(this);
     m_timer->start(1000);
     StatusCommand = new MShPRCommand(m_deviceAddr, MShPR_COMMANDS::STATUS_CMD, CommandType::READ);
@@ -71,7 +71,9 @@ void MShPRDevice::setAddress(quint8 value) {
         m_deviceAddr.push_front("0");
     }
 
-    m_requester->removeCommands();
+    // Не удаляем циклические команды других устройств, использующих тот же
+    // requester.
+    m_requester->removeCircularCommand(StatusCommand);
     StatusCommand = new MShPRCommand(m_deviceAddr, MShPR_COMMANDS::STATUS_CMD, CommandType::READ);
     AttenuationCommand = new MShPRCommand(m_deviceAddr, MShPR_COMMANDS::ATTENUATION_CMD, CommandType::WRITE);
     GeterodinCommand = new MShPRCommand(m_deviceAddr, MShPR_COMMANDS::GETERODIN_CMD, CommandType::WRITE);

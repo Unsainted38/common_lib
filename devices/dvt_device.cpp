@@ -6,7 +6,7 @@ DvtDevice::DvtDevice(SerialCircularRequester *requester, QString configPath, QSt
     dvtStateCommand = new ReadHoldingRegisters(0, 60, protocol);
     addCircularCommand(dvtStateCommand);
 
-    m_timer = new QTimer();
+    m_timer = new QTimer(this);
     m_timer->start(100);
 
     connect(m_timer, SIGNAL(timeout()), this, SLOT(onTimer()));
@@ -35,6 +35,10 @@ float DvtDevice::humidity()
 void DvtDevice::onTimer()
 {
     QVector<quint16> state = dvtStateCommand->getValue().value<QVector<quint16>>();
+    if (state.size() < 9) {
+        return;
+    }
+
     dvtInfo.status = state[0];
     dvtInfo.pressure = BitUtils::makeFloat(state[1], state[2]);
     dvtInfo.tempetature = BitUtils::makeFloat(state[5], state[6]);

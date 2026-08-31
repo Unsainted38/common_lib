@@ -17,7 +17,7 @@ class DvtDevice : public AbstractModbusDevice
 
     AbstractCommand *dvtStateCommand;
     quint8 deviceAddress;
-    DvtState dvtInfo;
+    DvtState dvtInfo{};
     QTimer *m_timer;
 
 public:

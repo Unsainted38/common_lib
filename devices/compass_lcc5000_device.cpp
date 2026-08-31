@@ -8,7 +8,7 @@ CompassLCC5000Device::CompassLCC5000Device(SerialCircularRequester *requester, Q
       m_section(section),
       m_configPath(configPath) {
     loadConfig();
-    m_parser = new CompassLCC5000Parser(m_deviceAddr);
+    m_parser = new CompassLCC5000Parser(m_deviceAddr, this);
     m_timer = new QTimer(this);
     m_timer->start(1000);
     AllAnglesRequest = new CompassLCC5000Command(m_deviceAddr, CompassCommands::ALLANGLE, 0x04, ValueType::DOUBLE, CommandType::READ);
@@ -78,6 +78,28 @@ void CompassLCC5000Device::onTimer() {
 }
 
 void CompassLCC5000Device::processData(const QByteArray &data, quint8 cmdId) {
+    qsizetype requiredSize = 0;
+    if (cmdId == CompassResponces::ALLANGLE) {
+        requiredSize = 9;
+    } else if (cmdId == CompassResponces::ROLL ||
+               cmdId == CompassResponces::HEADING ||
+               cmdId == CompassResponces::PITCH) {
+        requiredSize = 3;
+    } else if (cmdId == CompassResponces::MAGNETICDECLINATION) {
+        requiredSize = 2;
+    } else if (cmdId == CompassResponces::SETMAGNETICDECLINATION ||
+               cmdId == CompassResponces::SETMODULEADDRESS ||
+               cmdId == CompassResponces::MODULEADDRESS ||
+               cmdId == CompassResponces::SAVESETTINGS ||
+               cmdId == CompassResponces::SWITCHCALIBRATIONOUTPUT) {
+        requiredSize = 1;
+    }
+
+    if (data.size() < requiredSize) {
+        qWarning() << "Compass response is too short for command:"
+                   << cmdId << data.size();
+        return;
+    }
 
     m_statusOnline = true;
 

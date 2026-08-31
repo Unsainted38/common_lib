@@ -34,8 +34,8 @@ class UM2_13Device : public QObject
     SerialCircularRequester *m_requester;
     AbstractCommand *RStatus, *RErrors, *RL1Attenuation, *RL3Attenuation, *RL5Attenuation, *RPathSelect,
                     *WL1Attenuation, *WL3Attenuation, *WL5Attenuation, *WPathSelect;
-    StatusInfo Status;
-    ErrorsInfo Errors;
+    StatusInfo Status{};
+    ErrorsInfo Errors{};
     QTimer *m_timer;
     QByteArray m_lastAnswer;
     bool m_statusOnline = false;
