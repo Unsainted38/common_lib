@@ -13,6 +13,7 @@ class CompassLCC5000Command : public AbstractCommand {
     CommandType cmdType;
     QByteArray cachedRead;
     QByteArray cachedWrite;
+    QByteArray responseBuffer;
     QVariant data;
 public:
     explicit CompassLCC5000Command(quint8 deviceAddr, quint8 cmdId, quint8 length, ValueType valueType, CommandType cmdType);
@@ -22,6 +23,7 @@ public:
     // AbstractCommand interface
 public:
     const QByteArray &makeCommand() override;
+    bool tryParse(const QByteArray &data) override;
 
     // AbstractCommand interface
 public:

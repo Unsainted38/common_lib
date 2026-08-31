@@ -72,6 +72,8 @@ const QByteArray &CompassLCC5000Command::makeWriteCommand() {
 
 const QByteArray &CompassLCC5000Command::makeCommand()
 {
+    responseBuffer.clear();
+
     switch (cmdType) {
     case CommandType::READ:
         return makeReadCommand();
@@ -82,6 +84,54 @@ const QByteArray &CompassLCC5000Command::makeCommand()
                    << static_cast<int>(cmdType);
         cachedRead.clear();
         return cachedRead;
+    }
+}
+
+bool CompassLCC5000Command::tryParse(const QByteArray &reply)
+{
+    responseBuffer.append(reply);
+
+    while (true) {
+        const qsizetype beginIndex = responseBuffer.indexOf(HEADERER);
+        if (beginIndex < 0) {
+            responseBuffer.clear();
+            return false;
+        }
+
+        responseBuffer.remove(0, beginIndex);
+        if (responseBuffer.size() < 2) {
+            return false;
+        }
+
+        const quint8 packetLength =
+            static_cast<quint8>(responseBuffer.at(1));
+        if (packetLength < 4) {
+            responseBuffer.remove(0, 1);
+            continue;
+        }
+
+        const qsizetype frameSize =
+            static_cast<qsizetype>(packetLength) + 1;
+        if (responseBuffer.size() < frameSize) {
+            return false;
+        }
+
+        const QByteArray packet = responseBuffer.mid(1, packetLength);
+        responseBuffer.remove(0, frameSize);
+
+        const quint8 address = static_cast<quint8>(packet.at(1));
+        const quint8 responseCommand =
+            static_cast<quint8>(packet.at(2));
+        const quint8 receivedCrc =
+            static_cast<quint8>(packet.at(packetLength - 1));
+        const quint8 expectedCommand = m_cmdId | 0x80;
+
+        if (address == m_deviceAddr &&
+            (responseCommand == m_cmdId ||
+             responseCommand == expectedCommand) &&
+            receivedCrc == BytesSumCrc(packet.first(packetLength - 1))) {
+            return true;
+        }
     }
 }
 

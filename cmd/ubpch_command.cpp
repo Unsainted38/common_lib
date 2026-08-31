@@ -54,7 +54,8 @@ const QByteArray &UBPChCommand::makeWriteCommand() {
             break;
         default:
             qDebug() << "Unsupported value type!";
-            break;
+            cachedWrite.clear();
+            return cachedWrite;
     }
 
     o << GetCrc16_ubpch(res);
@@ -66,11 +67,87 @@ const QByteArray &UBPChCommand::makeWriteCommand() {
 
 const QByteArray &UBPChCommand::makeCommand()
 {
+    responseBuffer.clear();
+
     switch (cmdType) {
     case CommandType::READ:
         return makeReadCommand();
     case CommandType::WRITE:
         return makeWriteCommand();
+    default:
+        qWarning() << "Unsupported UBPCh command type:"
+                   << static_cast<int>(cmdType);
+        cachedRead.clear();
+        return cachedRead;
+    }
+}
+
+bool UBPChCommand::tryParse(const QByteArray &reply)
+{
+    constexpr qsizetype markerSize = 2;
+    constexpr qsizetype trailerSize = 4;
+    constexpr qsizetype minimumPacketSize = 11;
+    const QByteArray header = QByteArray::fromHex("FE FE");
+    const QByteArray end = QByteArray::fromHex("FC FC");
+
+    responseBuffer.append(reply);
+    while (true) {
+        const qsizetype headerIndex = responseBuffer.indexOf(header);
+        if (headerIndex < 0) {
+            if (!responseBuffer.isEmpty() &&
+                static_cast<quint8>(responseBuffer.back()) == 0xFE) {
+                responseBuffer = responseBuffer.last(1);
+            } else {
+                responseBuffer.clear();
+            }
+            return false;
+        }
+
+        responseBuffer.remove(0, headerIndex);
+        const qsizetype endIndex =
+            responseBuffer.indexOf(end, header.size());
+        if (endIndex < 0) {
+            return false;
+        }
+
+        const QByteArray packet = unpack(
+            responseBuffer.first(endIndex + end.size()));
+        responseBuffer.remove(0, endIndex + end.size());
+        if (packet.size() < minimumPacketSize) {
+            continue;
+        }
+
+        quint16 start = 0;
+        quint8 destination = 0;
+        quint8 source = 0;
+        quint8 command = 0;
+        quint16 registerAddress = 0;
+        quint16 receivedCrc = 0;
+        quint16 stop = 0;
+
+        QDataStream in(packet);
+        in.setByteOrder(QDataStream::LittleEndian);
+        in >> start >> destination >> source >> command >> registerAddress;
+        in.device()->seek(packet.size() - trailerSize);
+        in >> receivedCrc >> stop;
+
+        const QByteArray crcPayload = packet.mid(
+            markerSize, packet.size() - markerSize - trailerSize);
+        const bool expectedCommand =
+            command == 0x0A ||
+            (cmdType == CommandType::READ && command == 0x04) ||
+            (cmdType == CommandType::WRITE && command == 0x06);
+
+        if (in.status() == QDataStream::Ok &&
+            start == HEADER &&
+            stop == END &&
+            destination == m_masterAddr &&
+            source == m_deviceAddr &&
+            expectedCommand &&
+            (command == 0x0A || registerAddress == m_regAddr) &&
+            receivedCrc == GetCrc16_ubpch(crcPayload)) {
+            return true;
+        }
     }
 }
 
@@ -92,37 +169,73 @@ void UBPChCommand::processData(const QByteArray &data, quint16 regAddr) {
     QDataStream in(data);
     in.setByteOrder(QDataStream::LittleEndian);
 
+    QVariant parsedValue;
     switch(valueType) {
-        case ValueType::QUINT8:
-            quint8 valu8;
-            in >> valu8;
-            value = QVariant::fromValue(valu8);
+        case ValueType::QUINT8: {
+            quint8 value8 = 0;
+            in >> value8;
+            parsedValue = value8;
             break;
+        }
 
-        case ValueType::QINT8:
-            qint8 val8;
-            in >> val8;
-            value = QVariant::fromValue(val8);
+        case ValueType::QINT8: {
+            qint8 value8 = 0;
+            in >> value8;
+            parsedValue = value8;
             break;
+        }
 
-        case ValueType::QUINT16:
-            quint16 valu16;
-            in >> valu16;
-            value = QVariant::fromValue(valu16);
+        case ValueType::QUINT16: {
+            quint16 value16 = 0;
+            in >> value16;
+            parsedValue = value16;
             break;
+        }
 
-        case ValueType::QUINT32:
-            quint32 valu32;
-            in >> valu32;
-            value = QVariant::fromValue(valu32);
+        case ValueType::QUINT32: {
+            quint32 value32 = 0;
+            in >> value32;
+            parsedValue = value32;
             break;
+        }
 
-        case ValueType::QINT32:
-            quint32 val32;
-            in >> val32;
-            value = QVariant::fromValue(val32);
+        case ValueType::QINT32: {
+            qint32 value32 = 0;
+            in >> value32;
+            parsedValue = value32;
+            break;
+        }
+        default:
+            qWarning() << "Unsupported UBPCh response value type:"
+                       << valueType;
             break;
     };
+
+    if (in.status() == QDataStream::Ok && parsedValue.isValid()) {
+        value = parsedValue;
+    } else {
+        qWarning() << "Invalid UBPCh response payload for register:"
+                   << regAddr;
+    }
+}
+
+QByteArray UBPChCommand::unpack(const QByteArray &frame)
+{
+    QByteArray result;
+    result.reserve(frame.size());
+
+    for (qsizetype i = 0; i < frame.size(); ++i) {
+        const quint8 byte = static_cast<quint8>(frame.at(i));
+        if ((byte == 0xFE || byte == 0xFC) &&
+            i + 1 < frame.size() && frame.at(i + 1) == 0x00) {
+            result.append(static_cast<char>(byte));
+            ++i;
+        } else {
+            result.append(static_cast<char>(byte));
+        }
+    }
+
+    return result;
 }
 QByteArray UBPChCommand::pack(const QByteArray &frame) {
     QByteArray result;

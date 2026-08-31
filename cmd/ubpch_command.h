@@ -42,14 +42,17 @@ private:
     static QByteArray pack(const QByteArray &frame);
     QByteArray cachedRead;
     QByteArray cachedWrite;
+    QByteArray responseBuffer;
     const QByteArray &makeReadCommand();
     const QByteArray &makeWriteCommand();
+    static QByteArray unpack(const QByteArray &frame);
 private slots:
     //void onDataReady(QByteArray data, quint16 regAddr);
 
     // AbstractCommand interface
 public:
     const QByteArray &makeCommand() override;
+    bool tryParse(const QByteArray &data) override;
 
     // AbstractCommand interface
 public:

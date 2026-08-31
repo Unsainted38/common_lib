@@ -15,6 +15,7 @@ class MShPRCommand : public AbstractCommand {
     QString data;
     QByteArray cachedRead;
     QByteArray cachedWrite;
+    QByteArray responseBuffer;
     CommandType cmdType;
     ValueType valueType;
 
@@ -31,6 +32,7 @@ signals:
     // AbstractCommand interface
 public:
     const QByteArray &makeCommand() override;
+    bool tryParse(const QByteArray &data) override;
 
     // AbstractCommand interface
 public:
