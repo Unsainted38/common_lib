@@ -39,7 +39,7 @@ private:
     NetworkTransportLocker *m_locker;
     QList<AbstractCommand *> m_circularCommands;
     QQueue<AbstractCommand *> m_disposableCommands;
-    AbstractCommand *currentCmd;
+    AbstractCommand *currentCmd = nullptr;
     int m_readIndex = 0;
 private slots:
     void processNext();

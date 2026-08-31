@@ -78,7 +78,6 @@ void SerialCircularRequester::processNext() {
         return;
     }
     static bool concurent_flag = true;
-    AbstractCommand *currentCmd = nullptr;
 
     if(!m_disposableCommands.isEmpty() && concurent_flag) {
 
