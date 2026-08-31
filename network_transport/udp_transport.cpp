@@ -33,6 +33,12 @@ void UdpTransport::setupTransport()
     connect(socket, &QUdpSocket::connected, this, &UdpTransport::onConnected);
     connect(socket, &QUdpSocket::disconnected, this, &UdpTransport::onDisconnected);
     connect(socket, &QUdpSocket::errorOccurred, this, &UdpTransport::onErrorOccured);
+    connect(socket, &QUdpSocket::bytesWritten, this, [this](qint64) {
+        QMetaObject::invokeMethod(
+            this,
+            [this]() { processQueue(); },
+            Qt::QueuedConnection);
+    });
     connect(heartbeatTimer, &QTimer::timeout, this, &UdpTransport::heartbeat);
     connect(socket, &QUdpSocket::readyRead, this, &UdpTransport::onReadSocket);
     connect(reconnectTimer, &QTimer::timeout, this, &UdpTransport::reconnect);
@@ -64,9 +70,15 @@ bool UdpTransport::open()
 
 bool UdpTransport::write(const QByteArray &packet)
 {
-    QMutexLocker locker(&mutex);
-    queue.enqueue(packet);
-    QMetaObject::invokeMethod(this, "processQueue", Qt::QueuedConnection);
+    {
+        QMutexLocker locker(&mutex);
+        queue.enqueue(packet);
+    }
+
+    QMetaObject::invokeMethod(
+        this,
+        [this]() { processQueue(); },
+        Qt::QueuedConnection);
     return true;
 }
 
@@ -94,6 +106,11 @@ void UdpTransport::onConnected()
     lastActivity = QDateTime::currentDateTime();
 
     heartbeatTimer->start();
+
+    QMetaObject::invokeMethod(
+        this,
+        [this]() { processQueue(); },
+        Qt::QueuedConnection);
 }
 
 void UdpTransport::onDisconnected()
@@ -119,19 +136,53 @@ void UdpTransport::onErrorOccured(QAbstractSocket::SocketError error)
 
 void UdpTransport::processQueue()
 {
-    QMutexLocker locker(&mutex);
+    QByteArray acceptedPacket;
+    QString writeResult;
+    bool packetWasAccepted = false;
+    bool writeFailed = false;
+    bool scheduleNext = false;
 
-    if(!queue.isEmpty()) {
-        QByteArray packet = queue.dequeue();
-        int writeCount = socket->write(packet);
-        socket->flush();
-        QString wErr = "w: " + QString::number(writeCount);
+    {
+        QMutexLocker locker(&mutex);
 
-        if(writeCount < packet.length()) {
-            emit translateError(wErr, WRITE_ERROR);
-        } else {
-            emit translateError(wErr, WRITE_OK);
+        if (queue.isEmpty() ||
+            socket->state() != QAbstractSocket::ConnectedState) {
+            return;
         }
+
+        const QByteArray &packet = queue.head();
+        const qint64 writeCount = socket->write(packet);
+        writeResult = "w: " + QString::number(writeCount);
+
+        if (writeCount == packet.size()) {
+            acceptedPacket = packet;
+            packetWasAccepted = true;
+            queue.dequeue();
+            scheduleNext = !queue.isEmpty();
+        } else {
+            // UDP-дейтаграмма атомарна: при ошибке сохраняем её целиком.
+            writeFailed = true;
+        }
+    }
+
+    socket->flush();
+
+    if (writeFailed) {
+        emit translateError(writeResult, WRITE_ERROR);
+        QTimer::singleShot(100, this, [this]() { processQueue(); });
+        return;
+    }
+
+    if (packetWasAccepted) {
+        emit translateError(writeResult, WRITE_OK);
+        emit packetAccepted(acceptedPacket);
+    }
+
+    if (scheduleNext) {
+        QMetaObject::invokeMethod(
+            this,
+            [this]() { processQueue(); },
+            Qt::QueuedConnection);
     }
 }
 

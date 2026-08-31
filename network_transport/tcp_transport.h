@@ -9,13 +9,18 @@
 #include <QDateTime>
 
 class TcpTransport : public AbstractNetworkTransport {
+    struct PendingPacket {
+        QByteArray data;
+        qsizetype offset = 0;
+    };
+
     QTcpSocket *socket;
     QHostAddress hostAddress;
     quint16 port = 7777;
     QHostAddress listenIp;
     QString name = "tcp_client";
     QMutex mutex;
-    QQueue<QByteArray> queue;
+    QQueue<PendingPacket> queue;
     QTimer *heartbeatTimer;
     QTimer *reconnectTimer;
     bool connectedState = false;

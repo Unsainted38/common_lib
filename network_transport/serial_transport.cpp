@@ -1,12 +1,19 @@
 #include "serial_transport.h"
+#include <QTimer>
 
 SerialTransport::SerialTransport(QString configPath, QString section, QObject *parent)
-    : AbstractNetworkTransport(configPath, section) {
+    : AbstractNetworkTransport(configPath, section, parent) {
     loadConfig();
     serial = new QSerialPort(this);
     setupTransport();
     open();
     connect(serial, SIGNAL(readyRead()), this, SLOT(onSerialRead()));
+    connect(serial, &QSerialPort::bytesWritten, this, [this](qint64) {
+        QMetaObject::invokeMethod(
+            this,
+            [this]() { processQueue(); },
+            Qt::QueuedConnection);
+    });
 }
 
 void SerialTransport::loadConfig() {
@@ -40,9 +47,15 @@ void SerialTransport::setupTransport() {
 
 
 bool SerialTransport::write(const QByteArray &packet) {
-    QMutexLocker locker(&mutex);
-    queue.enqueue(packet);
-    QMetaObject::invokeMethod(this, "processQueue", Qt::QueuedConnection);
+    {
+        QMutexLocker locker(&mutex);
+        queue.enqueue({packet, 0});
+    }
+
+    QMetaObject::invokeMethod(
+        this,
+        [this]() { processQueue(); },
+        Qt::QueuedConnection);
     return true;
 }
 
@@ -54,10 +67,21 @@ bool SerialTransport::open() {
     }
 
     qDebug() << "opened serial port: " << portName;
+
+    QMetaObject::invokeMethod(
+        this,
+        [this]() { processQueue(); },
+        Qt::QueuedConnection);
     return true;
 }
 
 bool SerialTransport::close() {
+    {
+        QMutexLocker locker(&mutex);
+        if (!queue.isEmpty()) {
+            queue.head().offset = 0;
+        }
+    }
     serial->close();
     return true;
 }
@@ -71,18 +95,69 @@ void SerialTransport::onSerialRead() {
 }
 
 void SerialTransport::processQueue() {
-    QMutexLocker locker(&mutex);
+    QByteArray acceptedPacket;
+    QString writeResult;
+    bool packetWasAccepted = false;
+    bool writeFailed = false;
+    bool retryAfterDelay = false;
+    bool scheduleNext = false;
 
-    if(!queue.isEmpty()) {
-        QByteArray packet = queue.dequeue();
-        int writeCount = serial->write(packet);
-        serial->flush();
-        QString wErr = "w: " + QString::number(writeCount);
+    {
+        QMutexLocker locker(&mutex);
 
-        if(writeCount < packet.length()) {
-            emit translateError(wErr, WRITE_ERROR);
-        } else {
-            emit translateError(wErr, WRITE_OK);
+        if (queue.isEmpty() || !serial->isOpen()) {
+            return;
         }
+
+        PendingPacket &pending = queue.head();
+        const qsizetype remaining = pending.data.size() - pending.offset;
+
+        if (remaining == 0) {
+            acceptedPacket = pending.data;
+            packetWasAccepted = true;
+            queue.dequeue();
+            scheduleNext = !queue.isEmpty();
+        } else {
+            const qint64 writeCount = serial->write(
+                pending.data.constData() + pending.offset,
+                remaining);
+            writeResult = "w: " + QString::number(writeCount);
+
+            if (writeCount < 0) {
+                writeFailed = true;
+            } else {
+                pending.offset += static_cast<qsizetype>(writeCount);
+                retryAfterDelay = writeCount == 0;
+
+                if (pending.offset == pending.data.size()) {
+                    acceptedPacket = pending.data;
+                    packetWasAccepted = true;
+                    queue.dequeue();
+                    scheduleNext = !queue.isEmpty();
+                }
+            }
+        }
+    }
+
+    serial->flush();
+
+    if (writeFailed) {
+        emit translateError(writeResult, WRITE_ERROR);
+        QTimer::singleShot(100, this, [this]() { processQueue(); });
+        return;
+    }
+
+    if (packetWasAccepted) {
+        emit translateError(writeResult, WRITE_OK);
+        emit packetAccepted(acceptedPacket);
+    }
+
+    if (scheduleNext) {
+        QMetaObject::invokeMethod(
+            this,
+            [this]() { processQueue(); },
+            Qt::QueuedConnection);
+    } else if (retryAfterDelay) {
+        QTimer::singleShot(50, this, [this]() { processQueue(); });
     }
 }

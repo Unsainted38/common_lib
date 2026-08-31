@@ -14,6 +14,8 @@ AbstractNetworkTransport *AbstractNetworkTransportFactory::getInstance(QString I
         return new TcpTransport(fileName, section);
     } else if(InterfaceType == "udp") {
         return new UdpTransport(fileName, section);
+    } else {
+        return nullptr;
     }
 }
 

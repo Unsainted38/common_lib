@@ -1,4 +1,4 @@
-#ifndef UBPCHTRANSPORT_H
+#ifndef SERIALTRANSPORT_H
 #define SERIALTRANSPORT_H
 
 #include <QObject>
@@ -11,6 +11,11 @@
 
 class SerialTransport : public AbstractNetworkTransport {
     Q_OBJECT
+    struct PendingPacket {
+        QByteArray data;
+        qsizetype offset = 0;
+    };
+
 public:
     explicit SerialTransport(QString configPath, QString section, QObject *parent = nullptr);
 
@@ -24,7 +29,7 @@ public:
 signals:
 private:
     QMutex mutex;
-    QQueue<QByteArray> queue;
+    QQueue<PendingPacket> queue;
     QString portName;
     QString name;
     int baud;

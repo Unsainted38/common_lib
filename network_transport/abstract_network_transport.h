@@ -25,6 +25,8 @@ public:
 signals:
     void translateError(QString err, TErrorCode code);
     void translateData(const QByteArray &data);
+    // Все байты пакета приняты внутренним буфером транспорта.
+    void packetAccepted(const QByteArray &packet);
 protected:
     QString m_configPath;
     QString m_section;
