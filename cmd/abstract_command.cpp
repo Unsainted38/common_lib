@@ -8,6 +8,7 @@ AbstractCommand::AbstractCommand(QObject *parent)
 QVariant AbstractCommand::getValue()
 {
     qDebug() << "[WARNING!!!] In AbstractCommand class getValue() [WARNING!!!]";
+    return QVariant();
 }
 
 void AbstractCommand::setValue(QVariant v)
@@ -19,6 +20,7 @@ void AbstractCommand::setValue(QVariant v)
 bool AbstractCommand::isSuccess()
 {
     qDebug() << "[WARNING!!!] In AbstractCommand class isSuccess() [WARNING!!!]";
+    return false;
 }
 
 void AbstractCommand::processData(const QByteArray &data, quint16 regAddr) {
@@ -37,5 +39,5 @@ bool AbstractCommand::tryParse(const QByteArray &data)
 {
     Q_UNUSED(data);
     qDebug() << "[WARNING!!!] In AbstractCommand class tryParse() [WARNING!!!]";
-    return true;
+    return false;
 }
