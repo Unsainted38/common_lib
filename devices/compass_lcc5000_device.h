@@ -5,7 +5,6 @@
 #include "requesters/serial_circular_requester.h"
 #include "cmd/abstract_command.h"
 #include "parsers/compass_lcc5000_parser.h"
-#include "cmd/compass_lcc5000_command.h"
 #include <QTimer>
 
 struct CompassCommands {

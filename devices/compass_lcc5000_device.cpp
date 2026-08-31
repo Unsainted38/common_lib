@@ -1,4 +1,6 @@
 #include "compass_lcc5000_device.h"
+#include "cmd/compass_lcc5000_command.h"
+#include "algorithm/binary_coded_decimals_converter.h"
 
 CompassLCC5000Device::CompassLCC5000Device(SerialCircularRequester *requester, QString configPath, QString section, QObject *parent)
     : QObject(parent),
