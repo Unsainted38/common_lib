@@ -15,8 +15,8 @@ TcpTelemetryServer::TcpTelemetryServer(QString configPath, QString section, int 
     : QObject(parent),
     m_packetSource(source) {
     loadConfig(configPath, section);
-    server = new QTcpServer();
-    telemetryTimer = new QTimer();
+    server = new QTcpServer(this);
+    telemetryTimer = new QTimer(this);
     telemetryTimer->start(period);
 
     if(server->listen(QHostAddress::Any, port)) {
