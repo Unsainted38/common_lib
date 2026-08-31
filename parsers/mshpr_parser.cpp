@@ -15,8 +15,8 @@ bool MShPRParser::parseReply(const QByteArray &reply) {
         return false;
     }
 
-    QByteArray packet = m_buffer.mid(beginIndex, endIndex - beginIndex + 4);
-    m_buffer.remove(0, endIndex + 4);
+    QByteArray packet = m_buffer.mid(beginIndex, endIndex - beginIndex + 2);
+    m_buffer.remove(0, endIndex + 2);
     QByteArray body = packet.mid(0, packet.size() - 2);
     emit lastAnswer(body);
     int lastStar = body.lastIndexOf('*');
