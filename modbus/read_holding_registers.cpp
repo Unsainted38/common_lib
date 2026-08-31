@@ -68,6 +68,7 @@ bool ReadHoldingRegisters::tryParse(const QByteArray &data)
                 in.device()->seek(0);
                 in.device()->seek(replyHeader.size());
                 in.setByteOrder(QDataStream::BigEndian);
+                regs.clear();
                 for (int i = 0; i < registersCount; i++) {
                     quint16 reg;
                     in >> reg;
