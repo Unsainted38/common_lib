@@ -11,7 +11,7 @@ AbstractModBusProtocol *ModBusProtocolFactory::getInstance(QString protocolType,
     } else if (protocolType == "tcp") {
         return new ModBusTcp(slaveID);
     } else if (protocolType == "viatcp") {
-
+        return nullptr;
     }
     return nullptr;
 }
