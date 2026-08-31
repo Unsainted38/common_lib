@@ -12,8 +12,10 @@
 class SerialTransport : public AbstractNetworkTransport {
     Q_OBJECT
     struct PendingPacket {
+        quint64 id = 0;
         QByteArray data;
-        qsizetype offset = 0;
+        qsizetype acceptedOffset = 0;
+        qsizetype confirmedOffset = 0;
     };
 
 public:
@@ -23,6 +25,7 @@ public:
     void loadConfig() override;
     void setupTransport() override;
     bool write(const QByteArray &packet) override;
+    quint64 writeTracked(const QByteArray &packet) override;
     bool open() override;
     bool close() override;
     void heartbeat() override;
@@ -30,6 +33,7 @@ signals:
 private:
     QMutex mutex;
     QQueue<PendingPacket> queue;
+    quint64 nextPacketId = 1;
     QString portName;
     QString name;
     int baud;
@@ -42,6 +46,7 @@ private:
 private slots:
     void onSerialRead();
     void processQueue() override;
+    void onBytesWritten(qint64 count);
 };
 
 #endif // SERIALTRANSPORT_H

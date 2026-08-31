@@ -10,8 +10,10 @@
 
 class TcpTransport : public AbstractNetworkTransport {
     struct PendingPacket {
+        quint64 id = 0;
         QByteArray data;
-        qsizetype offset = 0;
+        qsizetype acceptedOffset = 0;
+        qsizetype confirmedOffset = 0;
     };
 
     QTcpSocket *socket;
@@ -21,6 +23,7 @@ class TcpTransport : public AbstractNetworkTransport {
     QString name = "tcp_client";
     QMutex mutex;
     QQueue<PendingPacket> queue;
+    quint64 nextPacketId = 1;
     QTimer *heartbeatTimer;
     QTimer *reconnectTimer;
     bool connectedState = false;
@@ -30,6 +33,7 @@ class TcpTransport : public AbstractNetworkTransport {
 public:
     explicit TcpTransport(QString configPath, QString section, QObject *parent = nullptr);
     bool write(const QByteArray &packet) override;
+    quint64 writeTracked(const QByteArray &packet) override;
 
     bool close() override;
     void setupTransport() override;
@@ -44,6 +48,7 @@ private:
     void onDisconnected();
     void onErrorOccured(QAbstractSocket::SocketError error);
     void processQueue() override;
+    void onBytesWritten(qint64 count);
     void onReadSocket();
     void resetTimers();
     void scheduleReconnect();

@@ -10,36 +10,41 @@ TcpTransport::TcpTransport(QString configPath, QString section, QObject *parent)
 }
 
 bool TcpTransport::write(const QByteArray &packet) {
+    return writeTracked(packet) != 0;
+}
+
+quint64 TcpTransport::writeTracked(const QByteArray &packet) {
+    if (packet.isEmpty()) {
+        return 0;
+    }
+
+    quint64 packetId = 0;
     {
         QMutexLocker locker(&mutex);
-        queue.enqueue({packet, 0});
+        packetId = nextPacketId++;
+        if (nextPacketId == 0) {
+            nextPacketId = 1;
+        }
+        queue.enqueue({packetId, packet, 0, 0});
     }
 
     QMetaObject::invokeMethod(
         this,
         [this]() { processQueue(); },
         Qt::QueuedConnection);
-    return true;
+    return packetId;
 }
 
 bool TcpTransport::open() {
-    socket->connectToHost(hostAddress, port);
-
-    if(!socket->isOpen()) {
-        qDebug() << "error while connect to tcp port:" << endl
-                 << "Ip:" << hostAddress.toString() << endl
-                 << "Port:" << port << endl
-                 << "Name:" << name << endl
-                 << socket->errorString() << endl
-                 << "trying to reconnect in 5 sec" << endl;
-        QTimer::singleShot(5000, this, "TcpTransport::open");
-        return false;
+    if (socket->state() == QAbstractSocket::ConnectedState ||
+        socket->state() == QAbstractSocket::ConnectingState ||
+        socket->state() == QAbstractSocket::HostLookupState) {
+        return true;
     }
 
-    qDebug() << "connected via tcp: " << endl
-             << "Ip:" << hostAddress.toString() << endl
-             << "Port:" << port << endl
-             << "Name:" << name << endl;
+    socket->connectToHost(hostAddress, port);
+    qDebug() << "Connecting via TCP:"
+             << hostAddress.toString() << port << name;
     return true;
 }
 
@@ -68,12 +73,8 @@ void TcpTransport::setupTransport() {
     connect(socket, &QTcpSocket::connected, this, &TcpTransport::onConnected);
     connect(socket, &QTcpSocket::disconnected, this, &TcpTransport::onDisconnected);
     connect(socket, &QTcpSocket::errorOccurred, this, &TcpTransport::onErrorOccured);
-    connect(socket, &QTcpSocket::bytesWritten, this, [this](qint64) {
-        QMetaObject::invokeMethod(
-            this,
-            [this]() { processQueue(); },
-            Qt::QueuedConnection);
-    });
+    connect(socket, &QTcpSocket::bytesWritten,
+            this, &TcpTransport::onBytesWritten);
     connect(heartbeatTimer, &QTimer::timeout, this, &TcpTransport::heartbeat);
     connect(socket, &QTcpSocket::readyRead, this, &TcpTransport::onReadSocket);
     connect(reconnectTimer, &QTimer::timeout, this, &TcpTransport::reconnect);
@@ -91,9 +92,9 @@ void TcpTransport::loadConfig() {
 }
 
 void TcpTransport::heartbeat() {
-    if(socket->state() == QAbstractSocket::ConnectedState) {
-        socket->write(heartbeatPacket); // ISSUE Придумать, как пихать в сокет хартбит пакет
-        socket->flush();
+    if (socket->state() == QAbstractSocket::ConnectedState &&
+        !heartbeatPacket.isEmpty()) {
+        write(heartbeatPacket);
     }
 }
 
@@ -135,7 +136,10 @@ void TcpTransport::onDisconnected() {
     {
         QMutexLocker locker(&mutex);
         if (!queue.isEmpty()) {
-            queue.head().offset = 0;
+            // После разрыва невозможно определить, сколько байтов получил peer.
+            // Повторяем текущий кадр целиком в новом TCP-соединении.
+            queue.head().acceptedOffset = 0;
+            queue.head().confirmedOffset = 0;
         }
     }
 
@@ -161,12 +165,9 @@ void TcpTransport::onErrorOccured(QAbstractSocket::SocketError error) {
 }
 
 void TcpTransport::processQueue() {
-    QByteArray acceptedPacket;
     QString writeResult;
-    bool packetWasAccepted = false;
     bool writeFailed = false;
     bool retryAfterDelay = false;
-    bool scheduleNext = false;
 
     {
         QMutexLocker locker(&mutex);
@@ -177,32 +178,25 @@ void TcpTransport::processQueue() {
         }
 
         PendingPacket &pending = queue.head();
-        const qsizetype remaining = pending.data.size() - pending.offset;
+        const qsizetype remaining =
+            pending.data.size() - pending.acceptedOffset;
 
+        // Все байты уже находятся во внутреннем буфере QTcpSocket.
+        // Удаление выполняется только из onBytesWritten().
         if (remaining == 0) {
-            acceptedPacket = pending.data;
-            packetWasAccepted = true;
-            queue.dequeue();
-            scheduleNext = !queue.isEmpty();
+            return;
+        }
+
+        const qint64 writeCount = socket->write(
+            pending.data.constData() + pending.acceptedOffset,
+            remaining);
+        writeResult = "w: " + QString::number(writeCount);
+
+        if (writeCount < 0) {
+            writeFailed = true;
         } else {
-            const qint64 writeCount = socket->write(
-                pending.data.constData() + pending.offset,
-                remaining);
-            writeResult = "w: " + QString::number(writeCount);
-
-            if (writeCount < 0) {
-                writeFailed = true;
-            } else {
-                pending.offset += static_cast<qsizetype>(writeCount);
-                retryAfterDelay = writeCount == 0;
-
-                if (pending.offset == pending.data.size()) {
-                    acceptedPacket = pending.data;
-                    packetWasAccepted = true;
-                    queue.dequeue();
-                    scheduleNext = !queue.isEmpty();
-                }
-            }
+            pending.acceptedOffset += static_cast<qsizetype>(writeCount);
+            retryAfterDelay = writeCount == 0;
         }
     }
 
@@ -210,22 +204,59 @@ void TcpTransport::processQueue() {
 
     if (writeFailed) {
         emit translateError(writeResult, WRITE_ERROR);
-        QTimer::singleShot(100, this, [this]() { processQueue(); });
+        // Новый TCP-поток должен повторить текущий кадр с первого байта.
+        socket->abort();
+        scheduleReconnect();
         return;
     }
 
-    if (packetWasAccepted) {
-        emit translateError(writeResult, WRITE_OK);
-        emit packetAccepted(acceptedPacket);
+    if (retryAfterDelay) {
+        QTimer::singleShot(50, this, [this]() { processQueue(); });
+    }
+}
+
+void TcpTransport::onBytesWritten(qint64 count)
+{
+    quint64 acceptedPacketId = 0;
+    QByteArray acceptedPacket;
+    bool scheduleNext = false;
+    bool continueCurrent = false;
+
+    {
+        QMutexLocker locker(&mutex);
+        if (queue.isEmpty() || count <= 0) {
+            return;
+        }
+
+        PendingPacket &pending = queue.head();
+        const qsizetype unconfirmed =
+            pending.acceptedOffset - pending.confirmedOffset;
+        const qsizetype confirmedNow = qMin(
+            static_cast<qsizetype>(count), unconfirmed);
+        pending.confirmedOffset += confirmedNow;
+
+        if (pending.acceptedOffset == pending.data.size() &&
+            pending.confirmedOffset == pending.data.size()) {
+            acceptedPacketId = pending.id;
+            acceptedPacket = pending.data;
+            queue.dequeue();
+            scheduleNext = !queue.isEmpty();
+        } else {
+            continueCurrent = pending.acceptedOffset < pending.data.size();
+        }
     }
 
-    if (scheduleNext) {
+    if (acceptedPacketId != 0) {
+        emit translateError(
+            "w: " + QString::number(acceptedPacket.size()), WRITE_OK);
+        emit packetAccepted(acceptedPacketId, acceptedPacket);
+    }
+
+    if (scheduleNext || continueCurrent) {
         QMetaObject::invokeMethod(
             this,
             [this]() { processQueue(); },
             Qt::QueuedConnection);
-    } else if (retryAfterDelay) {
-        QTimer::singleShot(50, this, [this]() { processQueue(); });
     }
 }
 

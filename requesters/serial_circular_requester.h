@@ -4,6 +4,8 @@
 #include <QObject>
 #include <QQueue>
 #include <QTimer>
+#include <QElapsedTimer>
+#include <QPointer>
 #include "cmd/abstract_command.h"
 #include "network_transport/network_transport_locker.h"
 #include "network_transport/abstract_network_transport.h"
@@ -27,6 +29,12 @@ public:
 signals:
     void translateData(QByteArray);
 private:
+    enum class RequestState {
+        Idle,
+        WaitingForWrite,
+        WaitingForResponse
+    };
+
 #ifdef MYABSTRACTCONNECT_H
     MyAbstractConnect *m_connect;
 #else
@@ -36,16 +44,21 @@ private:
     NetworkTransportLocker *m_locker;
     QList<AbstractCommand *> m_circularCommands;
     QQueue<AbstractCommand *> m_disposableCommands;
-    AbstractCommand *currentCmd = nullptr;
+    QPointer<AbstractCommand> currentCmd;
     QByteArray m_pendingPacket;
-    bool m_waitingForWrite = false;
+    quint64 m_pendingPacketId = 0;
+    RequestState m_state = RequestState::Idle;
+    QElapsedTimer m_responseTimer;
     bool m_currentIsDisposable = false;
     bool m_preferDisposable = true;
+    bool m_deleteCurrentWhenIdle = false;
     int m_readIndex = 0;
+    void rejectCurrentCommand();
+    void finishCurrentCommand();
 private slots:
     void processNext();
     void unlock(QByteArray data);
-    void onPacketAccepted(const QByteArray &packet);
+    void onPacketAccepted(quint64 packetId, const QByteArray &packet);
 };
 
 #endif // SERIALCIRCULARREQUESTER_H

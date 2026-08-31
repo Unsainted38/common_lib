@@ -70,16 +70,30 @@ bool UdpTransport::open()
 
 bool UdpTransport::write(const QByteArray &packet)
 {
+    return writeTracked(packet) != 0;
+}
+
+quint64 UdpTransport::writeTracked(const QByteArray &packet)
+{
+    if (packet.isEmpty()) {
+        return 0;
+    }
+
+    quint64 packetId = 0;
     {
         QMutexLocker locker(&mutex);
-        queue.enqueue(packet);
+        packetId = nextPacketId++;
+        if (nextPacketId == 0) {
+            nextPacketId = 1;
+        }
+        queue.enqueue({packetId, packet});
     }
 
     QMetaObject::invokeMethod(
         this,
         [this]() { processQueue(); },
         Qt::QueuedConnection);
-    return true;
+    return packetId;
 }
 
 bool UdpTransport::close()
@@ -93,8 +107,7 @@ bool UdpTransport::close()
 void UdpTransport::heartbeat()
 {
     if(socket->state() == QAbstractSocket::ConnectedState) {
-        socket->write(heartbeatPacket); // ISSUE Придумать, как пихать в сокет хартбит пакет
-        socket->flush();
+        write(heartbeatPacket);
     }
 }
 
@@ -137,6 +150,7 @@ void UdpTransport::onErrorOccured(QAbstractSocket::SocketError error)
 void UdpTransport::processQueue()
 {
     QByteArray acceptedPacket;
+    quint64 acceptedPacketId = 0;
     QString writeResult;
     bool packetWasAccepted = false;
     bool writeFailed = false;
@@ -150,12 +164,13 @@ void UdpTransport::processQueue()
             return;
         }
 
-        const QByteArray &packet = queue.head();
-        const qint64 writeCount = socket->write(packet);
+        const PendingPacket &pending = queue.head();
+        const qint64 writeCount = socket->write(pending.data);
         writeResult = "w: " + QString::number(writeCount);
 
-        if (writeCount == packet.size()) {
-            acceptedPacket = packet;
+        if (writeCount == pending.data.size()) {
+            acceptedPacketId = pending.id;
+            acceptedPacket = pending.data;
             packetWasAccepted = true;
             queue.dequeue();
             scheduleNext = !queue.isEmpty();
@@ -175,7 +190,7 @@ void UdpTransport::processQueue()
 
     if (packetWasAccepted) {
         emit translateError(writeResult, WRITE_OK);
-        emit packetAccepted(acceptedPacket);
+        emit packetAccepted(acceptedPacketId, acceptedPacket);
     }
 
     if (scheduleNext) {

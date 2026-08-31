@@ -20,13 +20,17 @@ public:
     virtual void setupTransport() = 0;
     virtual bool open() = 0;
     virtual bool write(const QByteArray &packet) = 0;
+    // Возвращает идентификатор поставленного в очередь пакета.
+    // Ноль означает, что пакет не был принят транспортом.
+    virtual quint64 writeTracked(const QByteArray &packet) = 0;
     virtual bool close() = 0;
 
 signals:
     void translateError(QString err, TErrorCode code);
     void translateData(const QByteArray &data);
-    // Все байты пакета приняты внутренним буфером транспорта.
-    void packetAccepted(const QByteArray &packet);
+    // Все байты пакета переданы устройству транспорта. Это не подтверждение
+    // получения или обработки пакета удалённой стороной.
+    void packetAccepted(quint64 packetId, const QByteArray &packet);
 protected:
     QString m_configPath;
     QString m_section;

@@ -37,7 +37,7 @@ AbstractNetworkTransport *SerialCircularRequester::getTransport()
 #endif
 
 void SerialCircularRequester::addCircularCommand(AbstractCommand *cmd) {
-    if(m_circularCommands.contains(cmd)) {
+    if (!cmd || m_circularCommands.contains(cmd)) {
         return;
     }
 
@@ -45,12 +45,33 @@ void SerialCircularRequester::addCircularCommand(AbstractCommand *cmd) {
 }
 
 void SerialCircularRequester::addDisposableCommand(AbstractCommand *cmd) {
-    m_disposableCommands.enqueue(cmd);
+    if (cmd) {
+        m_disposableCommands.enqueue(cmd);
+    }
 }
 
 void SerialCircularRequester::removeCommands() {
-    qDeleteAll(m_circularCommands);
+    const AbstractCommand *activeCommand = currentCmd.data();
+    const bool activeIsCircular =
+        activeCommand && m_circularCommands.contains(currentCmd.data());
+
+    for (AbstractCommand *command : std::as_const(m_circularCommands)) {
+        if (command != activeCommand) {
+            delete command;
+        }
+    }
     m_circularCommands.clear();
+    m_readIndex = 0;
+
+    if (activeIsCircular) {
+        if (m_state == RequestState::Idle) {
+            delete currentCmd.data();
+            currentCmd = nullptr;
+        } else {
+            // Активная команда удалится после ответа или таймаута.
+            m_deleteCurrentWhenIdle = true;
+        }
+    }
 }
 
 void SerialCircularRequester::startRequest() {
@@ -63,7 +84,22 @@ void SerialCircularRequester::stopRequest()
 }
 
 void SerialCircularRequester::processNext() {
-    if(m_locker->isLocked() || m_waitingForWrite) {
+    if (m_state == RequestState::WaitingForWrite) {
+        return;
+    }
+
+    if (m_state == RequestState::WaitingForResponse) {
+        if (m_responseTimer.isValid() &&
+            m_responseTimer.elapsed() < m_locker->timeout()) {
+            return;
+        }
+
+        qWarning() << "Command response timeout";
+        m_locker->unlock();
+        finishCurrentCommand();
+    }
+
+    if (m_locker->isLocked()) {
         return;
     }
 
@@ -99,28 +135,41 @@ void SerialCircularRequester::processNext() {
     }
 
     m_pendingPacket = currentCmd->makeCommand();
-    m_waitingForWrite = true;
+    if (m_pendingPacket.isEmpty()) {
+        qWarning() << "Command produced an empty packet";
+        rejectCurrentCommand();
+        return;
+    }
+
+    m_state = RequestState::WaitingForWrite;
 
 #ifdef MYABSTRACTCONNECT_H
+    m_pendingPacketId = 1;
     m_connect->writeData(m_pendingPacket);
-    onPacketAccepted(m_pendingPacket);
+    onPacketAccepted(m_pendingPacketId, m_pendingPacket);
 #else
-    if (!m_transport->write(m_pendingPacket)) {
-        m_waitingForWrite = false;
+    m_pendingPacketId = m_transport->writeTracked(m_pendingPacket);
+    if (m_pendingPacketId == 0) {
+        m_state = RequestState::Idle;
         m_pendingPacket.clear();
+        currentCmd = nullptr;
     }
 #endif
 }
 
-void SerialCircularRequester::onPacketAccepted(const QByteArray &packet)
+void SerialCircularRequester::onPacketAccepted(
+    quint64 packetId,
+    const QByteArray &packet)
 {
-    if (!m_waitingForWrite || packet != m_pendingPacket) {
+    if (m_state != RequestState::WaitingForWrite ||
+        packetId != m_pendingPacketId ||
+        packet != m_pendingPacket) {
         return;
     }
 
     if (m_currentIsDisposable) {
         if (!m_disposableCommands.isEmpty() &&
-            m_disposableCommands.head() == currentCmd) {
+            m_disposableCommands.head() == currentCmd.data()) {
             m_disposableCommands.dequeue();
         }
         m_preferDisposable = false;
@@ -129,18 +178,60 @@ void SerialCircularRequester::onPacketAccepted(const QByteArray &packet)
         m_preferDisposable = true;
     }
 
-    m_waitingForWrite = false;
+    m_state = RequestState::WaitingForResponse;
+    m_pendingPacketId = 0;
     m_pendingPacket.clear();
     m_locker->lock();
+    m_responseTimer.restart();
 }
 
 void SerialCircularRequester::unlock(QByteArray data) {
-    bool tryParse = false;
-    if (currentCmd) {
-        tryParse = currentCmd->tryParse(data);
+    if (m_state != RequestState::WaitingForResponse) {
+        return;
     }
-    bool locked = m_locker->isLocked();
-    if(locked && tryParse) {
+
+    if (!currentCmd ||
+        !m_responseTimer.isValid() ||
+        m_responseTimer.elapsed() >= m_locker->timeout()) {
         m_locker->unlock();
+        finishCurrentCommand();
+        return;
+    }
+
+    if (currentCmd->tryParse(data)) {
+        m_locker->unlock();
+        finishCurrentCommand();
+    }
+}
+
+void SerialCircularRequester::rejectCurrentCommand()
+{
+    if (m_currentIsDisposable) {
+        if (!m_disposableCommands.isEmpty() &&
+            m_disposableCommands.head() == currentCmd.data()) {
+            m_disposableCommands.dequeue();
+        }
+        m_preferDisposable = false;
+    } else if (!m_circularCommands.isEmpty()) {
+        m_readIndex = (m_readIndex + 1) % m_circularCommands.size();
+        m_preferDisposable = true;
+    }
+
+    finishCurrentCommand();
+}
+
+void SerialCircularRequester::finishCurrentCommand()
+{
+    AbstractCommand *finishedCommand = currentCmd.data();
+
+    m_state = RequestState::Idle;
+    m_pendingPacketId = 0;
+    m_pendingPacket.clear();
+    currentCmd = nullptr;
+    m_responseTimer.invalidate();
+
+    if (m_deleteCurrentWhenIdle) {
+        m_deleteCurrentWhenIdle = false;
+        delete finishedCommand;
     }
 }

@@ -8,12 +8,8 @@ SerialTransport::SerialTransport(QString configPath, QString section, QObject *p
     setupTransport();
     open();
     connect(serial, SIGNAL(readyRead()), this, SLOT(onSerialRead()));
-    connect(serial, &QSerialPort::bytesWritten, this, [this](qint64) {
-        QMetaObject::invokeMethod(
-            this,
-            [this]() { processQueue(); },
-            Qt::QueuedConnection);
-    });
+    connect(serial, &QSerialPort::bytesWritten,
+            this, &SerialTransport::onBytesWritten);
 }
 
 void SerialTransport::loadConfig() {
@@ -47,16 +43,29 @@ void SerialTransport::setupTransport() {
 
 
 bool SerialTransport::write(const QByteArray &packet) {
+    return writeTracked(packet) != 0;
+}
+
+quint64 SerialTransport::writeTracked(const QByteArray &packet) {
+    if (packet.isEmpty()) {
+        return 0;
+    }
+
+    quint64 packetId = 0;
     {
         QMutexLocker locker(&mutex);
-        queue.enqueue({packet, 0});
+        packetId = nextPacketId++;
+        if (nextPacketId == 0) {
+            nextPacketId = 1;
+        }
+        queue.enqueue({packetId, packet, 0, 0});
     }
 
     QMetaObject::invokeMethod(
         this,
         [this]() { processQueue(); },
         Qt::QueuedConnection);
-    return true;
+    return packetId;
 }
 
 bool SerialTransport::open() {
@@ -79,7 +88,8 @@ bool SerialTransport::close() {
     {
         QMutexLocker locker(&mutex);
         if (!queue.isEmpty()) {
-            queue.head().offset = 0;
+            queue.head().acceptedOffset = 0;
+            queue.head().confirmedOffset = 0;
         }
     }
     serial->close();
@@ -95,12 +105,9 @@ void SerialTransport::onSerialRead() {
 }
 
 void SerialTransport::processQueue() {
-    QByteArray acceptedPacket;
     QString writeResult;
-    bool packetWasAccepted = false;
     bool writeFailed = false;
     bool retryAfterDelay = false;
-    bool scheduleNext = false;
 
     {
         QMutexLocker locker(&mutex);
@@ -110,32 +117,23 @@ void SerialTransport::processQueue() {
         }
 
         PendingPacket &pending = queue.head();
-        const qsizetype remaining = pending.data.size() - pending.offset;
+        const qsizetype remaining =
+            pending.data.size() - pending.acceptedOffset;
 
         if (remaining == 0) {
-            acceptedPacket = pending.data;
-            packetWasAccepted = true;
-            queue.dequeue();
-            scheduleNext = !queue.isEmpty();
+            return;
+        }
+
+        const qint64 writeCount = serial->write(
+            pending.data.constData() + pending.acceptedOffset,
+            remaining);
+        writeResult = "w: " + QString::number(writeCount);
+
+        if (writeCount < 0) {
+            writeFailed = true;
         } else {
-            const qint64 writeCount = serial->write(
-                pending.data.constData() + pending.offset,
-                remaining);
-            writeResult = "w: " + QString::number(writeCount);
-
-            if (writeCount < 0) {
-                writeFailed = true;
-            } else {
-                pending.offset += static_cast<qsizetype>(writeCount);
-                retryAfterDelay = writeCount == 0;
-
-                if (pending.offset == pending.data.size()) {
-                    acceptedPacket = pending.data;
-                    packetWasAccepted = true;
-                    queue.dequeue();
-                    scheduleNext = !queue.isEmpty();
-                }
-            }
+            pending.acceptedOffset += static_cast<qsizetype>(writeCount);
+            retryAfterDelay = writeCount == 0;
         }
     }
 
@@ -147,17 +145,51 @@ void SerialTransport::processQueue() {
         return;
     }
 
-    if (packetWasAccepted) {
-        emit translateError(writeResult, WRITE_OK);
-        emit packetAccepted(acceptedPacket);
+    if (retryAfterDelay) {
+        QTimer::singleShot(50, this, [this]() { processQueue(); });
+    }
+}
+
+void SerialTransport::onBytesWritten(qint64 count)
+{
+    quint64 acceptedPacketId = 0;
+    QByteArray acceptedPacket;
+    bool processMore = false;
+
+    {
+        QMutexLocker locker(&mutex);
+        if (queue.isEmpty() || count <= 0) {
+            return;
+        }
+
+        PendingPacket &pending = queue.head();
+        const qsizetype unconfirmed =
+            pending.acceptedOffset - pending.confirmedOffset;
+        const qsizetype confirmedNow = qMin(
+            static_cast<qsizetype>(count), unconfirmed);
+        pending.confirmedOffset += confirmedNow;
+
+        if (pending.acceptedOffset == pending.data.size() &&
+            pending.confirmedOffset == pending.data.size()) {
+            acceptedPacketId = pending.id;
+            acceptedPacket = pending.data;
+            queue.dequeue();
+            processMore = !queue.isEmpty();
+        } else {
+            processMore = pending.acceptedOffset < pending.data.size();
+        }
     }
 
-    if (scheduleNext) {
+    if (acceptedPacketId != 0) {
+        emit translateError(
+            "w: " + QString::number(acceptedPacket.size()), WRITE_OK);
+        emit packetAccepted(acceptedPacketId, acceptedPacket);
+    }
+
+    if (processMore) {
         QMetaObject::invokeMethod(
             this,
             [this]() { processQueue(); },
             Qt::QueuedConnection);
-    } else if (retryAfterDelay) {
-        QTimer::singleShot(50, this, [this]() { processQueue(); });
     }
 }

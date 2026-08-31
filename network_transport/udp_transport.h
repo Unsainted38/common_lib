@@ -12,13 +12,19 @@
 class UdpTransport : public AbstractNetworkTransport
 {
     Q_OBJECT
+    struct PendingPacket {
+        quint64 id = 0;
+        QByteArray data;
+    };
+
     QUdpSocket *socket;
     QHostAddress hostAddress;
     quint16 port = 7777;
     QHostAddress listenIp;
     QString name = "udp_client";
     QMutex mutex;
-    QQueue<QByteArray> queue;
+    QQueue<PendingPacket> queue;
+    quint64 nextPacketId = 1;
     QTimer *heartbeatTimer;
     QTimer *reconnectTimer;
     bool connectedState = false;
@@ -34,6 +40,7 @@ public:
     void setupTransport() override;
     bool open() override;
     bool write(const QByteArray &packet) override;
+    quint64 writeTracked(const QByteArray &packet) override;
     bool close() override;
     void heartbeat() override;
 
