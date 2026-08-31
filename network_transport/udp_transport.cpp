@@ -1,4 +1,5 @@
 #include "udp_transport.h"
+#include <QNetworkDatagram>
 
 using namespace Qt;
 
@@ -48,23 +49,17 @@ void UdpTransport::setupTransport()
 
 bool UdpTransport::open()
 {
-    socket->connectToHost(hostAddress, port);
+    reconnectEnabled = true;
 
-    if(!socket->isOpen()) {
-        qDebug() << "error while connect to udp port:" << endl
-                 << "Ip:" << hostAddress.toString() << endl
-                 << "Port:" << port << endl
-                 << "Name:" << name << endl
-                 << socket->errorString() << endl
-                 << "trying to reconnect in 5 sec" << endl;
-        QTimer::singleShot(5000, this, "UdpTransport::open");
-        return false;
+    if (socket->state() == QAbstractSocket::ConnectedState ||
+        socket->state() == QAbstractSocket::ConnectingState ||
+        socket->state() == QAbstractSocket::HostLookupState) {
+        return true;
     }
 
-    qDebug() << "connected via udp: " << endl
-             << "Ip:" << hostAddress.toString() << endl
-             << "Port:" << port << endl
-             << "Name:" << name << endl;
+    socket->connectToHost(hostAddress, port);
+    qDebug() << "Connecting via UDP:"
+             << hostAddress.toString() << port << name;
     return true;
 }
 
@@ -98,6 +93,9 @@ quint64 UdpTransport::writeTracked(const QByteArray &packet)
 
 bool UdpTransport::close()
 {
+    reconnectEnabled = false;
+    reconnectTimer->stop();
+    heartbeatTimer->stop();
     socket->disconnectFromHost();
     return true;
 }
@@ -136,7 +134,9 @@ void UdpTransport::onDisconnected()
     }
 
     resetTimers();
-    scheduleReconnect();
+    if (reconnectEnabled) {
+        scheduleReconnect();
+    }
 }
 
 void UdpTransport::onErrorOccured(QAbstractSocket::SocketError error)
@@ -144,7 +144,9 @@ void UdpTransport::onErrorOccured(QAbstractSocket::SocketError error)
     Q_UNUSED(error);
     qDebug() << "Socket error:" << socket->errorString();
     heartbeatTimer->stop();
-    scheduleReconnect();
+    if (reconnectEnabled) {
+        scheduleReconnect();
+    }
 }
 
 void UdpTransport::processQueue()
@@ -203,7 +205,12 @@ void UdpTransport::processQueue()
 
 void UdpTransport::onReadSocket()
 {
-    emit translateData(socket->readAll());
+    while (socket->hasPendingDatagrams()) {
+        const QNetworkDatagram datagram = socket->receiveDatagram();
+        if (datagram.isValid()) {
+            emit translateData(datagram.data());
+        }
+    }
     lastActivity = QDateTime::currentDateTime();
 }
 
@@ -214,13 +221,17 @@ void UdpTransport::resetTimers()
 
 void UdpTransport::scheduleReconnect()
 {
-    if(!reconnectTimer->isActive()) {
+    if (reconnectEnabled && !reconnectTimer->isActive()) {
         reconnectTimer->start();
     }
 }
 
 void UdpTransport::reconnect()
 {
+    if (!reconnectEnabled) {
+        return;
+    }
+
     if(socket->state() == QAbstractSocket::ConnectedState ||
         socket->state() == QAbstractSocket::ConnectingState) {
         return;

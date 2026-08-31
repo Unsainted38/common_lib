@@ -36,6 +36,8 @@ quint64 TcpTransport::writeTracked(const QByteArray &packet) {
 }
 
 bool TcpTransport::open() {
+    reconnectEnabled = true;
+
     if (socket->state() == QAbstractSocket::ConnectedState ||
         socket->state() == QAbstractSocket::ConnectingState ||
         socket->state() == QAbstractSocket::HostLookupState) {
@@ -49,6 +51,9 @@ bool TcpTransport::open() {
 }
 
 bool TcpTransport::close() {
+    reconnectEnabled = false;
+    reconnectTimer->stop();
+    heartbeatTimer->stop();
     socket->disconnectFromHost();
     return true;
 }
@@ -99,6 +104,10 @@ void TcpTransport::heartbeat() {
 }
 
 void TcpTransport::reconnect() {
+    if (!reconnectEnabled) {
+        return;
+    }
+
     if(socket->state() == QAbstractSocket::ConnectedState ||
             socket->state() == QAbstractSocket::ConnectingState) {
         return;
@@ -144,7 +153,9 @@ void TcpTransport::onDisconnected() {
     }
 
     resetTimers();
-    scheduleReconnect();
+    if (reconnectEnabled) {
+        scheduleReconnect();
+    }
 }
 
 void TcpTransport::resetTimers() {
@@ -152,7 +163,7 @@ void TcpTransport::resetTimers() {
 }
 
 void TcpTransport::scheduleReconnect() {
-    if(!reconnectTimer->isActive()) {
+    if (reconnectEnabled && !reconnectTimer->isActive()) {
         reconnectTimer->start();
     }
 }
@@ -161,7 +172,9 @@ void TcpTransport::onErrorOccured(QAbstractSocket::SocketError error) {
     Q_UNUSED(error);
     qDebug() << "Socket error:" << socket->errorString();
     heartbeatTimer->stop();
-    scheduleReconnect();
+    if (reconnectEnabled) {
+        scheduleReconnect();
+    }
 }
 
 void TcpTransport::processQueue() {
@@ -206,7 +219,9 @@ void TcpTransport::processQueue() {
         emit translateError(writeResult, WRITE_ERROR);
         // Новый TCP-поток должен повторить текущий кадр с первого байта.
         socket->abort();
-        scheduleReconnect();
+        if (reconnectEnabled) {
+            scheduleReconnect();
+        }
         return;
     }
 

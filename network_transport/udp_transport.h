@@ -28,6 +28,7 @@ class UdpTransport : public AbstractNetworkTransport
     QTimer *heartbeatTimer;
     QTimer *reconnectTimer;
     bool connectedState = false;
+    bool reconnectEnabled = true;
     QDateTime lastActivity;
     QByteArray heartbeatPacket;
 
