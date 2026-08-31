@@ -60,6 +60,7 @@ void UM2_13Device::setL1Attenuation(float attenuation)
     quint16 v = ceil(attenuation / 0.5);
     if (v >= 63) v = 63;
     WL1Attenuation->setValue(QVariant::fromValue(v));
+    m_requester->addDisposableCommand(WL1Attenuation);
 }
 
 void UM2_13Device::setL3Attenuation(float attenuation)
