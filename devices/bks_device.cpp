@@ -7,6 +7,7 @@ BksDevice::BksDevice(SerialCircularRequester *requester, QString configPath, QSt
       m_configPath(configPath),
       m_section(section),
       m_requester(requester) {
+    loadConfig();
     m_parser = new MShPRParser();
     m_timer = new QTimer(this);
     m_timer->start(1000);
@@ -15,8 +16,8 @@ BksDevice::BksDevice(SerialCircularRequester *requester, QString configPath, QSt
     FC2Command = new MShPRCommand(m_deviceAddr, BKS_COMMANDS::FC_HIGH_FREQ_CMD, CommandType::WRITE);
     FX1Command = new MShPRCommand(m_deviceAddr, BKS_COMMANDS::FX_LOW_FREQ_CMD, CommandType::WRITE);
     FX2Command = new MShPRCommand(m_deviceAddr, BKS_COMMANDS::FX_HIGH_FREQ_CMD, CommandType::WRITE);
-    AddressCommand = new MShPRCommand(m_deviceAddr, BKS_COMMANDS::STATUS_CMD, CommandType::WRITE);
-    BaudCommand = new MShPRCommand(m_deviceAddr, BKS_COMMANDS::STATUS_CMD, CommandType::WRITE);
+    AddressCommand = new MShPRCommand(m_deviceAddr, BKS_COMMANDS::ADDRESS_CMD, CommandType::WRITE);
+    BaudCommand = new MShPRCommand(m_deviceAddr, BKS_COMMANDS::BAUD_CMD, CommandType::WRITE);
     m_requester->addCircularCommand(StatusCommand);
     m_requester->startRequest();
 
