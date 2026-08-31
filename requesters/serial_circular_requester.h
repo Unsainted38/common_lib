@@ -37,10 +37,15 @@ private:
     QList<AbstractCommand *> m_circularCommands;
     QQueue<AbstractCommand *> m_disposableCommands;
     AbstractCommand *currentCmd = nullptr;
+    QByteArray m_pendingPacket;
+    bool m_waitingForWrite = false;
+    bool m_currentIsDisposable = false;
+    bool m_preferDisposable = true;
     int m_readIndex = 0;
 private slots:
     void processNext();
     void unlock(QByteArray data);
+    void onPacketAccepted(const QByteArray &packet);
 };
 
 #endif // SERIALCIRCULARREQUESTER_H

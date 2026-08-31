@@ -25,6 +25,9 @@ SerialCircularRequester::SerialCircularRequester(AbstractNetworkTransport *trans
     connect(timer, &QTimer::timeout, this, &SerialCircularRequester::processNext);
     connect(m_transport, &AbstractNetworkTransport::translateData, this, &SerialCircularRequester::translateData);
     connect(m_transport, SIGNAL(translateData(QByteArray)), this, SLOT(unlock(QByteArray)), Qt::UniqueConnection);
+    connect(m_transport, &AbstractNetworkTransport::packetAccepted,
+            this, &SerialCircularRequester::onPacketAccepted,
+            Qt::UniqueConnection);
 }
 
 AbstractNetworkTransport *SerialCircularRequester::getTransport()
@@ -60,41 +63,75 @@ void SerialCircularRequester::stopRequest()
 }
 
 void SerialCircularRequester::processNext() {
-    if(m_locker->isLocked()) {
+    if(m_locker->isLocked() || m_waitingForWrite) {
         return;
     }
-    static bool concurent_flag = true;
 
-    if(!m_disposableCommands.isEmpty() && concurent_flag) {
-
-        currentCmd = m_disposableCommands.dequeue();
-
-        if(currentCmd) {
-            m_locker->lock();
-            concurent_flag = false;
-#ifdef MYABSTRACTCONNECT_H
-            m_connect->writeData(currentCmd->makeCommand());
-#else
-            m_transport->write(currentCmd->makeCommand());
-#endif
-
-        }
-    } else if(!m_circularCommands.isEmpty()) {
-        currentCmd = m_circularCommands[m_readIndex];
-        m_readIndex = (m_readIndex + 1) % m_circularCommands.size();
-
-        if(currentCmd) {
-            m_locker->lock();
-            concurent_flag = true;
-#ifdef MYABSTRACTCONNECT_H
-            m_connect->writeData(currentCmd->makeCommand());
-#else
-            m_transport->write(currentCmd->makeCommand());
-#endif
-
-        }
+    while (!m_disposableCommands.isEmpty() &&
+           m_disposableCommands.head() == nullptr) {
+        m_disposableCommands.dequeue();
     }
 
+    const bool takeDisposable =
+        !m_disposableCommands.isEmpty() &&
+        (m_preferDisposable || m_circularCommands.isEmpty());
+
+    if (takeDisposable) {
+        currentCmd = m_disposableCommands.head();
+        m_currentIsDisposable = true;
+    } else if (!m_circularCommands.isEmpty()) {
+        if (m_readIndex >= m_circularCommands.size()) {
+            m_readIndex = 0;
+        }
+
+        currentCmd = m_circularCommands.at(m_readIndex);
+        m_currentIsDisposable = false;
+    } else {
+        currentCmd = nullptr;
+        return;
+    }
+
+    if (!currentCmd) {
+        if (!m_currentIsDisposable) {
+            m_readIndex = (m_readIndex + 1) % m_circularCommands.size();
+        }
+        return;
+    }
+
+    m_pendingPacket = currentCmd->makeCommand();
+    m_waitingForWrite = true;
+
+#ifdef MYABSTRACTCONNECT_H
+    m_connect->writeData(m_pendingPacket);
+    onPacketAccepted(m_pendingPacket);
+#else
+    if (!m_transport->write(m_pendingPacket)) {
+        m_waitingForWrite = false;
+        m_pendingPacket.clear();
+    }
+#endif
+}
+
+void SerialCircularRequester::onPacketAccepted(const QByteArray &packet)
+{
+    if (!m_waitingForWrite || packet != m_pendingPacket) {
+        return;
+    }
+
+    if (m_currentIsDisposable) {
+        if (!m_disposableCommands.isEmpty() &&
+            m_disposableCommands.head() == currentCmd) {
+            m_disposableCommands.dequeue();
+        }
+        m_preferDisposable = false;
+    } else if (!m_circularCommands.isEmpty()) {
+        m_readIndex = (m_readIndex + 1) % m_circularCommands.size();
+        m_preferDisposable = true;
+    }
+
+    m_waitingForWrite = false;
+    m_pendingPacket.clear();
+    m_locker->lock();
 }
 
 void SerialCircularRequester::unlock(QByteArray data) {
