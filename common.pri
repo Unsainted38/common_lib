@@ -34,7 +34,7 @@ linux-g++: {
     QMAKE_CFLAGS_WARN_ON += -Wno-class-memaccess
     QMAKE_CXXFLAGS_WARN_ON += -Wno-class-memaccess
     QMAKE_CFLAGS += -Wno-class-memaccess
-    QMAKE_CXXFLAGS += -пWno-class-memaccess
+    QMAKE_CXXFLAGS += -Wno-class-memaccess
     QMAKE_CXXFLAGS += -std=gnu++17
 #    DEFINES += nullptr=0
 #    QMAKE_CXXFLAGS += -std=gnu++11
@@ -62,5 +62,4 @@ if (equals(TEMPLATE, lib)) {
 if (equals(TEMPLATE, app)) {
     DESTDIR = $$OUT_PWD/bin
 }
-
 
