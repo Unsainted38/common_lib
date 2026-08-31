@@ -72,7 +72,6 @@ ModbusParseStatus ModBusRtu::tryExtractFrame(QByteArray &buffer, ModbusFrame &fr
     }
 
     const QByteArray adu = buffer.left(frameSize);
-    buffer.remove(0, frameSize);
 
     const quint16 receivedCrc =
         static_cast<quint8>(adu[frameSize - 2]) |
@@ -80,8 +79,13 @@ ModbusParseStatus ModBusRtu::tryExtractFrame(QByteArray &buffer, ModbusFrame &fr
              static_cast<quint8>(adu[frameSize - 1])) << 8);
 
     if (receivedCrc != GetCrc16(adu)) {
+        // frameSize мог быть получен из повреждённого byte count.
+        // Сдвигаемся на один байт, чтобы не удалить следующий корректный кадр.
+        buffer.remove(0, 1);
         return ModbusParseStatus::Invalid;
     }
+
+    buffer.remove(0, frameSize);
 
     frame.transactionId = 0;
     frame.deviceId = static_cast<quint8>(adu[0]);

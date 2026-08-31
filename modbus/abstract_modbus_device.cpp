@@ -5,6 +5,8 @@ AbstractModbusDevice::AbstractModbusDevice(SerialCircularRequester *requester, Q
     requester(requester)
 {
     protocol = ModBusProtocolFactory::getInstance(configPath, section);
+    Q_ASSERT(protocol);
+    protocol->setParent(this);
     deviceID = protocol->deviceID();
 }
 

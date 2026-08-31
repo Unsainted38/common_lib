@@ -56,6 +56,11 @@ const QByteArray &CompassLCC5000Command::makeWriteCommand() {
             }
 
             break;
+
+        default:
+            qWarning() << "Unsupported compass value type:" << valueType;
+            cachedWrite.clear();
+            return cachedWrite;
     }
 
     quint8 crc8 = BytesSumCrc(res);
@@ -72,6 +77,11 @@ const QByteArray &CompassLCC5000Command::makeCommand()
         return makeReadCommand();
     case CommandType::WRITE:
         return makeWriteCommand();
+    default:
+        qWarning() << "Unsupported compass command type:"
+                   << static_cast<int>(cmdType);
+        cachedRead.clear();
+        return cachedRead;
     }
 }
 

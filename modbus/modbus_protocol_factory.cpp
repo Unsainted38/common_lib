@@ -11,9 +11,13 @@ AbstractModBusProtocol *ModBusProtocolFactory::getInstance(QString protocolType,
     } else if (protocolType == "tcp") {
         return new ModBusTcp(slaveID);
     } else if (protocolType == "viatcp") {
-        return nullptr;
+        // Modbus RTU over a TCP transport keeps RTU framing and CRC.
+        return new ModBusRtu(slaveID);
     }
-    return nullptr;
+
+    qWarning() << "Unknown Modbus protocol type:" << protocolType
+               << "- falling back to RTU";
+    return new ModBusRtu(slaveID);
 }
 
 AbstractModBusProtocol *ModBusProtocolFactory::getInstance(QString configPath, QString section)
