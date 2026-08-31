@@ -23,6 +23,7 @@ public:
 #endif
     void addCircularCommand(AbstractCommand *cmd);
     void addDisposableCommand(AbstractCommand *cmd);
+    void removeCircularCommand(AbstractCommand *cmd);
     void removeCommands();
     void startRequest();
     void stopRequest();
@@ -46,6 +47,7 @@ private:
     QQueue<AbstractCommand *> m_disposableCommands;
     QPointer<AbstractCommand> currentCmd;
     QByteArray m_pendingPacket;
+    QByteArray m_earlyResponseBuffer;
     quint64 m_pendingPacketId = 0;
     RequestState m_state = RequestState::Idle;
     QElapsedTimer m_responseTimer;

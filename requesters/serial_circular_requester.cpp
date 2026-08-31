@@ -45,8 +45,37 @@ void SerialCircularRequester::addCircularCommand(AbstractCommand *cmd) {
 }
 
 void SerialCircularRequester::addDisposableCommand(AbstractCommand *cmd) {
-    if (cmd) {
+    // Команды устройств являются переиспользуемыми объектами. Повторное
+    // добавление того же указателя до отправки не должно создавать несколько
+    // одинаковых записей, каждая из которых всё равно увидит последнее value.
+    if (cmd && !m_disposableCommands.contains(cmd)) {
         m_disposableCommands.enqueue(cmd);
+    }
+}
+
+void SerialCircularRequester::removeCircularCommand(AbstractCommand *cmd)
+{
+    const qsizetype index = m_circularCommands.indexOf(cmd);
+    if (index < 0) {
+        return;
+    }
+
+    m_circularCommands.removeAt(index);
+    m_disposableCommands.removeAll(cmd);
+    if (index < m_readIndex) {
+        --m_readIndex;
+    }
+    if (m_readIndex < 0 || m_readIndex >= m_circularCommands.size()) {
+        m_readIndex = 0;
+    }
+
+    if (currentCmd == cmd && m_state != RequestState::Idle) {
+        m_deleteCurrentWhenIdle = true;
+    } else {
+        delete cmd;
+        if (currentCmd == cmd) {
+            currentCmd = nullptr;
+        }
     }
 }
 
@@ -135,6 +164,7 @@ void SerialCircularRequester::processNext() {
     }
 
     m_pendingPacket = currentCmd->makeCommand();
+    m_earlyResponseBuffer.clear();
     if (m_pendingPacket.isEmpty()) {
         qWarning() << "Command produced an empty packet";
         rejectCurrentCommand();
@@ -183,9 +213,19 @@ void SerialCircularRequester::onPacketAccepted(
     m_pendingPacket.clear();
     m_locker->lock();
     m_responseTimer.restart();
+
+    if (!m_earlyResponseBuffer.isEmpty()) {
+        const QByteArray earlyResponse = std::move(m_earlyResponseBuffer);
+        unlock(earlyResponse);
+    }
 }
 
 void SerialCircularRequester::unlock(QByteArray data) {
+    if (m_state == RequestState::WaitingForWrite) {
+        m_earlyResponseBuffer.append(data);
+        return;
+    }
+
     if (m_state != RequestState::WaitingForResponse) {
         return;
     }
@@ -227,6 +267,7 @@ void SerialCircularRequester::finishCurrentCommand()
     m_state = RequestState::Idle;
     m_pendingPacketId = 0;
     m_pendingPacket.clear();
+    m_earlyResponseBuffer.clear();
     currentCmd = nullptr;
     m_responseTimer.invalidate();
 
