@@ -41,7 +41,11 @@ quint16 GetCrc16(const QByteArray &array) {
     quint16 wCRCWord = 0xFFFF;
 
 
-    for(uint i = 0; i < array.length() - sizeof(wCRCWord); ++i) {
+    // В этой версии последние два байта считаются принятым CRC и не входят
+    // в расчёт. qsizetype нужен, чтобы размер короче CRC не дал unsigned
+    // underflow и выход за границы массива.
+    const qsizetype payloadSize = qMax<qsizetype>(0, array.size() - 2);
+    for(qsizetype i = 0; i < payloadSize; ++i) {
         nTemp = (quint8)array.at(i) ^ wCRCWord;
         wCRCWord >>= 8;
         wCRCWord ^= wCRCTable[nTemp];
