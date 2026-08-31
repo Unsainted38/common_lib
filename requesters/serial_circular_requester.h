@@ -4,8 +4,6 @@
 #include <QObject>
 #include <QQueue>
 #include <QTimer>
-#include <mach/mach.h>
-#include <mach/task.h>
 #include "cmd/abstract_command.h"
 #include "network_transport/network_transport_locker.h"
 #include "network_transport/abstract_network_transport.h"
@@ -29,7 +27,6 @@ public:
 signals:
     void translateData(QByteArray);
 private:
-    size_t currentMemoryUsage();
 #ifdef MYABSTRACTCONNECT_H
     MyAbstractConnect *m_connect;
 #else
