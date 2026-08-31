@@ -36,7 +36,7 @@ HEADERS += \
     devices/ubpch_device.h \
     devices/um2_13_device.h \
     modbus/ModBusCmdTypes.h \
-    modbus/ModBusDto.h \
+    modbus/ModBusDTO.h \
     modbus/abstract_modbus_device.h \
     modbus/abstract_modbus_protocol.h \
     modbus/modbus_protocol_factory.h \
