@@ -2,6 +2,10 @@
 #define MODBUSCMDTYPES_H
 #include <QObject>
 
+/**
+ * @brief
+ *
+ */
 enum class ModBusCmdTypes : quint8 {
     READ_COILS = 0x01,
     READ_DESCRETE_INPUTS = 0x02,
@@ -13,6 +17,12 @@ enum class ModBusCmdTypes : quint8 {
     WRITE_MULTIPLE_REGISTERS = 0x10,
 };
 
+/**
+ * @brief
+ *
+ * @param e
+ * @return quint8 operator
+ */
 constexpr quint8 operator*(ModBusCmdTypes e) {
     return static_cast<quint8>(e);
 }

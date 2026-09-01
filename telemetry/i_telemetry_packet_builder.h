@@ -4,12 +4,26 @@
 #include <QByteArray>
 
 template <typename TData>
+/**
+ * @brief
+ *
+ */
 class ITelemetryPacketBuilder
 {
 public:
-    virtual ~ITelemetryPacketBuilder() = default;
+    /**
+     * @brief
+     *
+     */
+virtual ~ITelemetryPacketBuilder() = default;
 
-    virtual QByteArray build(const TData &data) = 0;
+    /**
+     * @brief
+     *
+     * @param data
+     * @return QByteArray
+     */
+virtual QByteArray build(const TData &data) = 0;
 };
 
 #endif // I_TELEMETRY_PACKET_BUILDER_H

@@ -4,28 +4,66 @@
 #include <QObject>
 #include "abstract_command.h"
 
+/**
+ * @brief
+ *
+ */
 class UM2_13Commnad : public AbstractCommand
 {
     Q_OBJECT
-    quint16 cmdId;
-    quint16 length;
-    CommandType cmdType;
-    ValueType valueType;
-    QVariant value;
-    QVariant cachedValue;
-    QByteArray cachedCommand;
-    QByteArray buffer;
+    quint16 cmdId; /**< TODO: describe */
+    quint16 length; /**< TODO: describe */
+    CommandType cmdType; /**< TODO: describe */
+    ValueType valueType; /**< TODO: describe */
+    QVariant value; /**< TODO: describe */
+    QVariant cachedValue; /**< TODO: describe */
+    QByteArray cachedCommand; /**< TODO: describe */
+    QByteArray buffer; /**< TODO: describe */
 public:
-    explicit UM2_13Commnad(quint16 cmdId, quint16 length, ValueType valueType, CommandType cmdType);
+    /**
+     * @brief
+     *
+     * @param cmdId
+     * @param length
+     * @param valueType
+     * @param cmdType
+     */
+explicit UM2_13Commnad(quint16 cmdId, quint16 length, ValueType valueType, CommandType cmdType);
 
     // AbstractCommand interface
 public:
-    const QByteArray &makeCommand() override;
-    QVariant getValue() override;
-    void setValue(QVariant v) override;
-    bool tryParse(const QByteArray &data) override;
+    /**
+     * @brief
+     *
+     * @return const QByteArray
+     */
+const QByteArray &makeCommand() override;
+    /**
+     * @brief
+     *
+     * @return QVariant
+     */
+QVariant getValue() override;
+    /**
+     * @brief
+     *
+     * @param v
+     */
+void setValue(QVariant v) override;
+    /**
+     * @brief
+     *
+     * @param data
+     * @return bool
+     */
+bool tryParse(const QByteArray &data) override;
 signals:
-    void translateLastAnswer(QByteArray);
+    /**
+     * @brief
+     *
+     * @param QByteArray
+     */
+void translateLastAnswer(QByteArray);
 };
 
 #endif // UM2_13_COMMNAD_H

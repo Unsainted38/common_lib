@@ -8,6 +8,10 @@
 #include <QList>
 #include <QVariant>
 
+/**
+ * @brief
+ *
+ */
 enum ValueType {
     QINT8 = 7,
     QUINT8 = 8,
@@ -21,6 +25,10 @@ enum ValueType {
     QLISTQUINT16 = 29,
 };
 
+/**
+ * @brief
+ *
+ */
 enum class CommandType {
     READ,
     WRITE,
@@ -28,21 +36,67 @@ enum class CommandType {
     READWRITE,
 };
 
+/**
+ * @brief
+ *
+ */
 class AbstractCommand : public QObject {
     Q_OBJECT
 public:
-    explicit AbstractCommand(QObject *parent = nullptr);
-    virtual const QByteArray &makeCommand() = 0;
+    /**
+     * @brief
+     *
+     * @param parent
+     */
+explicit AbstractCommand(QObject *parent = nullptr);
+    /**
+     * @brief
+     *
+     * @return const QByteArray
+     */
+virtual const QByteArray &makeCommand() = 0;
 
-    virtual QVariant getValue();
-    virtual void setValue(QVariant v);
-    virtual bool isSuccess();
+    /**
+     * @brief
+     *
+     * @return QVariant
+     */
+virtual QVariant getValue();
+    /**
+     * @brief
+     *
+     * @param v
+     */
+virtual void setValue(QVariant v);
+    /**
+     * @brief
+     *
+     * @return bool
+     */
+virtual bool isSuccess();
 
-    virtual bool tryParse(const QByteArray &data);
+    /**
+     * @brief
+     *
+     * @param data
+     * @return bool
+     */
+virtual bool tryParse(const QByteArray &data);
 
 public slots:
-    virtual void processData(const QByteArray &data, quint16 regAddr);
-    virtual void processData(const QByteArray &data);
+    /**
+     * @brief
+     *
+     * @param data
+     * @param regAddr
+     */
+virtual void processData(const QByteArray &data, quint16 regAddr);
+    /**
+     * @brief
+     *
+     * @param data
+     */
+virtual void processData(const QByteArray &data);
 signals:
 protected:
 };

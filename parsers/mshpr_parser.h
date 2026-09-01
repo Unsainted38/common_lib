@@ -8,18 +8,45 @@
 #include <QByteArray>
 #include <QStringList>
 
+/**
+ * @brief
+ *
+ */
 class MShPRParser : public QObject {
     Q_OBJECT
 public:
-    explicit MShPRParser(QObject *parent = nullptr);
+    /**
+     * @brief
+     *
+     * @param parent
+     */
+explicit MShPRParser(QObject *parent = nullptr);
 
 signals:
-    void dataReady(QString, QMap<QString, int>);
-    void lastAnswer(QByteArray);
+    /**
+     * @brief
+     *
+     * @param QString
+     * @param QMap<QString
+     * @param int>
+     */
+void dataReady(QString, QMap<QString, int>);
+    /**
+     * @brief
+     *
+     * @param QByteArray
+     */
+void lastAnswer(QByteArray);
 public slots:
-    bool parseReply(const QByteArray &reply);
+    /**
+     * @brief
+     *
+     * @param reply
+     * @return bool
+     */
+bool parseReply(const QByteArray &reply);
 private:
-    QByteArray m_buffer;
+    QByteArray m_buffer; /**< TODO: describe */
 
 };
 

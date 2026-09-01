@@ -5,27 +5,55 @@
 #include <modbus/abstract_modbus_protocol.h>
 
 
+/**
+ * @brief
+ *
+ */
 class ReadInputRegisters : public AbstractCommand
 {
     Q_OBJECT
-    QByteArray cachedCommand;
-    QByteArray cachedPdu;
-    AbstractModBusProtocol *protocol;
-    quint16 registerAddress;
-    quint16 registersCount;
-    quint8 byteCount;
-    QByteArray buffer;
-    QVector<quint16> regs;
-    const quint8 cmdID = 0x04;
+    QByteArray cachedCommand; /**< TODO: describe */
+    QByteArray cachedPdu; /**< TODO: describe */
+    AbstractModBusProtocol *protocol; /**< TODO: describe */
+    quint16 registerAddress; /**< TODO: describe */
+    quint16 registersCount; /**< TODO: describe */
+    quint8 byteCount; /**< TODO: describe */
+    QByteArray buffer; /**< TODO: describe */
+    QVector<quint16> regs; /**< TODO: describe */
+    const quint8 cmdID = 0x04; /**< TODO: describe */
 
 public:
-    explicit ReadInputRegisters(quint16 regAddress, quint16 regsCount, AbstractModBusProtocol *protocol, QObject *parent = nullptr);
+    /**
+     * @brief
+     *
+     * @param regAddress
+     * @param regsCount
+     * @param protocol
+     * @param parent
+     */
+explicit ReadInputRegisters(quint16 regAddress, quint16 regsCount, AbstractModBusProtocol *protocol, QObject *parent = nullptr);
 
     // AbstractCommand interface
 public:
-    const QByteArray &makeCommand() override;
-    QVariant getValue() override;
-    bool tryParse(const QByteArray &data) override;
+    /**
+     * @brief
+     *
+     * @return const QByteArray
+     */
+const QByteArray &makeCommand() override;
+    /**
+     * @brief
+     *
+     * @return QVariant
+     */
+QVariant getValue() override;
+    /**
+     * @brief
+     *
+     * @param data
+     * @return bool
+     */
+bool tryParse(const QByteArray &data) override;
 };
 
 #endif // READ_INPUT_REGISTERS_H

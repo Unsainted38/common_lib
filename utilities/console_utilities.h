@@ -3,6 +3,10 @@
 
 #include <QDebug>
 
+/**
+ * @brief
+ *
+ */
 void clearConsole();
 
 #endif // CONSOLE_UTILITIES_H

@@ -11,6 +11,10 @@
 #include "network_transport/abstract_network_transport.h"
 //#include "uacs_network_transport/myabstractconnect.h"
 
+/**
+ * @brief
+ *
+ */
 class SerialCircularRequester : public QObject {
     Q_OBJECT
 public:
@@ -18,19 +22,68 @@ public:
     explicit SerialCircularRequester(MyAbstractConnect *transport, NetworkTransportLocker *locker, int pollIntervalMs = 50, QObject *parent = nullptr);
     MyAbstractConnect* getTransport();
 #else
-    explicit SerialCircularRequester(AbstractNetworkTransport *transport, NetworkTransportLocker *locker, int pollIntervalMs = 50, QObject *parent = nullptr);
-    AbstractNetworkTransport* getTransport();
+    /**
+     * @brief
+     *
+     * @param transport
+     * @param locker
+     * @param pollIntervalMs
+     * @param parent
+     */
+explicit SerialCircularRequester(AbstractNetworkTransport *transport, NetworkTransportLocker *locker, int pollIntervalMs = 50, QObject *parent = nullptr);
+    /**
+     * @brief
+     *
+     * @return AbstractNetworkTransport
+     */
+AbstractNetworkTransport* getTransport();
 #endif
-    void addCircularCommand(AbstractCommand *cmd);
-    void addDisposableCommand(AbstractCommand *cmd);
-    void removeCircularCommand(AbstractCommand *cmd);
-    void removeCommands();
-    void startRequest();
-    void stopRequest();
+    /**
+     * @brief
+     *
+     * @param cmd
+     */
+void addCircularCommand(AbstractCommand *cmd);
+    /**
+     * @brief
+     *
+     * @param cmd
+     */
+void addDisposableCommand(AbstractCommand *cmd);
+    /**
+     * @brief
+     *
+     * @param cmd
+     */
+void removeCircularCommand(AbstractCommand *cmd);
+    /**
+     * @brief
+     *
+     */
+void removeCommands();
+    /**
+     * @brief
+     *
+     */
+void startRequest();
+    /**
+     * @brief
+     *
+     */
+void stopRequest();
 signals:
-    void translateData(QByteArray);
+    /**
+     * @brief
+     *
+     * @param QByteArray
+     */
+void translateData(QByteArray);
 private:
-    enum class RequestState {
+    /**
+     * @brief
+     *
+     */
+enum class RequestState {
         Idle,
         WaitingForWrite,
         WaitingForResponse
@@ -39,28 +92,51 @@ private:
 #ifdef MYABSTRACTCONNECT_H
     MyAbstractConnect *m_connect;
 #else
-    AbstractNetworkTransport *m_transport;
+    AbstractNetworkTransport *m_transport; /**< TODO: describe */
 #endif
-    QTimer *timer;
-    NetworkTransportLocker *m_locker;
-    QList<AbstractCommand *> m_circularCommands;
-    QQueue<AbstractCommand *> m_disposableCommands;
-    QPointer<AbstractCommand> currentCmd;
-    QByteArray m_pendingPacket;
-    QByteArray m_earlyResponseBuffer;
-    quint64 m_pendingPacketId = 0;
-    RequestState m_state = RequestState::Idle;
-    QElapsedTimer m_responseTimer;
-    bool m_currentIsDisposable = false;
-    bool m_preferDisposable = true;
-    bool m_deleteCurrentWhenIdle = false;
-    int m_readIndex = 0;
-    void rejectCurrentCommand();
-    void finishCurrentCommand();
+    QTimer *timer; /**< TODO: describe */
+    NetworkTransportLocker *m_locker; /**< TODO: describe */
+    QList<AbstractCommand *> m_circularCommands; /**< TODO: describe */
+    QQueue<AbstractCommand *> m_disposableCommands; /**< TODO: describe */
+    QPointer<AbstractCommand> currentCmd; /**< TODO: describe */
+    QByteArray m_pendingPacket; /**< TODO: describe */
+    QByteArray m_earlyResponseBuffer; /**< TODO: describe */
+    quint64 m_pendingPacketId = 0; /**< TODO: describe */
+    RequestState m_state = RequestState::Idle; /**< TODO: describe */
+    QElapsedTimer m_responseTimer; /**< TODO: describe */
+    bool m_currentIsDisposable = false; /**< TODO: describe */
+    bool m_preferDisposable = true; /**< TODO: describe */
+    bool m_deleteCurrentWhenIdle = false; /**< TODO: describe */
+    int m_readIndex = 0; /**< TODO: describe */
+    /**
+     * @brief
+     *
+     */
+void rejectCurrentCommand();
+    /**
+     * @brief
+     *
+     */
+void finishCurrentCommand();
 private slots:
-    void processNext();
-    void unlock(QByteArray data);
-    void onPacketAccepted(quint64 packetId, const QByteArray &packet);
+    /**
+     * @brief
+     *
+     */
+void processNext();
+    /**
+     * @brief
+     *
+     * @param data
+     */
+void unlock(QByteArray data);
+    /**
+     * @brief
+     *
+     * @param packetId
+     * @param packet
+     */
+void onPacketAccepted(quint64 packetId, const QByteArray &packet);
 };
 
 #endif // SERIALCIRCULARREQUESTER_H

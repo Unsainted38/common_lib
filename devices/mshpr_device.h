@@ -6,15 +6,23 @@
 #include "cmd/abstract_command.h"
 #include "parsers/mshpr_parser.h"
 
+/**
+ * @brief
+ *
+ */
 struct MShPR_COMMANDS {
-    inline static const QString STATUS_CMD = "STA";
-    inline static const QString GETERODIN_CMD = "FKA";
-    inline static const QString ATTENUATION_CMD = "AT1";
-    inline static const QString ADDRESS_CMD = "ADR";
-    inline static const QString BAUD_CMD = "BRG";
+    inline static const QString STATUS_CMD = "STA"; /**< TODO: describe */
+    inline static const QString GETERODIN_CMD = "FKA"; /**< TODO: describe */
+    inline static const QString ATTENUATION_CMD = "AT1"; /**< TODO: describe */
+    inline static const QString ADDRESS_CMD = "ADR"; /**< TODO: describe */
+    inline static const QString BAUD_CMD = "BRG"; /**< TODO: describe */
 };
 
 
+/**
+ * @brief
+ *
+ */
 enum MShPRBaud {
     Baud4800 = 0,
     Baud9600 = 1,
@@ -23,41 +31,118 @@ enum MShPRBaud {
 };
 
 
+/**
+ * @brief
+ *
+ */
 class MShPRDevice : public QObject {
     Q_OBJECT
 public:
-    explicit MShPRDevice(SerialCircularRequester *requester, QString configPath, QString section, QObject *parent = nullptr);
-    void loadConfig();
-    quint8 getAttenuation();
-    quint8 getGeterodin();
-    quint8 getStatus();
-    quint8 getDeviceAddress();
-    QString getLastAnswer();
-    void setAttenuation(quint8 value);
-    void setGeterodin(quint8 value);
-    void setAddress(quint8 value);
-    void setBaud(MShPRBaud baud);
-    void setBaud(quint8 baud);
+    /**
+     * @brief
+     *
+     * @param requester
+     * @param configPath
+     * @param section
+     * @param parent
+     */
+explicit MShPRDevice(SerialCircularRequester *requester, QString configPath, QString section, QObject *parent = nullptr);
+    /**
+     * @brief
+     *
+     */
+void loadConfig();
+    /**
+     * @brief
+     *
+     * @return quint8
+     */
+quint8 getAttenuation();
+    /**
+     * @brief
+     *
+     * @return quint8
+     */
+quint8 getGeterodin();
+    /**
+     * @brief
+     *
+     * @return quint8
+     */
+quint8 getStatus();
+    /**
+     * @brief
+     *
+     * @return quint8
+     */
+quint8 getDeviceAddress();
+    /**
+     * @brief
+     *
+     * @return QString
+     */
+QString getLastAnswer();
+    /**
+     * @brief
+     *
+     * @param value
+     */
+void setAttenuation(quint8 value);
+    /**
+     * @brief
+     *
+     * @param value
+     */
+void setGeterodin(quint8 value);
+    /**
+     * @brief
+     *
+     * @param value
+     */
+void setAddress(quint8 value);
+    /**
+     * @brief
+     *
+     * @param baud
+     */
+void setBaud(MShPRBaud baud);
+    /**
+     * @brief
+     *
+     * @param baud
+     */
+void setBaud(quint8 baud);
 
 signals:
 private:
 
 
-    QString m_configPath;
-    QString m_section;
-    SerialCircularRequester *m_requester;
-    MShPRParser *m_parser;
-    AbstractCommand *StatusCommand, *AttenuationCommand, *GeterodinCommand, *AddressCommand, *BaudCommand;
-    QString m_deviceAddr = "01";
-    quint8 m_status = 0;
-    quint8 m_attenuation = 0;
-    quint8 m_geterodin = 0;
-    quint8 m_baud = MShPRBaud::Baud19200;
-    QString m_lastAnswer;
-    QTimer *m_timer;
+    QString m_configPath; /**< TODO: describe */
+    QString m_section; /**< TODO: describe */
+    SerialCircularRequester *m_requester; /**< TODO: describe */
+    MShPRParser *m_parser; /**< TODO: describe */
+    AbstractCommand *StatusCommand, *AttenuationCommand, *GeterodinCommand, *AddressCommand, *BaudCommand; /**< TODO: describe */
+    QString m_deviceAddr = "01"; /**< TODO: describe */
+    quint8 m_status = 0; /**< TODO: describe */
+    quint8 m_attenuation = 0; /**< TODO: describe */
+    quint8 m_geterodin = 0; /**< TODO: describe */
+    quint8 m_baud = MShPRBaud::Baud19200; /**< TODO: describe */
+    QString m_lastAnswer; /**< TODO: describe */
+    QTimer *m_timer; /**< TODO: describe */
 private slots:
-    void processData(QString addr, QMap<QString, int> fieldsMap);
-    void onTimer();
+    /**
+     * @brief
+     *
+     * @param addr
+     * @param QMap<QString
+     * @param fieldsMap
+     */
+void processData(QString addr, QMap<QString, int> fieldsMap);
+    /**
+     * @brief
+     *
+     */
+void onTimer();
     void LastAnswer(QByteArray packet);
 };
 

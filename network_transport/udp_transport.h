@@ -9,51 +9,133 @@
 #include <QDateTime>
 
 
+/**
+ * @brief
+ *
+ */
 class UdpTransport : public AbstractNetworkTransport
 {
     Q_OBJECT
-    struct PendingPacket {
-        quint64 id = 0;
-        QByteArray data;
+    /**
+     * @brief
+     *
+     */
+struct PendingPacket {
+        quint64 id = 0; /**< TODO: describe */
+        QByteArray data; /**< TODO: describe */
     };
 
-    QUdpSocket *socket;
-    QHostAddress hostAddress;
-    quint16 port = 7777;
-    QHostAddress listenIp;
-    QString name = "udp_client";
-    QMutex mutex;
-    QQueue<PendingPacket> queue;
-    quint64 nextPacketId = 1;
-    QTimer *heartbeatTimer;
-    QTimer *reconnectTimer;
-    bool connectedState = false;
-    bool reconnectEnabled = true;
-    QDateTime lastActivity;
-    QByteArray heartbeatPacket;
+    QUdpSocket *socket; /**< TODO: describe */
+    QHostAddress hostAddress; /**< TODO: describe */
+    quint16 port = 7777; /**< TODO: describe */
+    QHostAddress listenIp; /**< TODO: describe */
+    QString name = "udp_client"; /**< TODO: describe */
+    QMutex mutex; /**< TODO: describe */
+    QQueue<PendingPacket> queue; /**< TODO: describe */
+    quint64 nextPacketId = 1; /**< TODO: describe */
+    QTimer *heartbeatTimer; /**< TODO: describe */
+    QTimer *reconnectTimer; /**< TODO: describe */
+    bool connectedState = false; /**< TODO: describe */
+    bool reconnectEnabled = true; /**< TODO: describe */
+    QDateTime lastActivity; /**< TODO: describe */
+    QByteArray heartbeatPacket; /**< TODO: describe */
 
 public:
-    explicit UdpTransport(QString configPath, QString section, QObject *parent = nullptr);
+    /**
+     * @brief
+     *
+     * @param configPath
+     * @param section
+     * @param parent
+     */
+explicit UdpTransport(QString configPath, QString section, QObject *parent = nullptr);
 
     // AbstractNetworkTransport interface
 public:
-    void loadConfig() override;
-    void setupTransport() override;
-    bool open() override;
-    bool write(const QByteArray &packet) override;
-    quint64 writeTracked(const QByteArray &packet) override;
-    bool close() override;
-    void heartbeat() override;
+    /**
+     * @brief
+     *
+     */
+void loadConfig() override;
+    /**
+     * @brief
+     *
+     */
+void setupTransport() override;
+    /**
+     * @brief
+     *
+     * @return bool
+     */
+bool open() override;
+    /**
+     * @brief
+     *
+     * @param packet
+     * @return bool
+     */
+bool write(const QByteArray &packet) override;
+    /**
+     * @brief
+     *
+     * @param packet
+     * @return quint64
+     */
+quint64 writeTracked(const QByteArray &packet) override;
+    /**
+     * @brief
+     *
+     * @return bool
+     */
+bool close() override;
+    /**
+     * @brief
+     *
+     */
+void heartbeat() override;
 
 private:
-    void onConnected();
-    void onDisconnected();
-    void onErrorOccured(QAbstractSocket::SocketError error);
-    void processQueue() override;
-    void onReadSocket();
-    void resetTimers();
-    void scheduleReconnect();
-    void reconnect();
+    /**
+     * @brief
+     *
+     */
+void onConnected();
+    /**
+     * @brief
+     *
+     */
+void onDisconnected();
+    /**
+     * @brief
+     *
+     * @param error
+     */
+void onErrorOccured(QAbstractSocket::SocketError error);
+    /**
+     * @brief
+     *
+     */
+void processQueue() override;
+    /**
+     * @brief
+     *
+     */
+void onReadSocket();
+    /**
+     * @brief
+     *
+     */
+void resetTimers();
+    /**
+     * @brief
+     *
+     */
+void scheduleReconnect();
+    /**
+     * @brief
+     *
+     */
+void reconnect();
 };
 
 #endif // UDP_TRANSPORT_H

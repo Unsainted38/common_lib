@@ -6,29 +6,57 @@
 #include <modbus/abstract_modbus_protocol.h>
 
 
+/**
+ * @brief
+ *
+ */
 class ReadCoils : public AbstractCommand
 {
     Q_OBJECT
-    QByteArray cachedCommand;
-    QByteArray cachedPdu;
-    AbstractModBusProtocol *protocol;
-    quint16 coilAddress;
-    quint16 coilsCount;
-    quint8 byteCount;
-    QByteArray buffer;
-    QVector<quint8> coils;
-    const quint8 cmdID = 0x01;
+    QByteArray cachedCommand; /**< TODO: describe */
+    QByteArray cachedPdu; /**< TODO: describe */
+    AbstractModBusProtocol *protocol; /**< TODO: describe */
+    quint16 coilAddress; /**< TODO: describe */
+    quint16 coilsCount; /**< TODO: describe */
+    quint8 byteCount; /**< TODO: describe */
+    QByteArray buffer; /**< TODO: describe */
+    QVector<quint8> coils; /**< TODO: describe */
+    const quint8 cmdID = 0x01; /**< TODO: describe */
 public:
-    explicit ReadCoils(quint16 coilAddress, quint16 coilsCount, AbstractModBusProtocol *protocol, QObject *parent = nullptr);
+    /**
+     * @brief
+     *
+     * @param coilAddress
+     * @param coilsCount
+     * @param protocol
+     * @param parent
+     */
+explicit ReadCoils(quint16 coilAddress, quint16 coilsCount, AbstractModBusProtocol *protocol, QObject *parent = nullptr);
 
     // AbstractCommand interface
 public:
-    const QByteArray &makeCommand() override;
+    /**
+     * @brief
+     *
+     * @return const QByteArray
+     */
+const QByteArray &makeCommand() override;
 
     // AbstractCommand interface
 public:
-    QVariant getValue() override;
-    bool tryParse(const QByteArray &data) override;
+    /**
+     * @brief
+     *
+     * @return QVariant
+     */
+QVariant getValue() override;
+    /**
+     * @brief
+     *
+     * @param data
+     * @return bool
+     */
+bool tryParse(const QByteArray &data) override;
 
 
 };

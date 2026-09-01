@@ -8,52 +8,139 @@
 #include <QTimer>
 #include <QDateTime>
 
+/**
+ * @brief
+ *
+ */
 class TcpTransport : public AbstractNetworkTransport {
-    struct PendingPacket {
-        quint64 id = 0;
-        QByteArray data;
-        qsizetype acceptedOffset = 0;
-        qsizetype confirmedOffset = 0;
+    /**
+     * @brief
+     *
+     */
+struct PendingPacket {
+        quint64 id = 0; /**< TODO: describe */
+        QByteArray data; /**< TODO: describe */
+        qsizetype acceptedOffset = 0; /**< TODO: describe */
+        qsizetype confirmedOffset = 0; /**< TODO: describe */
     };
 
-    QTcpSocket *socket;
-    QHostAddress hostAddress;
-    quint16 port = 7777;
-    QHostAddress listenIp;
-    QString name = "tcp_client";
-    QMutex mutex;
-    QQueue<PendingPacket> queue;
-    quint64 nextPacketId = 1;
-    QTimer *heartbeatTimer;
-    QTimer *reconnectTimer;
-    bool connectedState = false;
-    bool reconnectEnabled = true;
-    QDateTime lastActivity;
-    QByteArray heartbeatPacket;
+    QTcpSocket *socket; /**< TODO: describe */
+    QHostAddress hostAddress; /**< TODO: describe */
+    quint16 port = 7777; /**< TODO: describe */
+    QHostAddress listenIp; /**< TODO: describe */
+    QString name = "tcp_client"; /**< TODO: describe */
+    QMutex mutex; /**< TODO: describe */
+    QQueue<PendingPacket> queue; /**< TODO: describe */
+    quint64 nextPacketId = 1; /**< TODO: describe */
+    QTimer *heartbeatTimer; /**< TODO: describe */
+    QTimer *reconnectTimer; /**< TODO: describe */
+    bool connectedState = false; /**< TODO: describe */
+    bool reconnectEnabled = true; /**< TODO: describe */
+    QDateTime lastActivity; /**< TODO: describe */
+    QByteArray heartbeatPacket; /**< TODO: describe */
 
 public:
-    explicit TcpTransport(QString configPath, QString section, QObject *parent = nullptr);
-    bool write(const QByteArray &packet) override;
-    quint64 writeTracked(const QByteArray &packet) override;
+    /**
+     * @brief
+     *
+     * @param configPath
+     * @param section
+     * @param parent
+     */
+explicit TcpTransport(QString configPath, QString section, QObject *parent = nullptr);
+    /**
+     * @brief
+     *
+     * @param packet
+     * @return bool
+     */
+bool write(const QByteArray &packet) override;
+    /**
+     * @brief
+     *
+     * @param packet
+     * @return quint64
+     */
+quint64 writeTracked(const QByteArray &packet) override;
 
-    bool close() override;
-    void setupTransport() override;
-    void loadConfig() override;
-    void heartbeat() override;
-    bool open() override;
+    /**
+     * @brief
+     *
+     * @return bool
+     */
+bool close() override;
+    /**
+     * @brief
+     *
+     */
+void setupTransport() override;
+    /**
+     * @brief
+     *
+     */
+void loadConfig() override;
+    /**
+     * @brief
+     *
+     */
+void heartbeat() override;
+    /**
+     * @brief
+     *
+     * @return bool
+     */
+bool open() override;
 
 signals:
     //void connectedChanged(bool);
 private:
-    void onConnected();
-    void onDisconnected();
-    void onErrorOccured(QAbstractSocket::SocketError error);
-    void processQueue() override;
-    void onBytesWritten(qint64 count);
-    void onReadSocket();
-    void resetTimers();
-    void scheduleReconnect();
-    void reconnect();
+    /**
+     * @brief
+     *
+     */
+void onConnected();
+    /**
+     * @brief
+     *
+     */
+void onDisconnected();
+    /**
+     * @brief
+     *
+     * @param error
+     */
+void onErrorOccured(QAbstractSocket::SocketError error);
+    /**
+     * @brief
+     *
+     */
+void processQueue() override;
+    /**
+     * @brief
+     *
+     * @param count
+     */
+void onBytesWritten(qint64 count);
+    /**
+     * @brief
+     *
+     */
+void onReadSocket();
+    /**
+     * @brief
+     *
+     */
+void resetTimers();
+    /**
+     * @brief
+     *
+     */
+void scheduleReconnect();
+    /**
+     * @brief
+     *
+     */
+void reconnect();
 public slots:
     //    void onConnected();
     //    void onDisconnected();

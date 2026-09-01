@@ -3,32 +3,76 @@
 
 #include "abstract_command.h"
 
-const quint8 HEADERER = 0x77;
+const quint8 HEADERER = 0x77; /**< TODO: describe */
 
+/**
+ * @brief
+ *
+ */
 class CompassLCC5000Command : public AbstractCommand {
-    quint8 m_deviceAddr;
-    quint8 m_cmdId;
-    quint8 m_length;
-    ValueType valueType;
-    CommandType cmdType;
-    QByteArray cachedRead;
-    QByteArray cachedWrite;
-    QByteArray responseBuffer;
-    QVariant data;
+    quint8 m_deviceAddr; /**< TODO: describe */
+    quint8 m_cmdId; /**< TODO: describe */
+    quint8 m_length; /**< TODO: describe */
+    ValueType valueType; /**< TODO: describe */
+    CommandType cmdType; /**< TODO: describe */
+    QByteArray cachedRead; /**< TODO: describe */
+    QByteArray cachedWrite; /**< TODO: describe */
+    QByteArray responseBuffer; /**< TODO: describe */
+    QVariant data; /**< TODO: describe */
 public:
-    explicit CompassLCC5000Command(quint8 deviceAddr, quint8 cmdId, quint8 length, ValueType valueType, CommandType cmdType);
-    const QByteArray &makeReadCommand();
-    const QByteArray &makeWriteCommand();
+    /**
+     * @brief
+     *
+     * @param deviceAddr
+     * @param cmdId
+     * @param length
+     * @param valueType
+     * @param cmdType
+     */
+explicit CompassLCC5000Command(quint8 deviceAddr, quint8 cmdId, quint8 length, ValueType valueType, CommandType cmdType);
+    /**
+     * @brief
+     *
+     * @return const QByteArray
+     */
+const QByteArray &makeReadCommand();
+    /**
+     * @brief
+     *
+     * @return const QByteArray
+     */
+const QByteArray &makeWriteCommand();
 
     // AbstractCommand interface
 public:
-    const QByteArray &makeCommand() override;
-    bool tryParse(const QByteArray &data) override;
+    /**
+     * @brief
+     *
+     * @return const QByteArray
+     */
+const QByteArray &makeCommand() override;
+    /**
+     * @brief
+     *
+     * @param data
+     * @return bool
+     */
+bool tryParse(const QByteArray &data) override;
 
     // AbstractCommand interface
 public:
-    QVariant getValue() override;
-    void setValue(QVariant v) override;
+    /**
+     * @brief
+     *
+     * @return QVariant
+     */
+QVariant getValue() override;
+    /**
+     * @brief
+     *
+     * @param v
+     */
+void setValue(QVariant v) override;
 };
 
 #endif // COMPASSLCC5000COMMAND_H

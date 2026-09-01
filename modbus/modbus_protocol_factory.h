@@ -7,13 +7,36 @@
 #include <modbus/modbus_rtu.h>
 #include <modbus/modbus_tcp.h>
 
+/**
+ * @brief
+ *
+ */
 class ModBusProtocolFactory : public QObject
 {
     Q_OBJECT
 public:
-    explicit ModBusProtocolFactory(QObject *parent = nullptr);
-    static AbstractModBusProtocol* getInstance(QString protocolType, quint8 slaveID);
-    static AbstractModBusProtocol* getInstance(QString configPath, QString section);
+    /**
+     * @brief
+     *
+     * @param parent
+     */
+explicit ModBusProtocolFactory(QObject *parent = nullptr);
+    /**
+     * @brief
+     *
+     * @param protocolType
+     * @param slaveID
+     * @return AbstractModBusProtocol
+     */
+static AbstractModBusProtocol* getInstance(QString protocolType, quint8 slaveID);
+    /**
+     * @brief
+     *
+     * @param configPath
+     * @param section
+     * @return AbstractModBusProtocol
+     */
+static AbstractModBusProtocol* getInstance(QString configPath, QString section);
 signals:
 };
 

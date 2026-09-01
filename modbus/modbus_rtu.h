@@ -5,15 +5,42 @@
 #include <algorithm/crc16.h>
 #include <utilities/bit_utils.h>
 
+/**
+ * @brief
+ *
+ */
 class ModBusRtu : public AbstractModBusProtocol
 {
     Q_OBJECT
-    quint8 slaveID;
+    quint8 slaveID; /**< TODO: describe */
 public:
-    explicit ModBusRtu(quint8 slaveID);
-    QByteArray pack(const QByteArray &pdu) override;
-    quint8 deviceID() override;
-    ModbusParseStatus tryExtractFrame(QByteArray &buffer, ModbusFrame &frame) override;
+    /**
+     * @brief
+     *
+     * @param slaveID
+     */
+explicit ModBusRtu(quint8 slaveID);
+    /**
+     * @brief
+     *
+     * @param pdu
+     * @return QByteArray
+     */
+QByteArray pack(const QByteArray &pdu) override;
+    /**
+     * @brief
+     *
+     * @return quint8
+     */
+quint8 deviceID() override;
+    /**
+     * @brief
+     *
+     * @param buffer
+     * @param frame
+     * @return ModbusParseStatus
+     */
+ModbusParseStatus tryExtractFrame(QByteArray &buffer, ModbusFrame &frame) override;
 };
 
 #endif // MODBUS_RTU_H

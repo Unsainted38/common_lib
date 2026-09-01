@@ -6,25 +6,68 @@
 #include <QByteArray>
 #include <QIODevice>
 
+/**
+ * @brief
+ *
+ */
 class UBPChParser : public QObject {
     Q_OBJECT
 public:
-    explicit UBPChParser(QObject *parent = 0);
+    /**
+     * @brief
+     *
+     * @param parent
+     */
+explicit UBPChParser(QObject *parent = 0);
+    /**
+     * @brief
+     *
+     * @param deviceAddr
+     * @param masterAddr
+     * @param parent
+     */
     UBPChParser(quint8 deviceAddr, quint8 masterAddr,
                 QObject *parent = nullptr);
-    QByteArray unpack(const QByteArray &frame);
+    /**
+     * @brief
+     *
+     * @param frame
+     * @return QByteArray
+     */
+QByteArray unpack(const QByteArray &frame);
 signals:
-    void dataReady(QByteArray, quint16);
-    void statusOnline();
-    void lastAnswer(QByteArray);
+    /**
+     * @brief
+     *
+     * @param QByteArray
+     * @param quint16
+     */
+void dataReady(QByteArray, quint16);
+    /**
+     * @brief
+     *
+     */
+void statusOnline();
+    /**
+     * @brief
+     *
+     * @param QByteArray
+     */
+void lastAnswer(QByteArray);
 private:
-    QByteArray m_buffer;
-    quint8 m_deviceAddr = 0;
-    quint8 m_masterAddr = 0;
-    bool m_filterAddresses = false;
+    QByteArray m_buffer; /**< TODO: describe */
+    quint8 m_deviceAddr = 0; /**< TODO: describe */
+    quint8 m_masterAddr = 0; /**< TODO: describe */
+    bool m_filterAddresses = false; /**< TODO: describe */
 
 public slots:
-    bool parseReply(const QByteArray &reply);
+    /**
+     * @brief
+     *
+     * @param reply
+     * @return bool
+     */
+bool parseReply(const QByteArray &reply);
 };
 
 #endif // UBPCHPARSER_H

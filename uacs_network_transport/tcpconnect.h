@@ -8,26 +8,54 @@
 
 #include "myabstractconnect.h"
 
+/**
+ * @brief
+ *
+ */
 class TcpConnect : public MyAbstractConnect
 {
 public:
+    /**
+     * @brief
+     *
+     * @param ip
+     * @param port
+     */
     TcpConnect(QString ip, quint16 port);
-    QString ipConnect;
-    quint16 portConnect;
+    QString ipConnect; /**< TODO: describe */
+    quint16 portConnect; /**< TODO: describe */
 
-    QTcpSocket *socket;
+    QTcpSocket *socket; /**< TODO: describe */
 
-    QQueue<QByteArray> packetQueue;
-    QByteArray currentPacket;
-    qsizetype currentOffset = 0;
-    bool isBusy = false;
+    QQueue<QByteArray> packetQueue; /**< TODO: describe */
+    QByteArray currentPacket; /**< TODO: describe */
+    qsizetype currentOffset = 0; /**< TODO: describe */
+    bool isBusy = false; /**< TODO: describe */
 
-    void writeData(const QByteArray &data) override;
+    /**
+     * @brief
+     *
+     * @param data
+     */
+void writeData(const QByteArray &data) override;
 
 public slots:
-    void onReadyRead() override;
-    void handleBytesWritten(qint64 bytes) override;
-    void writeNext() override;
+    /**
+     * @brief
+     *
+     */
+void onReadyRead() override;
+    /**
+     * @brief
+     *
+     * @param bytes
+     */
+void handleBytesWritten(qint64 bytes) override;
+    /**
+     * @brief
+     *
+     */
+void writeNext() override;
 };
 
 #endif // TCPCONNECT_H

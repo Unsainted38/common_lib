@@ -8,36 +8,83 @@
 #include "abstract_command.h"
 
 
+/**
+ * @brief
+ *
+ */
 class MShPRCommand : public AbstractCommand {
     Q_OBJECT
-    QString m_addr;
-    QString m_cmd;
-    QString data;
-    QByteArray cachedRead;
-    QByteArray cachedWrite;
-    QByteArray responseBuffer;
-    CommandType cmdType;
-    ValueType valueType;
+    QString m_addr; /**< TODO: describe */
+    QString m_cmd; /**< TODO: describe */
+    QString data; /**< TODO: describe */
+    QByteArray cachedRead; /**< TODO: describe */
+    QByteArray cachedWrite; /**< TODO: describe */
+    QByteArray responseBuffer; /**< TODO: describe */
+    CommandType cmdType; /**< TODO: describe */
+    ValueType valueType; /**< TODO: describe */
 
-    const QByteArray &makeWriteCommand();
-    const QByteArray &makeReadCommand();
+    /**
+     * @brief
+     *
+     * @return const QByteArray
+     */
+const QByteArray &makeWriteCommand();
+    /**
+     * @brief
+     *
+     * @return const QByteArray
+     */
+const QByteArray &makeReadCommand();
 public:
-    explicit MShPRCommand(QString addr, QString cmd, CommandType cmdType);
+    /**
+     * @brief
+     *
+     * @param addr
+     * @param cmd
+     * @param cmdType
+     */
+explicit MShPRCommand(QString addr, QString cmd, CommandType cmdType);
 
 
-    void setAddress(QString addr);
+    /**
+     * @brief
+     *
+     * @param addr
+     */
+void setAddress(QString addr);
 signals:
 
 
     // AbstractCommand interface
 public:
-    const QByteArray &makeCommand() override;
-    bool tryParse(const QByteArray &data) override;
+    /**
+     * @brief
+     *
+     * @return const QByteArray
+     */
+const QByteArray &makeCommand() override;
+    /**
+     * @brief
+     *
+     * @param data
+     * @return bool
+     */
+bool tryParse(const QByteArray &data) override;
 
     // AbstractCommand interface
 public:
-    QVariant getValue() override;
-    void setValue(QVariant v) override;
+    /**
+     * @brief
+     *
+     * @return QVariant
+     */
+QVariant getValue() override;
+    /**
+     * @brief
+     *
+     * @param v
+     */
+void setValue(QVariant v) override;
 };
 
 #endif // MSHPRCOMMAND_H

@@ -6,30 +6,63 @@
 #include <modbus/abstract_modbus_protocol.h>
 
 
+/**
+ * @brief
+ *
+ */
 class WriteMultipleRegisters : public AbstractCommand
 {
-    AbstractModBusProtocol *protocol;
-    QByteArray cachedCommand;
-    QByteArray cachedPdu;
-    quint16 registerAddress;
-    quint16 registersCount;
-    QByteArray buffer;
-    QVector<quint16> regs;
-    QVector<quint16> cachedRegs;
-    bool commandStatus = false;
-    const quint8 cmdID = 0x10;
+    AbstractModBusProtocol *protocol; /**< TODO: describe */
+    QByteArray cachedCommand; /**< TODO: describe */
+    QByteArray cachedPdu; /**< TODO: describe */
+    quint16 registerAddress; /**< TODO: describe */
+    quint16 registersCount; /**< TODO: describe */
+    QByteArray buffer; /**< TODO: describe */
+    QVector<quint16> regs; /**< TODO: describe */
+    QVector<quint16> cachedRegs; /**< TODO: describe */
+    bool commandStatus = false; /**< TODO: describe */
+    const quint8 cmdID = 0x10; /**< TODO: describe */
 public:
-    explicit WriteMultipleRegisters(quint16 regAddress, quint16 regsCount, AbstractModBusProtocol *protocol, QObject *parent = nullptr);
+    /**
+     * @brief
+     *
+     * @param regAddress
+     * @param regsCount
+     * @param protocol
+     * @param parent
+     */
+explicit WriteMultipleRegisters(quint16 regAddress, quint16 regsCount, AbstractModBusProtocol *protocol, QObject *parent = nullptr);
 
     // AbstractCommand interface
 public:
-    const QByteArray &makeCommand() override;
+    /**
+     * @brief
+     *
+     * @return const QByteArray
+     */
+const QByteArray &makeCommand() override;
 
     // AbstractCommand interface
 public:
-    void setValue(QVariant v) override;
-    bool isSuccess() override;
-    bool tryParse(const QByteArray &data) override;
+    /**
+     * @brief
+     *
+     * @param v
+     */
+void setValue(QVariant v) override;
+    /**
+     * @brief
+     *
+     * @return bool
+     */
+bool isSuccess() override;
+    /**
+     * @brief
+     *
+     * @param data
+     * @return bool
+     */
+bool tryParse(const QByteArray &data) override;
 };
 
 #endif // WRITE_MULTIPLE_REGISTERS_H

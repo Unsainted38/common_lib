@@ -10,28 +10,59 @@
 #include <QByteArray>
 #include <telemetry/i_telemetry_packet_source.h>
 
+/**
+ * @brief
+ *
+ */
 class TcpTelemetryServer : public QObject
 {
     Q_OBJECT
-    quint16 port;
-    QString name;
-    QTcpServer *server;
-    QVector<QTcpSocket*> clients;
-    QTimer *telemetryTimer;
+    quint16 port; /**< TODO: describe */
+    QString name; /**< TODO: describe */
+    QTcpServer *server; /**< TODO: describe */
+    QVector<QTcpSocket*> clients; /**< TODO: describe */
+    QTimer *telemetryTimer; /**< TODO: describe */
 
-    ITelemetryPacketSource &m_packetSource;
+    ITelemetryPacketSource &m_packetSource; /**< TODO: describe */
 
-    void loadConfig(const QString &configPath, const QString &section);
+    /**
+     * @brief
+     *
+     * @param configPath
+     * @param section
+     */
+void loadConfig(const QString &configPath, const QString &section);
 
 public:
-    explicit TcpTelemetryServer(QString configPath, QString section, int period, ITelemetryPacketSource &source, QObject *parent = nullptr);
+    /**
+     * @brief
+     *
+     * @param configPath
+     * @param section
+     * @param period
+     * @param source
+     * @param parent
+     */
+explicit TcpTelemetryServer(QString configPath, QString section, int period, ITelemetryPacketSource &source, QObject *parent = nullptr);
 
 signals:
 
 private slots:
-    void onNewClientConnection();
-    void onClientDisconnected();
-    void sendTelemetry();
+    /**
+     * @brief
+     *
+     */
+void onNewClientConnection();
+    /**
+     * @brief
+     *
+     */
+void onClientDisconnected();
+    /**
+     * @brief
+     *
+     */
+void sendTelemetry();
 };
 
 #endif // TCP_TELEMETRY_SERVER_H

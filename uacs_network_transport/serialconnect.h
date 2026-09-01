@@ -10,31 +10,63 @@
 #include "myabstractconnect.h"
 
 
+/**
+ * @brief
+ *
+ */
 class SerialConnect : public MyAbstractConnect
 {
 public:
+    /**
+     * @brief
+     *
+     * @param nameport
+     * @param baundrate
+     * @param databits
+     * @param parity
+     * @param stopbit
+     * @param flowcontrol
+     */
     SerialConnect(QString nameport, int baundrate, int databits, QString parity, int stopbit, QString flowcontrol);
 
-    QString np;
-    int br;
-    int db;
-    QString pt;
-    int sb;
-    QString fc;
+    QString np; /**< TODO: describe */
+    int br; /**< TODO: describe */
+    int db; /**< TODO: describe */
+    QString pt; /**< TODO: describe */
+    int sb; /**< TODO: describe */
+    QString fc; /**< TODO: describe */
 
-    QSerialPort *serial;
-    QQueue<QByteArray> packetQueue;
-    QByteArray currentPacket;
-    qsizetype currentOffset = 0;
-    bool isBusy = false;
+    QSerialPort *serial; /**< TODO: describe */
+    QQueue<QByteArray> packetQueue; /**< TODO: describe */
+    QByteArray currentPacket; /**< TODO: describe */
+    qsizetype currentOffset = 0; /**< TODO: describe */
+    bool isBusy = false; /**< TODO: describe */
 
 
-    void writeData(const QByteArray &data) override;
+    /**
+     * @brief
+     *
+     * @param data
+     */
+void writeData(const QByteArray &data) override;
 
 public slots:
-    void onReadyRead() override;
-    void handleBytesWritten(qint64 bytes) override;
-    void writeNext() override;
+    /**
+     * @brief
+     *
+     */
+void onReadyRead() override;
+    /**
+     * @brief
+     *
+     * @param bytes
+     */
+void handleBytesWritten(qint64 bytes) override;
+    /**
+     * @brief
+     *
+     */
+void writeNext() override;
 };
 
 #endif // SERIALCONNECT_H

@@ -4,12 +4,36 @@
 #include <QObject>
 #include "abstract_network_transport.h"
 
+/**
+ * @brief
+ *
+ */
 class AbstractNetworkTransportFactory : public QObject {
     Q_OBJECT
 public:
-    explicit AbstractNetworkTransportFactory(QObject *parent = nullptr);
-    static AbstractNetworkTransport *getInstance(QString InterfaceType, QString fileName, QString section);
-    static AbstractNetworkTransport *getInstance(QString fileName, QString section);
+    /**
+     * @brief
+     *
+     * @param parent
+     */
+explicit AbstractNetworkTransportFactory(QObject *parent = nullptr);
+    /**
+     * @brief
+     *
+     * @param InterfaceType
+     * @param fileName
+     * @param section
+     * @return AbstractNetworkTransport
+     */
+static AbstractNetworkTransport *getInstance(QString InterfaceType, QString fileName, QString section);
+    /**
+     * @brief
+     *
+     * @param fileName
+     * @param section
+     * @return AbstractNetworkTransport
+     */
+static AbstractNetworkTransport *getInstance(QString fileName, QString section);
 
 signals:
 

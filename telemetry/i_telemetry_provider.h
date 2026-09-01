@@ -2,12 +2,25 @@
 #define I_TELEMETRY_PROVIDER_H
 
 template <typename TData>
+/**
+ * @brief
+ *
+ */
 class ITelemetryProvider
 {
 public:
-    virtual ~ITelemetryProvider() = default;
+    /**
+     * @brief
+     *
+     */
+virtual ~ITelemetryProvider() = default;
 
-    virtual TData currentData() const = 0;
+    /**
+     * @brief
+     *
+     * @return TData
+     */
+virtual TData currentData() const = 0;
 };
 
 #endif // I_TELEMETRY_PROVIDER_H

@@ -3,12 +3,25 @@
 
 #include <QByteArray>
 
+/**
+ * @brief
+ *
+ */
 class ITelemetryPacketSource
 {
 public:
-    virtual ~ITelemetryPacketSource() = default;
+    /**
+     * @brief
+     *
+     */
+virtual ~ITelemetryPacketSource() = default;
 
-    virtual QByteArray makePacket() = 0;
+    /**
+     * @brief
+     *
+     * @return QByteArray
+     */
+virtual QByteArray makePacket() = 0;
 
 signals:
 };
