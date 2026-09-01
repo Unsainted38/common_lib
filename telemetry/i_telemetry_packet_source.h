@@ -4,22 +4,20 @@
 #include <QByteArray>
 
 /**
- * @brief
- *
+ * @brief Интерфейс источника готовых пакетов телеметрии.
  */
 class ITelemetryPacketSource
 {
 public:
     /**
-     * @brief
-     *
+     * @brief Освобождает ресурсы объекта.
      */
 virtual ~ITelemetryPacketSource() = default;
 
     /**
-     * @brief
+     * @brief Формирует актуальный пакет телеметрии.
      *
-     * @return QByteArray
+     * @return Сформированный массив байтов.
      */
 virtual QByteArray makePacket() = 0;
 

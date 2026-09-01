@@ -7,19 +7,18 @@
 
 template <typename TData>
 /**
- * @brief
- *
+ * @brief Объединяет поставщика данных и построитель пакетов телеметрии.
  */
 class TelemetryPacketSource final : public ITelemetryPacketSource
 {
-    ITelemetryProvider<TData> &m_provider; /**< TODO: describe */
-    ITelemetryPacketBuilder<TData> &m_builder; /**< TODO: describe */
+    ITelemetryProvider<TData> &m_provider; /**< Поставщик текущих данных. */
+    ITelemetryPacketBuilder<TData> &m_builder; /**< Сериализатор телеметрических данных. */
 public:
     /**
-     * @brief
+     * @brief Объединяет поставщика данных и построитель пакетов телеметрии.
      *
-     * @param builder
-     * @param provider
+     * @param builder Сериализатор снимка телеметрии.
+     * @param provider Поставщик текущего снимка телеметрии.
      */
     TelemetryPacketSource(ITelemetryPacketBuilder<TData> &builder, ITelemetryProvider<TData> &provider)
         :
@@ -29,9 +28,9 @@ public:
     }
 
     /**
-     * @brief
+     * @brief Формирует актуальный пакет телеметрии.
      *
-     * @return QByteArray
+     * @return Сформированный массив байтов.
      */
 QByteArray makePacket() override {
         const TData data = m_provider.currentData();

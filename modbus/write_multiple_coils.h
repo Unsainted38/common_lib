@@ -7,58 +7,57 @@
 
 
 /**
- * @brief
- *
+ * @brief Реализует Modbus-функцию 0x0F Write Multiple Coils.
  */
 class WriteMultipleCoils : public AbstractCommand
 {
     Q_OBJECT
-    AbstractModBusProtocol *protocol; /**< TODO: describe */
-    QByteArray cachedCommand; /**< TODO: describe */
-    QByteArray cachedPdu; /**< TODO: describe */
-    quint16 coilAddress; /**< TODO: describe */
-    quint16 coilsCount; /**< TODO: describe */
-    QVector<quint8> coils; /**< TODO: describe */
-    QVector<quint8> cachedCoils; /**< TODO: describe */
-    QByteArray buffer; /**< TODO: describe */
-    bool commandStatus = false; /**< TODO: describe */
-    const quint8 cmdID = 0x0F; /**< TODO: describe */
+    AbstractModBusProtocol *protocol; /**< Реализация упаковки и разбора Modbus. */
+    QByteArray cachedCommand; /**< Кэш последнего сформированного пакета. */
+    QByteArray cachedPdu; /**< Кэш PDU без транспортной обёртки. */
+    quint16 coilAddress; /**< Начальный адрес катушки. */
+    quint16 coilsCount; /**< Количество катушек в операции. */
+    QVector<quint8> coils; /**< Последние прочитанные или заданные состояния катушек. */
+    QVector<quint8> cachedCoils; /**< Хранит cached coils. */
+    QByteArray buffer; /**< Накопительный буфер входных данных. */
+    bool commandStatus = false; /**< Признак успешного подтверждения команды записи. */
+    const quint8 cmdID = 0x0F; /**< Код функции протокола. */
 public:
     /**
-     * @brief
+     * @brief Реализует Modbus-функцию 0x0F Write Multiple Coils.
      *
-     * @param coilAddress
-     * @param coilsCount
-     * @param protocol
-     * @param parent
+     * @param coilAddress Начальный адрес катушки.
+     * @param coilsCount Количество катушек.
+     * @param protocol Реализация транспортного формата Modbus.
+     * @param parent Родительский QObject, управляющий временем жизни объекта.
      */
 explicit WriteMultipleCoils(quint16 coilAddress, quint16 coilsCount, AbstractModBusProtocol *protocol, QObject *parent = nullptr);
 
     // AbstractCommand interface
 public:
     /**
-     * @brief
+     * @brief Формирует пакет команды и сбрасывает буфер ожидаемого ответа.
      *
-     * @return const QByteArray
+     * @return Сформированный массив байтов.
      */
 const QByteArray &makeCommand() override;
     /**
-     * @brief
+     * @brief Устанавливает значение для последующего формирования команды записи.
      *
-     * @param v
+     * @param v Новое значение команды.
      */
 void setValue(QVariant v) override;
     /**
-     * @brief
+     * @brief Возвращает признак успешного ответа на команду записи.
      *
-     * @return bool
+     * @return Текущее логическое состояние.
      */
 bool isSuccess() override;
     /**
-     * @brief
+     * @brief Добавляет фрагмент ответа в буфер и проверяет завершённые кадры.
      *
-     * @param data
-     * @return bool
+     * @param data Входные данные или полезная нагрузка ответа.
+     * @return true, если найден и обработан полный корректный кадр.
      */
 bool tryParse(const QByteArray &data) override;
 };

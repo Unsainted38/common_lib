@@ -3,74 +3,73 @@
 
 #include "abstract_command.h"
 
-const quint8 HEADERER = 0x77; /**< TODO: describe */
+const quint8 HEADERER = 0x77; /**< Хранит headerer. */
 
 /**
- * @brief
- *
+ * @brief Формирует команды и распознаёт ответы компаса LC-C5000.
  */
 class CompassLCC5000Command : public AbstractCommand {
-    quint8 m_deviceAddr; /**< TODO: describe */
-    quint8 m_cmdId; /**< TODO: describe */
-    quint8 m_length; /**< TODO: describe */
-    ValueType valueType; /**< TODO: describe */
-    CommandType cmdType; /**< TODO: describe */
-    QByteArray cachedRead; /**< TODO: describe */
-    QByteArray cachedWrite; /**< TODO: describe */
-    QByteArray responseBuffer; /**< TODO: describe */
-    QVariant data; /**< TODO: describe */
+    quint8 m_deviceAddr; /**< Адрес device addr. */
+    quint8 m_cmdId; /**< Код команды протокола. */
+    quint8 m_length; /**< Хранит length. */
+    ValueType valueType; /**< Тип кодируемого значения. */
+    CommandType cmdType; /**< Тип операции команды. */
+    QByteArray cachedRead; /**< Кэш пакета команды чтения. */
+    QByteArray cachedWrite; /**< Кэш пакета команды записи. */
+    QByteArray responseBuffer; /**< Накопительный буфер ответа активной команды. */
+    QVariant data; /**< Текущее значение или полезная нагрузка. */
 public:
     /**
-     * @brief
+     * @brief Формирует команды и распознаёт ответы компаса LC-C5000.
      *
-     * @param deviceAddr
-     * @param cmdId
-     * @param length
-     * @param valueType
-     * @param cmdType
+     * @param deviceAddr Адрес управляемого устройства.
+     * @param cmdId Код команды протокола.
+     * @param length Длина протокольного блока от поля длины до CRC включительно.
+     * @param valueType Тип кодируемого значения.
+     * @param cmdType Тип операции чтения или записи.
      */
 explicit CompassLCC5000Command(quint8 deviceAddr, quint8 cmdId, quint8 length, ValueType valueType, CommandType cmdType);
     /**
-     * @brief
+     * @brief Формирует и кэширует пакет чтения.
      *
-     * @return const QByteArray
+     * @return Сформированный массив байтов.
      */
 const QByteArray &makeReadCommand();
     /**
-     * @brief
+     * @brief Формирует пакет записи из текущего значения.
      *
-     * @return const QByteArray
+     * @return Сформированный массив байтов.
      */
 const QByteArray &makeWriteCommand();
 
     // AbstractCommand interface
 public:
     /**
-     * @brief
+     * @brief Формирует пакет команды и сбрасывает буфер ожидаемого ответа.
      *
-     * @return const QByteArray
+     * @return Сформированный массив байтов.
      */
 const QByteArray &makeCommand() override;
     /**
-     * @brief
+     * @brief Добавляет фрагмент ответа в буфер и проверяет завершённые кадры.
      *
-     * @param data
-     * @return bool
+     * @param data Входные данные или полезная нагрузка ответа.
+     * @return true, если найден и обработан полный корректный кадр.
      */
 bool tryParse(const QByteArray &data) override;
 
     // AbstractCommand interface
 public:
     /**
-     * @brief
+     * @brief Возвращает последнее принятое или установленное значение команды.
      *
-     * @return QVariant
+     * @return Значение в контейнере QVariant.
      */
 QVariant getValue() override;
     /**
-     * @brief
+     * @brief Устанавливает значение для последующего формирования команды записи.
      *
-     * @param v
+     * @param v Новое значение команды.
      */
 void setValue(QVariant v) override;
 };

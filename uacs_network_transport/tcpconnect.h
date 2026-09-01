@@ -9,51 +9,48 @@
 #include "myabstractconnect.h"
 
 /**
- * @brief
- *
+ * @brief Устаревший TCP-адаптер с безопасной очередью записи.
  */
 class TcpConnect : public MyAbstractConnect
 {
 public:
     /**
-     * @brief
+     * @brief Устаревший TCP-адаптер с безопасной очередью записи.
      *
-     * @param ip
-     * @param port
+     * @param ip IP-адрес удалённого узла.
+     * @param port TCP-порт удалённого узла.
      */
     TcpConnect(QString ip, quint16 port);
-    QString ipConnect; /**< TODO: describe */
-    quint16 portConnect; /**< TODO: describe */
+    QString ipConnect; /**< Хранит ip connect. */
+    quint16 portConnect; /**< Хранит port connect. */
 
-    QTcpSocket *socket; /**< TODO: describe */
+    QTcpSocket *socket; /**< Хранит socket. */
 
-    QQueue<QByteArray> packetQueue; /**< TODO: describe */
-    QByteArray currentPacket; /**< TODO: describe */
-    qsizetype currentOffset = 0; /**< TODO: describe */
-    bool isBusy = false; /**< TODO: describe */
+    QQueue<QByteArray> packetQueue; /**< Хранит packet queue. */
+    QByteArray currentPacket; /**< Пакет, отправляемый в настоящий момент. */
+    qsizetype currentOffset = 0; /**< Количество байтов текущего пакета, принятых устройством ввода-вывода. */
+    bool isBusy = false; /**< Признак активной записи пакета. */
 
     /**
-     * @brief
+     * @brief Добавляет данные в очередь на отправку.
      *
-     * @param data
+     * @param data Входные данные или полезная нагрузка ответа.
      */
 void writeData(const QByteArray &data) override;
 
 public slots:
     /**
-     * @brief
-     *
+     * @brief Считывает входные данные и передаёт их обработчикам.
      */
 void onReadyRead() override;
     /**
-     * @brief
+     * @brief Завершает текущий пакет после полной передачи его байтов.
      *
-     * @param bytes
+     * @param bytes Количество байтов, подтверждённых устройством ввода-вывода.
      */
 void handleBytesWritten(qint64 bytes) override;
     /**
-     * @brief
-     *
+     * @brief Продолжает отправку текущего пакета.
      */
 void writeNext() override;
 };

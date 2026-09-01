@@ -5,32 +5,31 @@
 #include <QSettings>
 
 /**
- * @brief
- *
+ * @brief Читает общие параметры устройства из INI-файла.
  */
 class ConfigHelper : public QObject {
     Q_OBJECT
 
 public:
     /**
-     * @brief
+     * @brief Читает общие параметры устройства из INI-файла.
      *
-     * @param parent
+     * @param parent Родительский QObject, управляющий временем жизни объекта.
      */
 explicit ConfigHelper(QObject *parent = nullptr);
     /**
-     * @brief
+     * @brief Загружает общие параметры транспорта из выбранной секции.
      *
-     * @param path
-     * @param section
+     * @param path Путь к INI-файлу конфигурации.
+     * @param section Имя секции с параметрами объекта.
      */
 static void loadTransportConfig(QString path, QString section);
     /**
-     * @brief
+     * @brief Загружает адрес Modbus-устройства из выбранной секции.
      *
-     * @param path
-     * @param section
-     * @return quint8
+     * @param path Путь к INI-файлу конфигурации.
+     * @param section Имя секции с параметрами объекта.
+     * @return Результат операции типа quint8.
      */
 static quint8 loadModBusDeviceAddress(QString path, QString section);
 

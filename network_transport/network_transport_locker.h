@@ -6,16 +6,15 @@
 #include <stdint.h>
 
 /**
- * @brief
- *
+ * @brief Ограничивает параллельную отправку команд и выдерживает защитный интервал.
  */
 class NetworkTransportLocker {
 public:
     /**
-     * @brief
+     * @brief Ограничивает параллельную отправку команд и выдерживает защитный интервал.
      *
-     * @param timeout
-     * @param safeTimeout
+     * @param timeout Максимальное время ожидания ответа в миллисекундах.
+     * @param safeTimeout Защитный интервал между командами в миллисекундах.
      */
     NetworkTransportLocker(
         uint16_t timeout,
@@ -26,9 +25,9 @@ public:
         m_lockedTime.start();
     }
     /**
-     * @brief
+     * @brief Проверяет, запрещена ли отправка следующей команды.
      *
-     * @return bool
+     * @return Текущее логическое состояние.
      */
 bool isLocked() {
         if(m_locked) {
@@ -46,43 +45,41 @@ bool isLocked() {
         return m_locked;
     }
     /**
-     * @brief
-     *
+     * @brief Блокирует отправку новых команд на время ожидания ответа.
      */
 void lock() {
         m_locked = true;
         m_lockedTime.start();
     }
     /**
-     * @brief
-     *
+     * @brief Передаёт принятые данные активной команде и завершает её при полном ответе.
      */
 void unlock() {
         m_locked = false;
         m_lockedTime.start();
     }
     /**
-     * @brief
+     * @brief Изменяет максимальное время ожидания ответа.
      *
-     * @param timeout
+     * @param timeout Максимальное время ожидания ответа в миллисекундах.
      */
 void setTimeout(uint16_t timeout) {
         m_timeout = timeout;
         m_lockedTime.restart();
     }
     /**
-     * @brief
+     * @brief Возвращает максимальное время ожидания ответа.
      *
-     * @return uint16_t
+     * @return Тайм-аут в миллисекундах.
      */
 uint16_t timeout() {
         return m_timeout;
     }
 protected:
-    bool m_locked; /**< TODO: describe */
-    uint16_t m_timeout; /**< TODO: describe */
-    uint16_t m_safeTimeout; /**< TODO: describe */
-    QElapsedTimer m_lockedTime; /**< TODO: describe */
+    bool m_locked; /**< Хранит locked. */
+    uint16_t m_timeout; /**< Хранит timeout. */
+    uint16_t m_safeTimeout; /**< Хранит safe timeout. */
+    QElapsedTimer m_lockedTime; /**< Хранит locked time. */
 };
 
 #endif // NETWORKTRANSPORT_LOCKER_H

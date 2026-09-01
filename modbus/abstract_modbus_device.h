@@ -8,47 +8,46 @@
 #include <modbus/modbus_protocol_factory.h>
 
 /**
- * @brief
- *
+ * @brief Базовый класс Modbus-устройства с фабричным созданием протокола.
  */
 class AbstractModbusDevice : public QObject
 {
     Q_OBJECT
-    quint8 deviceID; /**< TODO: describe */
-    QString configPath; /**< TODO: describe */
-    QString section; /**< TODO: describe */
-    SerialCircularRequester *requester; /**< TODO: describe */
-    QByteArray buffer; /**< TODO: describe */
+    quint8 deviceID; /**< Хранит device id. */
+    QString configPath; /**< Хранит config path. */
+    QString section; /**< Хранит section. */
+    SerialCircularRequester *requester; /**< Requester, выполняющий команды устройства. */
+    QByteArray buffer; /**< Накопительный буфер входных данных. */
 
 protected:
-    AbstractModBusProtocol *protocol; /**< TODO: describe */
+    AbstractModBusProtocol *protocol; /**< Реализация упаковки и разбора Modbus. */
     /**
-     * @brief
+     * @brief Добавляет переиспользуемую команду в циклический опрос.
      *
-     * @param cmd
+     * @param cmd Команда, добавляемая в циклический опрос.
      */
 void addCircularCommand(AbstractCommand *cmd);
     /**
-     * @brief
+     * @brief Добавляет команду для однократного выполнения.
      *
-     * @param cmd
+     * @param cmd Команда для однократного выполнения.
      */
 void executeCommand(AbstractCommand *cmd);
 
 public:
     /**
-     * @brief
+     * @brief Базовый класс Modbus-устройства с фабричным созданием протокола.
      *
-     * @param requester
-     * @param configPath
-     * @param section
-     * @param parent
+     * @param requester Requester, выполняющий команды устройства.
+     * @param configPath Путь к INI-файлу конфигурации.
+     * @param section Имя секции с параметрами объекта.
+     * @param parent Родительский QObject, управляющий временем жизни объекта.
      */
 explicit AbstractModbusDevice(SerialCircularRequester *requester, QString configPath, QString section, QObject *parent = nullptr);
     /**
-     * @brief
+     * @brief Возвращает адрес устройства на шине Modbus.
      *
-     * @return quint8
+     * @return Адрес устройства.
      */
 quint8 deviceAddress();
 

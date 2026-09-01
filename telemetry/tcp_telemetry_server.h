@@ -11,37 +11,36 @@
 #include <telemetry/i_telemetry_packet_source.h>
 
 /**
- * @brief
- *
+ * @brief Периодически рассылает телеметрию всем подключённым TCP-клиентам.
  */
 class TcpTelemetryServer : public QObject
 {
     Q_OBJECT
-    quint16 port; /**< TODO: describe */
-    QString name; /**< TODO: describe */
-    QTcpServer *server; /**< TODO: describe */
-    QVector<QTcpSocket*> clients; /**< TODO: describe */
-    QTimer *telemetryTimer; /**< TODO: describe */
+    quint16 port; /**< Номер локального или удалённого порта. */
+    QString name; /**< Диагностическое имя объекта. */
+    QTcpServer *server; /**< TCP-сервер входящих подключений. */
+    QVector<QTcpSocket*> clients; /**< Активные клиенты рассылки телеметрии. */
+    QTimer *telemetryTimer; /**< Таймер периодической рассылки. */
 
-    ITelemetryPacketSource &m_packetSource; /**< TODO: describe */
+    ITelemetryPacketSource &m_packetSource; /**< Источник готовых пакетов телеметрии. */
 
     /**
-     * @brief
+     * @brief Загружает параметры из указанной секции INI-файла.
      *
-     * @param configPath
-     * @param section
+     * @param configPath Путь к INI-файлу конфигурации.
+     * @param section Имя секции с параметрами объекта.
      */
 void loadConfig(const QString &configPath, const QString &section);
 
 public:
     /**
-     * @brief
+     * @brief Периодически рассылает телеметрию всем подключённым TCP-клиентам.
      *
-     * @param configPath
-     * @param section
-     * @param period
-     * @param source
-     * @param parent
+     * @param configPath Путь к INI-файлу конфигурации.
+     * @param section Имя секции с параметрами объекта.
+     * @param period Период рассылки телеметрии в миллисекундах.
+     * @param source Источник готовых пакетов телеметрии.
+     * @param parent Родительский QObject, управляющий временем жизни объекта.
      */
 explicit TcpTelemetryServer(QString configPath, QString section, int period, ITelemetryPacketSource &source, QObject *parent = nullptr);
 
@@ -49,18 +48,15 @@ signals:
 
 private slots:
     /**
-     * @brief
-     *
+     * @brief Регистрирует новое входящее TCP-соединение.
      */
 void onNewClientConnection();
     /**
-     * @brief
-     *
+     * @brief Удаляет отключившегося клиента из списка рассылки.
      */
 void onClientDisconnected();
     /**
-     * @brief
-     *
+     * @brief Формирует и отправляет очередной пакет подключённым клиентам.
      */
 void sendTelemetry();
 };

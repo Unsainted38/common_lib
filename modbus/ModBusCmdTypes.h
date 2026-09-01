@@ -3,8 +3,7 @@
 #include <QObject>
 
 /**
- * @brief
- *
+ * @brief Перечисляет поддерживаемые коды функций Modbus.
  */
 enum class ModBusCmdTypes : quint8 {
     READ_COILS = 0x01,
@@ -18,10 +17,10 @@ enum class ModBusCmdTypes : quint8 {
 };
 
 /**
- * @brief
+ * @brief Преобразует код функции Modbus в байтовое значение.
  *
- * @param e
- * @return quint8 operator
+ * @param e Код функции Modbus.
+ * @return Результат операции типа constexpr quint8.
  */
 constexpr quint8 operator*(ModBusCmdTypes e) {
     return static_cast<quint8>(e);

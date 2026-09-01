@@ -8,33 +8,32 @@
 #include <modbus/modbus_tcp.h>
 
 /**
- * @brief
- *
+ * @brief Создаёт реализацию Modbus RTU, TCP или RTU-over-TCP из настроек.
  */
 class ModBusProtocolFactory : public QObject
 {
     Q_OBJECT
 public:
     /**
-     * @brief
+     * @brief Создаёт реализацию Modbus RTU, TCP или RTU-over-TCP из настроек.
      *
-     * @param parent
+     * @param parent Родительский QObject, управляющий временем жизни объекта.
      */
 explicit ModBusProtocolFactory(QObject *parent = nullptr);
     /**
-     * @brief
+     * @brief Создаёт объект требуемой реализации по типу или настройкам.
      *
-     * @param protocolType
-     * @param slaveID
-     * @return AbstractModBusProtocol
+     * @param protocolType Строковый тип протокола: rtu, tcp или viatcp.
+     * @param slaveID Адрес ведомого Modbus-устройства.
+     * @return Указатель на созданный объект; для неизвестного транспорта может быть nullptr.
      */
 static AbstractModBusProtocol* getInstance(QString protocolType, quint8 slaveID);
     /**
-     * @brief
+     * @brief Создаёт объект требуемой реализации по типу или настройкам.
      *
-     * @param configPath
-     * @param section
-     * @return AbstractModBusProtocol
+     * @param configPath Путь к INI-файлу конфигурации.
+     * @param section Имя секции с параметрами объекта.
+     * @return Указатель на созданный объект; для неизвестного транспорта может быть nullptr.
      */
 static AbstractModBusProtocol* getInstance(QString configPath, QString section);
 signals:

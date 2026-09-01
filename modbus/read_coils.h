@@ -7,54 +7,53 @@
 
 
 /**
- * @brief
- *
+ * @brief Реализует Modbus-функцию 0x01 Read Coils.
  */
 class ReadCoils : public AbstractCommand
 {
     Q_OBJECT
-    QByteArray cachedCommand; /**< TODO: describe */
-    QByteArray cachedPdu; /**< TODO: describe */
-    AbstractModBusProtocol *protocol; /**< TODO: describe */
-    quint16 coilAddress; /**< TODO: describe */
-    quint16 coilsCount; /**< TODO: describe */
-    quint8 byteCount; /**< TODO: describe */
-    QByteArray buffer; /**< TODO: describe */
-    QVector<quint8> coils; /**< TODO: describe */
-    const quint8 cmdID = 0x01; /**< TODO: describe */
+    QByteArray cachedCommand; /**< Кэш последнего сформированного пакета. */
+    QByteArray cachedPdu; /**< Кэш PDU без транспортной обёртки. */
+    AbstractModBusProtocol *protocol; /**< Реализация упаковки и разбора Modbus. */
+    quint16 coilAddress; /**< Начальный адрес катушки. */
+    quint16 coilsCount; /**< Количество катушек в операции. */
+    quint8 byteCount; /**< Ожидаемое количество байтов данных в ответе. */
+    QByteArray buffer; /**< Накопительный буфер входных данных. */
+    QVector<quint8> coils; /**< Последние прочитанные или заданные состояния катушек. */
+    const quint8 cmdID = 0x01; /**< Код функции протокола. */
 public:
     /**
-     * @brief
+     * @brief Реализует Modbus-функцию 0x01 Read Coils.
      *
-     * @param coilAddress
-     * @param coilsCount
-     * @param protocol
-     * @param parent
+     * @param coilAddress Начальный адрес катушки.
+     * @param coilsCount Количество катушек.
+     * @param protocol Реализация транспортного формата Modbus.
+     * @param parent Родительский QObject, управляющий временем жизни объекта.
      */
 explicit ReadCoils(quint16 coilAddress, quint16 coilsCount, AbstractModBusProtocol *protocol, QObject *parent = nullptr);
 
     // AbstractCommand interface
 public:
     /**
-     * @brief
+     * @brief Формирует пакет команды и сбрасывает буфер ожидаемого ответа.
      *
-     * @return const QByteArray
+     * @return Сформированный массив байтов.
      */
 const QByteArray &makeCommand() override;
 
     // AbstractCommand interface
 public:
     /**
-     * @brief
+     * @brief Возвращает последнее принятое или установленное значение команды.
      *
-     * @return QVariant
+     * @return Значение в контейнере QVariant.
      */
 QVariant getValue() override;
     /**
-     * @brief
+     * @brief Добавляет фрагмент ответа в буфер и проверяет завершённые кадры.
      *
-     * @param data
-     * @return bool
+     * @param data Входные данные или полезная нагрузка ответа.
+     * @return true, если найден и обработан полный корректный кадр.
      */
 bool tryParse(const QByteArray &data) override;
 

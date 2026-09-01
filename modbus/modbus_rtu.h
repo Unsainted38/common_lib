@@ -6,39 +6,38 @@
 #include <utilities/bit_utils.h>
 
 /**
- * @brief
- *
+ * @brief Упаковывает и извлекает кадры Modbus RTU с проверкой CRC16.
  */
 class ModBusRtu : public AbstractModBusProtocol
 {
     Q_OBJECT
-    quint8 slaveID; /**< TODO: describe */
+    quint8 slaveID; /**< Адрес ведомого Modbus-устройства. */
 public:
     /**
-     * @brief
+     * @brief Упаковывает и извлекает кадры Modbus RTU с проверкой CRC16.
      *
-     * @param slaveID
+     * @param slaveID Адрес ведомого Modbus-устройства.
      */
 explicit ModBusRtu(quint8 slaveID);
     /**
-     * @brief
+     * @brief Упаковывает полезную нагрузку в кадр соответствующего протокола.
      *
-     * @param pdu
-     * @return QByteArray
+     * @param pdu Блок данных протокола Modbus без транспортного заголовка.
+     * @return Сформированный массив байтов.
      */
 QByteArray pack(const QByteArray &pdu) override;
     /**
-     * @brief
+     * @brief Возвращает адрес ведомого Modbus-устройства.
      *
-     * @return quint8
+     * @return Адрес устройства.
      */
 quint8 deviceID() override;
     /**
-     * @brief
+     * @brief Пытается извлечь один полный кадр из накопительного буфера.
      *
-     * @param buffer
-     * @param frame
-     * @return ModbusParseStatus
+     * @param buffer Накопительный буфер; обработанные байты удаляются.
+     * @param frame Структура, в которую записывается разобранный кадр.
+     * @return Статус разбора: неполный, некорректный или завершённый кадр.
      */
 ModbusParseStatus tryExtractFrame(QByteArray &buffer, ModbusFrame &frame) override;
 };

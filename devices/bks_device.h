@@ -9,8 +9,7 @@
 #include "parsers/mshpr_parser.h"
 
 /**
- * @brief
- *
+ * @brief Перечисляет коды скоростей обмена БКС.
  */
 enum BksBaud {
     Baud4800 = 0,
@@ -21,136 +20,133 @@ enum BksBaud {
 
 
 /**
- * @brief
- *
+ * @brief Содержит строковые идентификаторы команд БКС.
  */
 struct BKS_COMMANDS {
-    inline static const QString STATUS_CMD = "STA"; /**< TODO: describe */
-    inline static const QString FC_LOW_FREQ_CMD = "FC1"; /**< TODO: describe */
-    inline static const QString FC_HIGH_FREQ_CMD = "FC2"; /**< TODO: describe */
-    inline static const QString FX_LOW_FREQ_CMD = "FX1"; /**< TODO: describe */
-    inline static const QString FX_HIGH_FREQ_CMD = "FX2"; /**< TODO: describe */
-    inline static const QString ADDRESS_CMD = "ADR"; /**< TODO: describe */
-    inline static const QString BAUD_CMD = "BRG"; /**< TODO: describe */
+    inline static const QString STATUS_CMD = "STA"; /**< Хранит status cmd. */
+    inline static const QString FC_LOW_FREQ_CMD = "FC1"; /**< Хранит fc low freq cmd. */
+    inline static const QString FC_HIGH_FREQ_CMD = "FC2"; /**< Хранит fc high freq cmd. */
+    inline static const QString FX_LOW_FREQ_CMD = "FX1"; /**< Хранит fx low freq cmd. */
+    inline static const QString FX_HIGH_FREQ_CMD = "FX2"; /**< Хранит fx high freq cmd. */
+    inline static const QString ADDRESS_CMD = "ADR"; /**< Хранит address cmd. */
+    inline static const QString BAUD_CMD = "BRG"; /**< Хранит baud cmd. */
 };
 /**
- * @brief
- *
+ * @brief Предоставляет высокоуровневый интерфейс управления устройством БКС.
  */
 class BksDevice : public QObject {
     Q_OBJECT
 
-    QString m_configPath; /**< TODO: describe */
-    QString m_section; /**< TODO: describe */
-    SerialCircularRequester *m_requester; /**< TODO: describe */
-    MShPRParser *m_parser; /**< TODO: describe */
-    AbstractCommand *StatusCommand, *FC1Command, *FC2Command, *FX1Command, *FX2Command, *AddressCommand, *BaudCommand; /**< TODO: describe */
-    QString m_deviceAddr = "00"; /**< TODO: describe */
-    bool m_statusOnline = false; /**< TODO: describe */
-    quint8 m_FC1 = 0; /**< TODO: describe */
-    quint8 m_FC2 = 0; /**< TODO: describe */
-    quint8 m_FX1 = 0; /**< TODO: describe */
-    quint8 m_FX2 = 0; /**< TODO: describe */
-    quint8 m_baud = BksBaud::Baud19200; /**< TODO: describe */
-    QString m_lastAnswer; /**< TODO: describe */
-    QTimer *m_timer; /**< TODO: describe */
+    QString m_configPath; /**< Путь к INI-файлу конфигурации. */
+    QString m_section; /**< Секция INI-файла для этого объекта. */
+    SerialCircularRequester *m_requester; /**< Requester, выполняющий команды устройства. */
+    MShPRParser *m_parser; /**< Потоковый парсер ответов устройства. */
+    AbstractCommand *StatusCommand, *FC1Command, *FC2Command, *FX1Command, *FX2Command, *AddressCommand, *BaudCommand; /**< Команда или набор команд baud command. */
+    QString m_deviceAddr = "00"; /**< Адрес device addr. */
+    bool m_statusOnline = false; /**< Признак недавнего корректного ответа устройства. */
+    quint8 m_FC1 = 0; /**< Хранит fc1. */
+    quint8 m_FC2 = 0; /**< Хранит fc2. */
+    quint8 m_FX1 = 0; /**< Хранит fx1. */
+    quint8 m_FX2 = 0; /**< Хранит fx2. */
+    quint8 m_baud = BksBaud::Baud19200; /**< Хранит baud. */
+    QString m_lastAnswer; /**< Последний выделенный ответ устройства. */
+    QTimer *m_timer; /**< Таймер контроля активности устройства. */
 public:
     /**
-     * @brief
+     * @brief Предоставляет высокоуровневый интерфейс управления устройством БКС.
      *
-     * @param requester
-     * @param configPath
-     * @param section
-     * @param parent
+     * @param requester Requester, выполняющий команды устройства.
+     * @param configPath Путь к INI-файлу конфигурации.
+     * @param section Имя секции с параметрами объекта.
+     * @param parent Родительский QObject, управляющий временем жизни объекта.
      */
 explicit BksDevice(SerialCircularRequester *requester, QString configPath, QString section, QObject *parent = nullptr);
     /**
-     * @brief
-     *
+     * @brief Загружает параметры из указанной секции INI-файла.
      */
 void loadConfig();
     /**
-     * @brief
+     * @brief Возвращает fc1.
      *
-     * @return quint8
+     * @return Текущее значение параметра.
      */
 quint8 getFC1();
     /**
-     * @brief
+     * @brief Возвращает fc2.
      *
-     * @return quint8
+     * @return Текущее значение параметра.
      */
 quint8 getFC2();
     /**
-     * @brief
+     * @brief Возвращает fx1.
      *
-     * @return quint8
+     * @return Текущее значение параметра.
      */
 quint8 getFX1();
     /**
-     * @brief
+     * @brief Возвращает fx2.
      *
-     * @return quint8
+     * @return Текущее значение параметра.
      */
 quint8 getFX2();
     /**
-     * @brief
+     * @brief Возвращает device address.
      *
-     * @return quint8
+     * @return Текущее значение параметра.
      */
 quint8 getDeviceAddress();
     /**
-     * @brief
+     * @brief Возвращает last answer.
      *
-     * @return QString
+     * @return Текущее значение параметра.
      */
 QString getLastAnswer();
     /**
-     * @brief
+     * @brief Возвращает status online.
      *
-     * @return bool
+     * @return Текущее логическое состояние.
      */
 bool getStatusOnline();
     /**
-     * @brief
+     * @brief Устанавливает fc1.
      *
-     * @param FC1
+     * @param FC1 Нижняя частота первого канала.
      */
 void setFC1(quint8 FC1);
     /**
-     * @brief
+     * @brief Устанавливает fc2.
      *
-     * @param FC2
+     * @param FC2 Верхняя частота первого канала.
      */
 void setFC2(quint8 FC2);
     /**
-     * @brief
+     * @brief Устанавливает fx1.
      *
-     * @param FX1
+     * @param FX1 Нижняя частота второго канала.
      */
 void setFX1(quint8 FX1);
     /**
-     * @brief
+     * @brief Устанавливает fx2.
      *
-     * @param FX2
+     * @param FX2 Верхняя частота второго канала.
      */
 void setFX2(quint8 FX2);
     /**
-     * @brief
+     * @brief Устанавливает device address.
      *
-     * @param value
+     * @param value Новое значение параметра.
      */
 void setDeviceAddress(quint8 value);
     /**
-     * @brief
+     * @brief Устанавливает baud.
      *
-     * @param baud
+     * @param baud Код или числовое значение скорости обмена.
      */
 void setBaud(BksBaud baud);
     /**
-     * @brief
+     * @brief Устанавливает baud.
      *
-     * @param baud
+     * @param baud Код или числовое значение скорости обмена.
      */
 void setBaud(quint8 baud);
 signals:
@@ -159,16 +155,14 @@ private:
 
 private slots:
     /**
-     * @brief
+     * @brief Декодирует полезную нагрузку ответа и обновляет значение команды.
      *
-     * @param addr
-     * @param QMap<QString
-     * @param fieldsMap
+     * @param addr Адрес устройства в формате протокола.
+     * @param fieldsMap Разобранные поля ответа по их строковым идентификаторам.
      */
 void processData(QString addr, QMap<QString, int> fieldsMap);
     /**
-     * @brief
-     *
+     * @brief Обрабатывает событие timer.
      */
 void onTimer();
     void LastAnswer(QByteArray packet);

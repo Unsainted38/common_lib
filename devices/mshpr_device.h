@@ -7,21 +7,19 @@
 #include "parsers/mshpr_parser.h"
 
 /**
- * @brief
- *
+ * @brief Содержит строковые идентификаторы команд МШПР.
  */
 struct MShPR_COMMANDS {
-    inline static const QString STATUS_CMD = "STA"; /**< TODO: describe */
-    inline static const QString GETERODIN_CMD = "FKA"; /**< TODO: describe */
-    inline static const QString ATTENUATION_CMD = "AT1"; /**< TODO: describe */
-    inline static const QString ADDRESS_CMD = "ADR"; /**< TODO: describe */
-    inline static const QString BAUD_CMD = "BRG"; /**< TODO: describe */
+    inline static const QString STATUS_CMD = "STA"; /**< Хранит status cmd. */
+    inline static const QString GETERODIN_CMD = "FKA"; /**< Хранит geterodin cmd. */
+    inline static const QString ATTENUATION_CMD = "AT1"; /**< Хранит attenuation cmd. */
+    inline static const QString ADDRESS_CMD = "ADR"; /**< Хранит address cmd. */
+    inline static const QString BAUD_CMD = "BRG"; /**< Хранит baud cmd. */
 };
 
 
 /**
- * @brief
- *
+ * @brief Перечисляет коды скоростей обмена МШПР.
  */
 enum MShPRBaud {
     Baud4800 = 0,
@@ -32,84 +30,82 @@ enum MShPRBaud {
 
 
 /**
- * @brief
- *
+ * @brief Предоставляет высокоуровневый интерфейс управления устройством МШПР.
  */
 class MShPRDevice : public QObject {
     Q_OBJECT
 public:
     /**
-     * @brief
+     * @brief Предоставляет высокоуровневый интерфейс управления устройством МШПР.
      *
-     * @param requester
-     * @param configPath
-     * @param section
-     * @param parent
+     * @param requester Requester, выполняющий команды устройства.
+     * @param configPath Путь к INI-файлу конфигурации.
+     * @param section Имя секции с параметрами объекта.
+     * @param parent Родительский QObject, управляющий временем жизни объекта.
      */
 explicit MShPRDevice(SerialCircularRequester *requester, QString configPath, QString section, QObject *parent = nullptr);
     /**
-     * @brief
-     *
+     * @brief Загружает параметры из указанной секции INI-файла.
      */
 void loadConfig();
     /**
-     * @brief
+     * @brief Возвращает attenuation.
      *
-     * @return quint8
+     * @return Текущее значение параметра.
      */
 quint8 getAttenuation();
     /**
-     * @brief
+     * @brief Возвращает geterodin.
      *
-     * @return quint8
+     * @return Текущее значение параметра.
      */
 quint8 getGeterodin();
     /**
-     * @brief
+     * @brief Возвращает status.
      *
-     * @return quint8
+     * @return Текущее значение параметра.
      */
 quint8 getStatus();
     /**
-     * @brief
+     * @brief Возвращает device address.
      *
-     * @return quint8
+     * @return Текущее значение параметра.
      */
 quint8 getDeviceAddress();
     /**
-     * @brief
+     * @brief Возвращает last answer.
      *
-     * @return QString
+     * @return Текущее значение параметра.
      */
 QString getLastAnswer();
     /**
-     * @brief
+     * @brief Устанавливает attenuation.
      *
-     * @param value
+     * @param value Новое значение параметра.
      */
 void setAttenuation(quint8 value);
     /**
-     * @brief
+     * @brief Устанавливает geterodin.
      *
-     * @param value
+     * @param value Новое значение параметра.
      */
 void setGeterodin(quint8 value);
     /**
-     * @brief
+     * @brief Устанавливает address.
      *
-     * @param value
+     * @param value Новое значение параметра.
      */
 void setAddress(quint8 value);
     /**
-     * @brief
+     * @brief Устанавливает baud.
      *
-     * @param baud
+     * @param baud Код или числовое значение скорости обмена.
      */
 void setBaud(MShPRBaud baud);
     /**
-     * @brief
+     * @brief Устанавливает baud.
      *
-     * @param baud
+     * @param baud Код или числовое значение скорости обмена.
      */
 void setBaud(quint8 baud);
 
@@ -117,30 +113,28 @@ signals:
 private:
 
 
-    QString m_configPath; /**< TODO: describe */
-    QString m_section; /**< TODO: describe */
-    SerialCircularRequester *m_requester; /**< TODO: describe */
-    MShPRParser *m_parser; /**< TODO: describe */
-    AbstractCommand *StatusCommand, *AttenuationCommand, *GeterodinCommand, *AddressCommand, *BaudCommand; /**< TODO: describe */
-    QString m_deviceAddr = "01"; /**< TODO: describe */
-    quint8 m_status = 0; /**< TODO: describe */
-    quint8 m_attenuation = 0; /**< TODO: describe */
-    quint8 m_geterodin = 0; /**< TODO: describe */
-    quint8 m_baud = MShPRBaud::Baud19200; /**< TODO: describe */
-    QString m_lastAnswer; /**< TODO: describe */
-    QTimer *m_timer; /**< TODO: describe */
+    QString m_configPath; /**< Путь к INI-файлу конфигурации. */
+    QString m_section; /**< Секция INI-файла для этого объекта. */
+    SerialCircularRequester *m_requester; /**< Requester, выполняющий команды устройства. */
+    MShPRParser *m_parser; /**< Потоковый парсер ответов устройства. */
+    AbstractCommand *StatusCommand, *AttenuationCommand, *GeterodinCommand, *AddressCommand, *BaudCommand; /**< Команда или набор команд baud command. */
+    QString m_deviceAddr = "01"; /**< Адрес device addr. */
+    quint8 m_status = 0; /**< Хранит status. */
+    quint8 m_attenuation = 0; /**< Хранит attenuation. */
+    quint8 m_geterodin = 0; /**< Хранит geterodin. */
+    quint8 m_baud = MShPRBaud::Baud19200; /**< Хранит baud. */
+    QString m_lastAnswer; /**< Последний выделенный ответ устройства. */
+    QTimer *m_timer; /**< Таймер контроля активности устройства. */
 private slots:
     /**
-     * @brief
+     * @brief Декодирует полезную нагрузку ответа и обновляет значение команды.
      *
-     * @param addr
-     * @param QMap<QString
-     * @param fieldsMap
+     * @param addr Адрес устройства в формате протокола.
+     * @param fieldsMap Разобранные поля ответа по их строковым идентификаторам.
      */
 void processData(QString addr, QMap<QString, int> fieldsMap);
     /**
-     * @brief
-     *
+     * @brief Обрабатывает событие timer.
      */
 void onTimer();
     void LastAnswer(QByteArray packet);

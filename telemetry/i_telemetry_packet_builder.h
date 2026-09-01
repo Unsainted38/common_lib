@@ -5,23 +5,21 @@
 
 template <typename TData>
 /**
- * @brief
- *
+ * @brief Интерфейс сериализации снимка телеметрии в сетевой пакет.
  */
 class ITelemetryPacketBuilder
 {
 public:
     /**
-     * @brief
-     *
+     * @brief Освобождает ресурсы объекта.
      */
 virtual ~ITelemetryPacketBuilder() = default;
 
     /**
-     * @brief
+     * @brief Сериализует переданный снимок данных.
      *
-     * @param data
-     * @return QByteArray
+     * @param data Входные данные или полезная нагрузка ответа.
+     * @return Сформированный массив байтов.
      */
 virtual QByteArray build(const TData &data) = 0;
 };

@@ -10,103 +10,96 @@
 #include "abstract_network_transport.h"
 
 /**
- * @brief
- *
+ * @brief Передаёт пакеты через QSerialPort с поддержкой частичной записи.
  */
 class SerialTransport : public AbstractNetworkTransport {
     Q_OBJECT
     /**
-     * @brief
-     *
+     * @brief Хранит пакет и прогресс его постановки в транспорт.
      */
 struct PendingPacket {
-        quint64 id = 0; /**< TODO: describe */
-        QByteArray data; /**< TODO: describe */
-        qsizetype acceptedOffset = 0; /**< TODO: describe */
-        qsizetype confirmedOffset = 0; /**< TODO: describe */
+        quint64 id = 0; /**< Уникальный идентификатор пакета. */
+        QByteArray data; /**< Текущее значение или полезная нагрузка. */
+        qsizetype acceptedOffset = 0; /**< Количество байтов, принятых методом write(). */
+        qsizetype confirmedOffset = 0; /**< Количество байтов, подтверждённых сигналом bytesWritten(). */
     };
 
 public:
     /**
-     * @brief
+     * @brief Передаёт пакеты через QSerialPort с поддержкой частичной записи.
      *
-     * @param configPath
-     * @param section
-     * @param parent
+     * @param configPath Путь к INI-файлу конфигурации.
+     * @param section Имя секции с параметрами объекта.
+     * @param parent Родительский QObject, управляющий временем жизни объекта.
      */
 explicit SerialTransport(QString configPath, QString section, QObject *parent = nullptr);
 
 public:
     /**
-     * @brief
-     *
+     * @brief Загружает параметры из указанной секции INI-файла.
      */
 void loadConfig() override;
     /**
-     * @brief
-     *
+     * @brief Создаёт и настраивает объект ввода-вывода и таймеры транспорта.
      */
 void setupTransport() override;
     /**
-     * @brief
+     * @brief Ставит пакет в очередь на отправку.
      *
-     * @param packet
-     * @return bool
+     * @param packet Пакет данных для отправки.
+     * @return true, если операция была принята к выполнению.
      */
 bool write(const QByteArray &packet) override;
     /**
-     * @brief
+     * @brief Ставит пакет в очередь и возвращает его уникальный идентификатор.
      *
-     * @param packet
-     * @return quint64
+     * @param packet Пакет данных для отправки.
+     * @return Идентификатор пакета или 0 при отказе постановки в очередь.
      */
 quint64 writeTracked(const QByteArray &packet) override;
     /**
-     * @brief
+     * @brief Открывает транспорт или запускает установление соединения.
      *
-     * @return bool
+     * @return true, если операция была принята к выполнению.
      */
 bool open() override;
     /**
-     * @brief
+     * @brief Закрывает транспорт и отключает автоматическое переподключение.
      *
-     * @return bool
+     * @return true, если операция была принята к выполнению.
      */
 bool close() override;
     /**
-     * @brief
-     *
+     * @brief Отправляет служебный пакет при активном соединении.
      */
 void heartbeat() override;
 signals:
 private:
-    QMutex mutex; /**< TODO: describe */
-    QQueue<PendingPacket> queue; /**< TODO: describe */
-    quint64 nextPacketId = 1; /**< TODO: describe */
-    QString portName; /**< TODO: describe */
-    QString name; /**< TODO: describe */
-    int baud; /**< TODO: describe */
-    int dataBits; /**< TODO: describe */
-    int parity; /**< TODO: describe */
-    int flowControl; /**< TODO: describe */
-    int stopBits; /**< TODO: describe */
+    QMutex mutex; /**< Защищает очередь при доступе из разных потоков. */
+    QQueue<PendingPacket> queue; /**< Очередь ожидающих отправки пакетов. */
+    quint64 nextPacketId = 1; /**< Следующий идентификатор пакета. */
+    QString portName; /**< Хранит port name. */
+    QString name; /**< Диагностическое имя объекта. */
+    int baud; /**< Хранит baud. */
+    int dataBits; /**< Хранит data bits. */
+    int parity; /**< Хранит parity. */
+    int flowControl; /**< Хранит flow control. */
+    int stopBits; /**< Хранит stop bits. */
 
-    QSerialPort *serial; /**< TODO: describe */
+    QSerialPort *serial; /**< Хранит serial. */
 private slots:
     /**
-     * @brief
-     *
+     * @brief Считывает все доступные байты последовательного порта.
      */
 void onSerialRead();
     /**
-     * @brief
-     *
+     * @brief Продолжает отправку первого пакета очереди с учётом частичной записи.
      */
 void processQueue() override;
     /**
-     * @brief
+     * @brief Обновляет подтверждённый прогресс записи и продолжает очередь.
      *
-     * @param count
+     * @param count Количество подтверждённых байтов.
      */
 void onBytesWritten(qint64 count);
 };

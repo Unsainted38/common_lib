@@ -9,44 +9,37 @@
 #include <QStringList>
 
 /**
- * @brief
- *
+ * @brief Потоково разбирает текстовые ответы МШПР с проверкой контрольной суммы.
  */
 class MShPRParser : public QObject {
     Q_OBJECT
 public:
     /**
-     * @brief
+     * @brief Потоково разбирает текстовые ответы МШПР с проверкой контрольной суммы.
      *
-     * @param parent
+     * @param parent Родительский QObject, управляющий временем жизни объекта.
      */
 explicit MShPRParser(QObject *parent = nullptr);
 
 signals:
     /**
-     * @brief
-     *
-     * @param QString
-     * @param QMap<QString
-     * @param int>
+     * @brief Сообщает о разобранных данных корректного кадра.
      */
 void dataReady(QString, QMap<QString, int>);
     /**
-     * @brief
-     *
-     * @param QByteArray
+     * @brief Передаёт последний выделенный кадр для диагностики.
      */
 void lastAnswer(QByteArray);
 public slots:
     /**
-     * @brief
+     * @brief Добавляет входные данные в буфер и разбирает все полные кадры.
      *
-     * @param reply
-     * @return bool
+     * @param reply Очередной фрагмент входного потока.
+     * @return true, если найден и обработан полный корректный кадр.
      */
 bool parseReply(const QByteArray &reply);
 private:
-    QByteArray m_buffer; /**< TODO: describe */
+    QByteArray m_buffer; /**< Накопительный буфер входных данных. */
 
 };
 

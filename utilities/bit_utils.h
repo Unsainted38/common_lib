@@ -4,43 +4,41 @@
 #include <QObject>
 
 /**
- * @brief
- *
+ * @brief Содержит операции над байтами, словами и регистрами Modbus.
  */
 class BitUtils {
 public:
     /**
-     * @brief
-     *
+     * @brief Содержит операции над байтами, словами и регистрами Modbus.
      */
 explicit BitUtils() {
 
     }
 
     /**
-     * @brief
+     * @brief Возвращает младший байт 16-битного значения.
      *
-     * @param value
-     * @return quint8
+     * @param value Новое значение параметра.
+     * @return Результат операции типа quint8.
      */
 static quint8 Low(quint16 value) {
         return static_cast<quint8>(value & 0xFF);
     }
     /**
-     * @brief
+     * @brief Возвращает старший байт 16-битного значения.
      *
-     * @param value
-     * @return quint8
+     * @param value Новое значение параметра.
+     * @return Результат операции типа quint8.
      */
 static quint8 High(quint16 value) {
         return static_cast<quint8>(value >> 8);
     }
 
     /**
-     * @brief
+     * @brief Собирает число с плавающей точкой из двух 16-битных слов.
      *
-     * @param regs
-     * @return float
+     * @param regs Регистры, содержащие двоичное представление числа.
+     * @return Результат операции типа float.
      */
 static float makeFloat(const quint16 *regs) {
         union {
@@ -52,11 +50,11 @@ static float makeFloat(const quint16 *regs) {
         return cvt.value;
     }
     /**
-     * @brief
+     * @brief Собирает число с плавающей точкой из двух 16-битных слов.
      *
-     * @param word1
-     * @param word2
-     * @return float
+     * @param word1 Первое 16-битное слово числа.
+     * @param word2 Второе 16-битное слово числа.
+     * @return Результат операции типа float.
      */
 static float makeFloat(quint16 word1, quint16 word2) {
         union {

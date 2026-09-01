@@ -4,8 +4,7 @@
 #include <QDebug>
 
 /**
- * @brief
- *
+ * @brief Очищает содержимое консоли средствами текущей платформы.
  */
 void clearConsole();
 

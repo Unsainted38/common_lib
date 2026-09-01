@@ -4,10 +4,10 @@
 #include <QtGlobal>
 
 /**
- * @brief
+ * @brief Вычисляет восьмибитную сумму всех байтов массива.
  *
- * @param data
- * @return quint8
+ * @param data Входные данные или полезная нагрузка ответа.
+ * @return Результат операции типа quint8.
  */
 quint8 BytesSumCrc(const QByteArray data);
 

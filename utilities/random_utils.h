@@ -3,11 +3,11 @@
 #include <QRandomGenerator>
 
 /**
- * @brief
+ * @brief Генерирует псевдослучайное вещественное число в заданном диапазоне.
  *
- * @param min
- * @param max
- * @return double
+ * @param min Нижняя граница диапазона.
+ * @param max Верхняя граница диапазона.
+ * @return Результат операции типа double.
  */
 double randomDouble(double min, double max)
 {

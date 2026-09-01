@@ -5,8 +5,7 @@
 #include <QByteArray>
 
 /**
- * @brief
- *
+ * @brief Описывает результат попытки извлечения кадра из потокового буфера.
  */
 enum class ModbusParseStatus {
     Incomplete, // Нужно больше данных
@@ -15,50 +14,48 @@ enum class ModbusParseStatus {
 };
 
 /**
- * @brief
- *
+ * @brief Содержит разобранные поля кадра Modbus и его PDU.
  */
 struct ModbusFrame {
-    quint16 transactionId = 0; // Для RTU всегда 0 /**< TODO: describe */
-    quint8 deviceId = 0; /**< TODO: describe */
-    QByteArray pdu;            // function code + response data /**< TODO: describe */
+    quint16 transactionId = 0; /**< Идентификатор транзакции; для RTU всегда равен 0. */
+    quint8 deviceId = 0; /**< Хранит device id. */
+    QByteArray pdu; /**< PDU: код функции и данные ответа. */
 };
 
 /**
- * @brief
- *
+ * @brief Определяет упаковку PDU и потоковое извлечение кадров Modbus.
  */
 class AbstractModBusProtocol : public QObject
 {
     Q_OBJECT
 public:
     /**
-     * @brief
+     * @brief Определяет упаковку PDU и потоковое извлечение кадров Modbus.
      *
-     * @param parent
+     * @param parent Родительский QObject, управляющий временем жизни объекта.
      */
 explicit AbstractModBusProtocol(QObject *parent = nullptr)
         : QObject(parent)
     {}
     /**
-     * @brief
+     * @brief Упаковывает полезную нагрузку в кадр соответствующего протокола.
      *
-     * @param pdu
-     * @return QByteArray
+     * @param pdu Блок данных протокола Modbus без транспортного заголовка.
+     * @return Сформированный массив байтов.
      */
 virtual QByteArray pack(const QByteArray &pdu) = 0;
     /**
-     * @brief
+     * @brief Пытается извлечь один полный кадр из накопительного буфера.
      *
-     * @param buffer
-     * @param frame
-     * @return ModbusParseStatus
+     * @param buffer Накопительный буфер; обработанные байты удаляются.
+     * @param frame Структура, в которую записывается разобранный кадр.
+     * @return Статус разбора: неполный, некорректный или завершённый кадр.
      */
 virtual ModbusParseStatus tryExtractFrame(QByteArray &buffer, ModbusFrame &frame) = 0;
     /**
-     * @brief
+     * @brief Возвращает адрес ведомого Modbus-устройства.
      *
-     * @return quint8
+     * @return Адрес устройства.
      */
 virtual quint8 deviceID() = 0;
 signals:

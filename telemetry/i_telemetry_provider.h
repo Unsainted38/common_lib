@@ -3,22 +3,20 @@
 
 template <typename TData>
 /**
- * @brief
- *
+ * @brief Интерфейс получения текущего снимка телеметрических данных.
  */
 class ITelemetryProvider
 {
 public:
     /**
-     * @brief
-     *
+     * @brief Освобождает ресурсы объекта.
      */
 virtual ~ITelemetryProvider() = default;
 
     /**
-     * @brief
+     * @brief Возвращает текущий снимок телеметрии.
      *
-     * @return TData
+     * @return Текущее значение параметра.
      */
 virtual TData currentData() const = 0;
 };

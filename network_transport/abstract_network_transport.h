@@ -7,15 +7,13 @@
 #include <QDebug>
 
 /**
- * @brief
- *
+ * @brief Задаёт асинхронный интерфейс транспорта с очередью пакетов.
  */
 class AbstractNetworkTransport : public QObject {
     Q_OBJECT
 public:
     /**
-     * @brief
-     *
+     * @brief Классифицирует события и ошибки транспорта.
      */
 enum TErrorCode {
         OK,
@@ -24,87 +22,83 @@ enum TErrorCode {
         WRITE_ERROR,
     };
     /**
-     * @brief
+     * @brief Задаёт асинхронный интерфейс транспорта с очередью пакетов.
      *
-     * @param configPath
-     * @param section
-     * @param parent
+     * @param configPath Путь к INI-файлу конфигурации.
+     * @param section Имя секции с параметрами объекта.
+     * @param parent Родительский QObject, управляющий временем жизни объекта.
      */
 explicit AbstractNetworkTransport(QString configPath, QString section, QObject *parent = nullptr);
     /**
-     * @brief
-     *
+     * @brief Загружает параметры из указанной секции INI-файла.
      */
 virtual void loadConfig() = 0;
     /**
-     * @brief
-     *
+     * @brief Создаёт и настраивает объект ввода-вывода и таймеры транспорта.
      */
 virtual void setupTransport() = 0;
     /**
-     * @brief
+     * @brief Открывает транспорт или запускает установление соединения.
      *
-     * @return bool
+     * @return true, если операция была принята к выполнению.
      */
 virtual bool open() = 0;
     /**
-     * @brief
+     * @brief Ставит пакет в очередь на отправку.
      *
-     * @param packet
-     * @return bool
+     * @param packet Пакет данных для отправки.
+     * @return true, если операция была принята к выполнению.
      */
 virtual bool write(const QByteArray &packet) = 0;
     // Возвращает идентификатор поставленного в очередь пакета.
     // Ноль означает, что пакет не был принят транспортом.
     /**
-     * @brief
+     * @brief Ставит пакет в очередь и возвращает его уникальный идентификатор.
      *
-     * @param packet
-     * @return quint64
+     * @param packet Пакет данных для отправки.
+     * @return Идентификатор пакета или 0 при отказе постановки в очередь.
      */
 virtual quint64 writeTracked(const QByteArray &packet) = 0;
     /**
-     * @brief
+     * @brief Закрывает транспорт и отключает автоматическое переподключение.
      *
-     * @return bool
+     * @return true, если операция была принята к выполнению.
      */
 virtual bool close() = 0;
 
 signals:
     /**
-     * @brief
+     * @brief Сообщает о результате операции транспорта.
      *
-     * @param err
-     * @param code
+     * @param err Текст результата или ошибки.
+     * @param code Классификация результата транспорта.
      */
 void translateError(QString err, TErrorCode code);
     /**
-     * @brief
+     * @brief Передаёт принятые транспортом данные подписчикам.
      *
-     * @param data
+     * @param data Входные данные или полезная нагрузка ответа.
      */
 void translateData(const QByteArray &data);
     // Все байты пакета переданы устройству транспорта. Это не подтверждение
     // получения или обработки пакета удалённой стороной.
     /**
-     * @brief
+     * @brief Сообщает, что все байты пакета переданы устройству транспорта.
      *
-     * @param packetId
-     * @param packet
+     * @param packetId Уникальный идентификатор пакета в очереди транспорта.
+     * @param packet Пакет данных для отправки.
      */
 void packetAccepted(quint64 packetId, const QByteArray &packet);
 protected:
-    QString m_configPath; /**< TODO: describe */
-    QString m_section; /**< TODO: describe */
+    QString m_configPath; /**< Путь к INI-файлу конфигурации. */
+    QString m_section; /**< Секция INI-файла для этого объекта. */
 protected slots:
     /**
-     * @brief
-     *
+     * @brief Продолжает отправку первого пакета очереди с учётом частичной записи.
      */
 virtual void processQueue() = 0;
     /**
-     * @brief
-     *
+     * @brief Отправляет служебный пакет при активном соединении.
      */
 virtual void heartbeat() = 0;
 };

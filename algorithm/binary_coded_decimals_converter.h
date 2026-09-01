@@ -4,58 +4,57 @@
 #include <QtCore>
 #include <QtGlobal>
 /**
- * @brief
- *
+ * @brief Преобразует двоично-десятичные представления значений компаса.
  */
 class BcdConverter {
 public:
     /**
-     * @brief
+     * @brief Преобразует входное значение в double sxxy.
      *
-     * @param bcd
-     * @return double
+     * @param bcd Байты двоично-десятичного представления.
+     * @return Результат операции типа double.
      */
 static double toDouble_SXXY(const QByteArray &bcd);
     /**
-     * @brief
+     * @brief Преобразует входное значение в float sxxy.
      *
-     * @param bcd
-     * @return float
+     * @param bcd Байты двоично-десятичного представления.
+     * @return Результат операции типа float.
      */
 static float toFloat_SXXY(const QByteArray &bcd);
     /**
-     * @brief
+     * @brief Преобразует входное значение в double sxxxyy.
      *
-     * @param bcd
-     * @return double
+     * @param bcd Байты двоично-десятичного представления.
+     * @return Результат операции типа double.
      */
 static double toDouble_SXXXYY(const QByteArray &bcd);
     /**
-     * @brief
+     * @brief Преобразует входное значение в float sxxxyy.
      *
-     * @param bcd
-     * @return float
+     * @param bcd Байты двоично-десятичного представления.
+     * @return Результат операции типа float.
      */
 static float toFloat_SXXXYY(const QByteArray &bcd);
     /**
-     * @brief
+     * @brief Кодирует значение в формат quint8 xx.
      *
-     * @param value
-     * @return QByteArray
+     * @param value Новое значение параметра.
+     * @return Результат операции типа QByteArray.
      */
 static QByteArray fromQuint8_XX(quint8 value);
     /**
-     * @brief
+     * @brief Кодирует значение в формат float sxxy.
      *
-     * @param value
-     * @return QByteArray
+     * @param value Новое значение параметра.
+     * @return Результат операции типа QByteArray.
      */
 static QByteArray fromFloat_SXXY(float value);
     /**
-     * @brief
+     * @brief Кодирует значение в формат double sxxy.
      *
-     * @param value
-     * @return QByteArray
+     * @param value Новое значение параметра.
+     * @return Результат операции типа QByteArray.
      */
 static QByteArray fromDouble_SXXY(double value);
 
