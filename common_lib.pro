@@ -33,6 +33,7 @@ HEADERS += \
     devices/compass_lcc5000_device.h \
     devices/dvt_device.h \
     devices/mshpr_device.h \
+    devices/pvt_device.h \
     devices/ubpch_device.h \
     devices/um2_13_device.h \
     modbus/ModBusCmdTypes.h \
@@ -86,6 +87,7 @@ SOURCES += \
     devices/compass_lcc5000_device.cpp \
     devices/dvt_device.cpp \
     devices/mshpr_device.cpp \
+    devices/pvt_device.cpp \
     devices/ubpch_device.cpp \
     devices/um2_13_device.cpp \
     modbus/abstract_modbus_device.cpp \
