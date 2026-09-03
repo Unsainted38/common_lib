@@ -74,6 +74,8 @@ coverage/
 
 # Generated Doxygen documentation
 docs/doxygen/
+DoxyFile
+~$*.docx
 
 # Qt Installer Framework
 packages/*/data/*.7z
