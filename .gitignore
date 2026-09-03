@@ -72,6 +72,9 @@ cmake-build-*/
 # Coverage
 coverage/
 
+# Generated Doxygen documentation
+docs/doxygen/
+
 # Qt Installer Framework
 packages/*/data/*.7z
 packages/*/data/*.tar
