@@ -5,9 +5,8 @@ TARGET = common_lib
 
 include($$PWD/common.pri)
 
-QT += core
-QT += network
-CONFIG += c++23
+QT += core network
+CONFIG += c++20
 
 INCLUDEPATH += \
             $$PWD \
@@ -28,14 +27,50 @@ HEADERS += \
     cmd/compass_lcc5000_command.h \
     cmd/mshpr_command.h \
     cmd/ubpch_command.h \
-    cmd/um2_13_commnad.h \
+    cmd/um2_13_command.h \
+    core/control/control_service.h \
+    core/event/emergency_stop_event.h \
+    core/event/event_priority.h \
+    core/event/event_type.h \
+    core/event/failure_event.h \
+    core/event/i_event.h \
+    core/event/init_completed_event.h \
+    core/event/reset_event.h \
+    core/event/shutdown_event.h \
+    core/event/start_auto_tracking_event.h \
+    core/event/start_extreme_tracking_event.h \
+    core/event/start_moving_event.h \
+    core/event/start_moving_to_point_event.h \
+    core/event/start_target_designation_tracking_event.h \
+    core/event/stop_event.h \
+    core/queue/priority_event_queue.h \
+    core/axis.h \
+    core/driver_controller.h \
+    core/state_machine/state/auto_tracking_state.h \
+    core/state_machine/state/extreme_tracking_state.h \
+    core/state_machine/state/handle_result.h \
+    core/state_machine/state/i_state.h \
+    core/state_machine/state/error_state.h \
+    core/state_machine/state/idle_state.h \
+    core/state_machine/state/initializing_state.h \
+    core/state_machine/state/moving_state.h \
+    core/state_machine/state/moving_to_point_state.h \
+    core/state_machine/state/operational_state.h \
+    core/state_machine/state/state_id.h \
+    core/state_machine/state/target_designation_tracking_state.h \
+    core/state_machine/state_machine.h \
+    core/state_machine_controller.h \
     devices/bks_device.h \
     devices/compass_lcc5000_device.h \
     devices/dvt_device.h \
+    devices/lir919d_device.h \
     devices/mshpr_device.h \
     devices/pvt_device.h \
     devices/ubpch_device.h \
     devices/um2_13_device.h \
+    drivers/i_driver.h \
+    drivers/vesper_driver.h \
+    encoders/i_encoder.h \
     modbus/ModBusCmdTypes.h \
     modbus/ModBusDTO.h \
     modbus/abstract_modbus_device.h \
@@ -82,14 +117,42 @@ SOURCES += \
     cmd/compass_lcc5000_command.cpp \
     cmd/mshpr_command.cpp \
     cmd/ubpch_command.cpp \
-    cmd/um2_13_commnad.cpp \
+    cmd/um2_13_command.cpp \
+    core/control/control_service.cpp \
+    core/event/emergency_stop_event.cpp \
+    core/event/failure_event.cpp \
+    core/event/init_completed_event.cpp \
+    core/event/reset_event.cpp \
+    core/event/shutdown_event.cpp \
+    core/event/start_auto_tracking_event.cpp \
+    core/event/start_extreme_tracking_event.cpp \
+    core/event/start_moving_event.cpp \
+    core/event/start_moving_to_point_event.cpp \
+    core/event/start_target_designation_tracking_event.cpp \
+    core/event/stop_event.cpp \
+    core/queue/priority_event_queue.cpp \
+    core/axis.cpp \
+    core/driver_controller.cpp \
+    core/state_machine/state/auto_tracking_state.cpp \
+    core/state_machine/state/error_state.cpp \
+    core/state_machine/state/extreme_tracking_state.cpp \
+    core/state_machine/state/idle_state.cpp \
+    core/state_machine/state/initializing_state.cpp \
+    core/state_machine/state/moving_state.cpp \
+    core/state_machine/state/moving_to_point_state.cpp \
+    core/state_machine/state/operational_state.cpp \
+    core/state_machine/state/target_designation_tracking_state.cpp \
+    core/state_machine/state_machine.cpp \
+    core/state_machine_controller.cpp \
     devices/bks_device.cpp \
     devices/compass_lcc5000_device.cpp \
     devices/dvt_device.cpp \
+    devices/lir919d_device.cpp \
     devices/mshpr_device.cpp \
     devices/pvt_device.cpp \
     devices/ubpch_device.cpp \
     devices/um2_13_device.cpp \
+    drivers/vesper_driver.cpp \
     modbus/abstract_modbus_device.cpp \
     modbus/modbus_protocol_factory.cpp \
     modbus/modbus_rtu.cpp \

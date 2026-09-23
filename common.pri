@@ -5,39 +5,28 @@ greaterThan(QT_MAJOR_VERSION, 4) {
     QT += gui
 }
 
+debian13_x86_64-g++ {
+    OS_SUFFIX = Debian13
+    USERNAME = user
+}
+
+linux-moxa-g++ {
+    OS_SUFFIX = Moxa
+    USERNAME = moxa
+    QT -= gui widgets
+    QMAKE_CXXFLAGS += -std=gnu++20
+}
+
+win32-g++ {
+    OS_SUFFIX = win64
+    USERNAME = erikveraksich
+}
 
 macx: {
     OS_SUFFIX = macOS
     USERNAME = erikveraksich
     QMAKE_LFLAGS -= -single_module
     QMAKE_LFLAGS_SHLIB -= -single_module
-}
-
-linux: {
-    OS_SUFFIX = linux
-    USERNAME = user
-}
-
-linux_qt5-g++: {
-    OS_SUFFIX = linux_qt5
-    USERNAME = user
-    QMAKE_LFLAGS += -Wl,--rpath=\\\$\$ORIGIN/../lib.$${OS_SUFFIX}/
-    QMAKE_LFLAGS += -Wl,--rpath=/home/user/develop/target/linux_qt5/lib.linux_qt5
-    QMAKE_CXXFLAGS += -std=gnu++17
-}
-
-linux-g++: {
-    OS_SUFFIX = linux
-    USERNAME = user
-    QMAKE_LFLAGS += -Wl,--rpath=\\\$\$ORIGIN/../lib.$${OS_SUFFIX}/
-    QMAKE_LFLAGS += -Wl,--rpath=/home/user/develop/target/linux/lib.linux
-    QMAKE_CFLAGS_WARN_ON += -Wno-class-memaccess
-    QMAKE_CXXFLAGS_WARN_ON += -Wno-class-memaccess
-    QMAKE_CFLAGS += -Wno-class-memaccess
-    QMAKE_CXXFLAGS += -Wno-class-memaccess
-    QMAKE_CXXFLAGS += -std=gnu++17
-#    DEFINES += nullptr=0
-#    QMAKE_CXXFLAGS += -std=gnu++11
 }
 
 BUILD_FLAG = debug
