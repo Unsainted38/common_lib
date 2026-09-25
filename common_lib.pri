@@ -1,4 +1,3 @@
-include($$PWD/common.pri)
 INCLUDEPATH +=  \
                 $$PWD \
                 $$PWD/cmd \
