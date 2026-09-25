@@ -27,6 +27,7 @@ Makefile.*
 *.obj
 *.lo
 *.la
+*.qmake.stash
 
 # moc / rcc / uic generated files
 moc_*.cpp
@@ -37,6 +38,7 @@ ui_*.h
 # Qt resource compiler
 *.qmlc
 *.jsc
+*.qtc_clangd
 
 # Compiled libraries / executables
 *.exe
