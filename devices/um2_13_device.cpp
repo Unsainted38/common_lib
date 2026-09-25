@@ -1,5 +1,5 @@
 #include "um2_13_device.h"
-#include "cmd/um2_13_commnad.h"
+#include "cmd/um2_13_command.h"
 
 UM2_13Device::UM2_13Device(SerialCircularRequester *requester, QObject *parent)
     : QObject(parent),

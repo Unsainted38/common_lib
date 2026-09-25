@@ -118,7 +118,6 @@ private:
     float m_voltage; /**< Хранит voltage. */
     quint8 m_deviceAddr = 0x16; /**< Адрес device addr. */
     quint8 m_masterAddr = 0x01; /**< Адрес master addr. */
-    QEventLoop loop; /**< Хранит loop. */
     QTimer *m_timer; /**< Таймер контроля активности устройства. */
     bool m_statusOnline = false; /**< Признак недавнего корректного ответа устройства. */
     QByteArray m_lastAnswer; /**< Последний выделенный ответ устройства. */
