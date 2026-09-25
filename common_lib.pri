@@ -1,3 +1,5 @@
+include(common_platform.pri)
+
 INCLUDEPATH +=  \
                 $$PWD \
                 $$PWD/cmd \
