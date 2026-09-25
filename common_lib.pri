@@ -4,6 +4,7 @@ INCLUDEPATH +=  \
                 $$PWD \
                 $$PWD/cmd \
                 $$PWD/algorithm \
+                $$PWD/modbus \
                 $$PWD/network_transport \
                 $$PWD/requesters \
                 $$PWD/devices \
