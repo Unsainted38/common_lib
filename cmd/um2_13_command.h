@@ -1,5 +1,5 @@
-#ifndef UM2_13_COMMNAD_H
-#define UM2_13_COMMNAD_H
+#ifndef UM2_13_COMMAND_H
+#define UM2_13_COMMAND_H
 
 #include <QObject>
 #include "abstract_command.h"
@@ -63,4 +63,4 @@ signals:
 void translateLastAnswer(QByteArray);
 };
 
-#endif // UM2_13_COMMNAD_H
+#endif // UM2_13_COMMAND_H

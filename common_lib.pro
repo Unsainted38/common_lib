@@ -2,6 +2,7 @@ TEMPLATE = lib
 CONFIG += shared
 #CONFIG += staticlib
 TARGET = common_lib
+LIB_INSTALL_DIR = /opt/common_lib/lib/
 
 include($$PWD/common.pri)
 

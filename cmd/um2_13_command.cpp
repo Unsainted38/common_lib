@@ -1,4 +1,4 @@
-#include "um2_13_commnad.h"
+#include "um2_13_command.h"
 
 UM2_13Commnad::UM2_13Commnad(quint16 cmdId, quint16 length, ValueType valueType, CommandType cmdType)
     :
