@@ -9,7 +9,7 @@
 #include "cmd/abstract_command.h"
 #include "network_transport/network_transport_locker.h"
 #include "network_transport/abstract_network_transport.h"
-//#include "uacs_network_transport/myabstractconnect.h"
+#include "uacs_network_transport/myabstractconnect.h"
 
 /**
  * @brief Последовательно выполняет циклические и одноразовые команды устройств.
