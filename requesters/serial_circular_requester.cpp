@@ -53,6 +53,22 @@ void SerialCircularRequester::addDisposableCommand(AbstractCommand *cmd) {
     }
 }
 
+void SerialCircularRequester::addNoResponceCommand(AbstractCommand *cmd)
+{
+    if (!cmd) {
+        return;
+    }
+
+    if (m_currentIsNoResponse && currentCmd == cmd) {
+        m_repeatCurrentNoResponse = true;
+        return;
+    }
+
+    if (!m_noresponceCommands.contains(cmd)) {
+        m_noresponceCommands.enqueue(cmd);
+    }
+}
+
 void SerialCircularRequester::removeCircularCommand(AbstractCommand *cmd)
 {
     const qsizetype index = m_circularCommands.indexOf(cmd);
@@ -116,7 +132,6 @@ void SerialCircularRequester::processNext() {
     if (m_state == RequestState::WaitingForWrite) {
         return;
     }
-
     if (m_state == RequestState::WaitingForResponse) {
         if (m_responseTimer.isValid() &&
             m_responseTimer.elapsed() < m_locker->timeout()) {
@@ -137,23 +152,45 @@ void SerialCircularRequester::processNext() {
         m_disposableCommands.dequeue();
     }
 
-    const bool takeDisposable =
-        !m_disposableCommands.isEmpty() &&
-        (m_preferDisposable || m_circularCommands.isEmpty());
+    while (!m_noresponceCommands.isEmpty() &&
+           m_noresponceCommands.head() == nullptr) {
+        m_noresponceCommands.dequeue();
+    }
 
-    if (takeDisposable) {
-        currentCmd = m_disposableCommands.head();
-        m_currentIsDisposable = true;
-    } else if (!m_circularCommands.isEmpty()) {
-        if (m_readIndex >= m_circularCommands.size()) {
-            m_readIndex = 0;
-        }
+    const bool hasResponseCommands =
+        !m_disposableCommands.isEmpty() ||
+        !m_circularCommands.isEmpty();
 
-        currentCmd = m_circularCommands.at(m_readIndex);
+    const bool takeNoResponse =
+        !m_noresponceCommands.isEmpty() &&
+        (m_preferNoResponse || !hasResponseCommands);
+
+    if (takeNoResponse) {
+        currentCmd = m_noresponceCommands.head();
+
+        m_currentIsNoResponse = true;
         m_currentIsDisposable = false;
     } else {
-        currentCmd = nullptr;
-        return;
+        m_currentIsNoResponse = false;
+
+        const bool takeDisposable =
+            !m_disposableCommands.isEmpty() &&
+            (m_preferDisposable || m_circularCommands.isEmpty());
+
+        if (takeDisposable) {
+            currentCmd = m_disposableCommands.head();
+            m_currentIsDisposable = true;
+        } else if (!m_circularCommands.isEmpty()) {
+            if (m_readIndex >= m_circularCommands.size()) {
+                m_readIndex = 0;
+            }
+
+            currentCmd = m_circularCommands.at(m_readIndex);
+            m_currentIsDisposable = false;
+        } else {
+            currentCmd = nullptr;
+            return;
+        }
     }
 
     if (!currentCmd) {
@@ -197,25 +234,51 @@ void SerialCircularRequester::onPacketAccepted(
         return;
     }
 
+    if (m_currentIsNoResponse) {
+        if (!m_noresponceCommands.isEmpty() &&
+            m_noresponceCommands.head() == currentCmd.data()) {
+            m_noresponceCommands.dequeue();
+        }
+
+        if (m_repeatCurrentNoResponse) {
+            m_repeatCurrentNoResponse = false;
+            m_noresponceCommands.enqueue(currentCmd.data());
+        }
+
+        m_preferNoResponse = false;
+
+        finishCurrentCommand();
+        return;
+    }
+
     if (m_currentIsDisposable) {
         if (!m_disposableCommands.isEmpty() &&
             m_disposableCommands.head() == currentCmd.data()) {
             m_disposableCommands.dequeue();
         }
+
         m_preferDisposable = false;
     } else if (!m_circularCommands.isEmpty()) {
-        m_readIndex = (m_readIndex + 1) % m_circularCommands.size();
+        m_readIndex =
+            (m_readIndex + 1) % m_circularCommands.size();
+
         m_preferDisposable = true;
     }
 
+    m_preferNoResponse = true;
+
     m_state = RequestState::WaitingForResponse;
+
     m_pendingPacketId = 0;
     m_pendingPacket.clear();
+
     m_locker->lock();
     m_responseTimer.restart();
 
     if (!m_earlyResponseBuffer.isEmpty()) {
-        const QByteArray earlyResponse = std::move(m_earlyResponseBuffer);
+        const QByteArray earlyResponse =
+            std::move(m_earlyResponseBuffer);
+
         unlock(earlyResponse);
     }
 }
@@ -246,15 +309,24 @@ void SerialCircularRequester::unlock(QByteArray data) {
 
 void SerialCircularRequester::rejectCurrentCommand()
 {
-    if (m_currentIsDisposable) {
+    if (m_currentIsNoResponse) {
+        if (!m_noresponceCommands.isEmpty() &&
+            m_noresponceCommands.head() == currentCmd.data()) {
+            m_noresponceCommands.dequeue();
+        }
+
+        m_preferNoResponse = false;
+    } else if (m_currentIsDisposable) {
         if (!m_disposableCommands.isEmpty() &&
             m_disposableCommands.head() == currentCmd.data()) {
             m_disposableCommands.dequeue();
         }
         m_preferDisposable = false;
+        m_preferNoResponse = true;
     } else if (!m_circularCommands.isEmpty()) {
         m_readIndex = (m_readIndex + 1) % m_circularCommands.size();
         m_preferDisposable = true;
+        m_preferNoResponse = true;
     }
 
     finishCurrentCommand();
@@ -269,6 +341,10 @@ void SerialCircularRequester::finishCurrentCommand()
     m_pendingPacket.clear();
     m_earlyResponseBuffer.clear();
     currentCmd = nullptr;
+
+    m_currentIsDisposable = false;
+    m_currentIsNoResponse = false;
+
     m_responseTimer.invalidate();
 
     if (m_deleteCurrentWhenIdle) {
