@@ -1,3 +1,5 @@
+isEmpty(COMMON_PLATFORM_PRI_INCLUDED) {
+    COMMON_PLATFORM_PRI_INCLUDED = 1
 greaterThan(QT_MAJOR_VERSION, 4) {
     QT += serialport widgets
 } else {
@@ -12,8 +14,8 @@ debian13_x86_64-g++ {
     CONFIG += htra_real
     QT -= gui widgets
     QMAKE_RPATHDIR += /opt/qt6/lib
-    QMAKE_RPATHDIR += /opt/common_lib/lib/x86_64
-    QMAKE_RPATHDIR += /opt/htraapi/lib/x86_64
+    QMAKE_RPATHDIR += /opt/common_lib/lib
+    QMAKE_RPATHDIR += /opt/htraapi/lib
     HTRA_SDK_PATH = /opt/sdk/sysroot/opt/htraapi
 }
 
@@ -49,3 +51,4 @@ CONFIG(debug, debug|release) {
 }
 
 QT_PROFILE = Qt_$${replace(QT_VERSION, \\., _)}_for_$${OS_SUFFIX}_$${CPU_ARCH}
+}
