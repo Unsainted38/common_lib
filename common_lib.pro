@@ -6,6 +6,7 @@ LIB_INSTALL_DIR = /opt/common_lib/lib/
 COMMON_LIB_ROOT = $$_PRO_FILE_PWD_
 
 include($$PWD/common_build.pri)
+include($$PWD/common_deploy.pri)
 
 QT += core network
 CONFIG += c++20
