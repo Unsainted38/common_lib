@@ -1,7 +1,8 @@
 # DEPLOY_NAME must be provided by the project/build environment.
 
 isEmpty(DEPLOY_NAME) {
-    error("DEPLOY_NAME is not defined")
+    message("DEPLOY_NAME is not defined")
+    DEPLOY_NAME = local
 }
 
 DEPLOY_ROOT = /opt/$$lower($$DEPLOY_NAME)
