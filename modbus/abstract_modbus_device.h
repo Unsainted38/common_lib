@@ -33,6 +33,12 @@ void addCircularCommand(AbstractCommand *cmd);
      * @param cmd Команда для однократного выполнения.
      */
 void executeCommand(AbstractCommand *cmd);
+/**
+     * @brief Добавляет команду для однократного выполнения без ожидания ответа.
+     *
+     * @param cmd Команда для однократного выполнения.
+     */
+void executeNoResponceCommand(AbstractCommand *cmd);
 
 public:
     /**

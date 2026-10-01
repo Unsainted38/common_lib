@@ -24,3 +24,8 @@ void AbstractModbusDevice::executeCommand(AbstractCommand *cmd)
 {
     requester->addDisposableCommand(cmd);
 }
+
+void AbstractModbusDevice::executeNoResponceCommand(AbstractCommand *cmd)
+{
+    requester->addNoResponceCommand(cmd);
+}

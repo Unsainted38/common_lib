@@ -50,6 +50,12 @@ void addCircularCommand(AbstractCommand *cmd);
      */
 void addDisposableCommand(AbstractCommand *cmd);
     /**
+     * @brief Добавляет команду для однократного выполнения без ожидания ответа.
+     *
+     * @param cmd Команда для однократного выполнения.
+     */
+void addNoResponceCommand(AbstractCommand *cmd);
+    /**
      * @brief Удаляет конкретную команду из циклического опроса.
      *
      * @param cmd Команда, удаляемая из циклического опроса.
@@ -91,6 +97,7 @@ enum class RequestState {
     NetworkTransportLocker *m_locker; /**< Хранит locker. */
     QList<AbstractCommand *> m_circularCommands; /**< Команда или набор команд circular commands. */
     QQueue<AbstractCommand *> m_disposableCommands; /**< Команда или набор команд disposable commands. */
+    QQueue<AbstractCommand *> m_noresponceCommands; /**< Команда или набор команд, не предполагающих ответа и его ожидания. */
     QPointer<AbstractCommand> currentCmd; /**< Хранит current cmd. */
     QByteArray m_pendingPacket; /**< Данные pending packet. */
     QByteArray m_earlyResponseBuffer; /**< Хранит early response buffer. */
@@ -100,6 +107,9 @@ enum class RequestState {
     bool m_currentIsDisposable = false; /**< Хранит current is disposable. */
     bool m_preferDisposable = true; /**< Хранит prefer disposable. */
     bool m_deleteCurrentWhenIdle = false; /**< Хранит delete current when idle. */
+    bool m_currentIsNoResponse = false; /**< Хранит current is no responce. */
+    bool m_preferNoResponse = false; /**< Хранит prefer no responce. */
+    bool m_repeatCurrentNoResponse = false; /**< Показывает, изменилось ли значение команды, которая сформировалась, но пока она еще не отправилась. */
     int m_readIndex = 0; /**< Хранит read index. */
     /**
      * @brief Отклоняет команду, которая не смогла сформировать пакет.
