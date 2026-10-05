@@ -1,4 +1,5 @@
 #include "pvt_device.h"
+#include "modbus/read_holding_registers.h"
 
 
 
@@ -13,9 +14,9 @@ void PvtDevice::onTimerUpdateData() {
     state.online = true;
 }
 
-PvtDevice::PvtDevice(SerialCircularRequester *requester, QString configPath, QString section)
-    : AbstractModbusDevice(requester, configPath, section) {
-    TempHumidityCmd = new ReadHoldingRegisters(TempReg, 2, protocol);
+PvtDevice::PvtDevice(std::shared_ptr<SerialCircularRequester> requester, QString configPath, QString section)
+    : AbstractModbusDevice(std::move(requester), configPath, section) {
+    TempHumidityCmd = new ReadHoldingRegisters(TempReg, 2, protocol_);
     addCircularCommand(TempHumidityCmd);
     requester->startRequest();
     m_timer = new QTimer(this);

@@ -1,11 +1,11 @@
 #include "ubpch_device.h"
 #include "cmd/ubpch_command.h"
 
-UBPChDevice::UBPChDevice(SerialCircularRequester *requester, QString configPath, QString section, QObject *parent)
+UBPChDevice::UBPChDevice(std::shared_ptr<SerialCircularRequester> requester, QString configPath, QString section, QObject *parent)
     : QObject(parent),
       m_configPath(configPath),
       m_section(section),
-      m_requester(requester) {
+      m_requester(std::move(requester)) {
     loadConfig();
     m_timer = new QTimer(this);
     m_timer->start(1000);
@@ -28,9 +28,8 @@ UBPChDevice::UBPChDevice(SerialCircularRequester *requester, QString configPath,
     m_requester->addCircularCommand(EmpowerCommand);
     m_requester->addCircularCommand(TemperatureCommand);
     m_requester->addCircularCommand(VoltageCommand);
-    m_requester->startRequest();
 
-    connect(m_requester, SIGNAL(translateData(QByteArray)), m_parser, SLOT(parseReply(QByteArray)));
+    connect(m_requester.get(), SIGNAL(translateData(QByteArray)), m_parser, SLOT(parseReply(QByteArray)));
     connect(m_parser, SIGNAL(dataReady(QByteArray, quint16)), this, SLOT(onStatusOnline()));
     connect(m_parser, SIGNAL(dataReady(QByteArray, quint16)), EnableCommand, SLOT(processData(QByteArray, quint16)));
     connect(m_parser, SIGNAL(dataReady(QByteArray, quint16)), AttenuationCommand, SLOT(processData(QByteArray, quint16)));
@@ -42,6 +41,7 @@ UBPChDevice::UBPChDevice(SerialCircularRequester *requester, QString configPath,
     connect(m_parser, SIGNAL(dataReady(QByteArray, quint16)), VoltageCommand, SLOT(processData(QByteArray, quint16)));
     connect(m_parser, SIGNAL(lastAnswer(QByteArray)), this, SLOT(onLastAnswer(QByteArray)));
     connect(m_timer, SIGNAL(timeout()), this, SLOT(onTimer()));
+    m_requester->startRequest();
 }
 
 void UBPChDevice::loadConfig() {

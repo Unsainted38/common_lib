@@ -1,31 +1,31 @@
 #include "abstract_modbus_device.h"
 
-AbstractModbusDevice::AbstractModbusDevice(SerialCircularRequester *requester, QString configPath, QString section, QObject *parent)
+AbstractModbusDevice::AbstractModbusDevice(std::shared_ptr<SerialCircularRequester> requester, QString configPath, QString section, QObject *parent)
     : QObject(parent),
-    requester(requester)
+    requester_(std::move(requester))
 {
-    protocol = ModBusProtocolFactory::getInstance(configPath, section);
-    Q_ASSERT(protocol);
-    protocol->setParent(this);
-    deviceID = protocol->deviceID();
+    protocol_ = ModBusProtocolFactory::getInstance(configPath, section);
+    Q_ASSERT(protocol_);
+    protocol_->setParent(this);
+    device_id_ = protocol_->deviceID();
 }
 
 quint8 AbstractModbusDevice::deviceAddress()
 {
-    return deviceID;
+    return device_id_;
 }
 
 void AbstractModbusDevice::addCircularCommand(AbstractCommand *cmd)
 {
-    requester->addCircularCommand(cmd);
+    requester_->addCircularCommand(cmd);
 }
 
 void AbstractModbusDevice::executeCommand(AbstractCommand *cmd)
 {
-    requester->addDisposableCommand(cmd);
+    requester_->addDisposableCommand(cmd);
 }
 
 void AbstractModbusDevice::executeNoResponceCommand(AbstractCommand *cmd)
 {
-    requester->addNoResponceCommand(cmd);
+    requester_->addNoResponceCommand(cmd);
 }

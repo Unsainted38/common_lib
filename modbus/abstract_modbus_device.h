@@ -4,8 +4,8 @@
 #include <QObject>
 #include <requesters/serial_circular_requester.h>
 #include <utilities/config_helper.h>
-#include <modbus/read_holding_registers.h>
 #include <modbus/modbus_protocol_factory.h>
+#include <memory>
 
 /**
  * @brief Базовый класс Modbus-устройства с фабричным созданием протокола.
@@ -13,14 +13,12 @@
 class AbstractModbusDevice : public QObject
 {
     Q_OBJECT
-    quint8 deviceID; /**< Хранит device id. */
-    QString configPath; /**< Хранит config path. */
-    QString section; /**< Хранит section. */
-    SerialCircularRequester *requester; /**< Requester, выполняющий команды устройства. */
-    QByteArray buffer; /**< Накопительный буфер входных данных. */
+    quint8 device_id_; /**< Хранит device id. */
+    std::shared_ptr<SerialCircularRequester> requester_; /**< Requester, выполняющий команды устройства. */
+    QByteArray buffer_; /**< Накопительный буфер входных данных. */
 
 protected:
-    AbstractModBusProtocol *protocol; /**< Реализация упаковки и разбора Modbus. */
+    AbstractModBusProtocol *protocol_; /**< Реализация упаковки и разбора Modbus. */
     /**
      * @brief Добавляет переиспользуемую команду в циклический опрос.
      *
@@ -49,7 +47,7 @@ public:
      * @param section Имя секции с параметрами объекта.
      * @param parent Родительский QObject, управляющий временем жизни объекта.
      */
-explicit AbstractModbusDevice(SerialCircularRequester *requester, QString configPath, QString section, QObject *parent = nullptr);
+explicit AbstractModbusDevice(std::shared_ptr<SerialCircularRequester> requester, QString configPath, QString section, QObject *parent = nullptr);
     /**
      * @brief Возвращает адрес устройства на шине Modbus.
      *

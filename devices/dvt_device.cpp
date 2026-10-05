@@ -1,9 +1,10 @@
 #include "dvt_device.h"
+#include "modbus/read_holding_registers.h"
 
-DvtDevice::DvtDevice(SerialCircularRequester *requester, QString configPath, QString section, QObject *parent)
-    : AbstractModbusDevice(requester, configPath, section, parent)
+DvtDevice::DvtDevice(std::shared_ptr<SerialCircularRequester> requester, QString configPath, QString section, QObject *parent)
+    : AbstractModbusDevice(std::move(requester), configPath, section, parent)
 {
-    dvtStateCommand = new ReadHoldingRegisters(0, 60, protocol);
+    dvtStateCommand = new ReadHoldingRegisters(0, 60, protocol_);
     addCircularCommand(dvtStateCommand);
 
     m_timer = new QTimer(this);

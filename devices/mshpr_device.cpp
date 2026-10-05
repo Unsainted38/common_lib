@@ -1,11 +1,11 @@
 #include "mshpr_device.h"
 #include "mshpr_command.h"
 
-MShPRDevice::MShPRDevice(SerialCircularRequester *requester, QString configPath, QString section, QObject *parent)
+MShPRDevice::MShPRDevice(std::shared_ptr<SerialCircularRequester> requester, QString configPath, QString section, QObject *parent)
     : QObject(parent),
       m_configPath(configPath),
       m_section(section),
-      m_requester(requester) {
+      m_requester(std::move(requester)) {
     loadConfig();
     m_parser = new MShPRParser(this);
     m_timer = new QTimer(this);
@@ -16,12 +16,12 @@ MShPRDevice::MShPRDevice(SerialCircularRequester *requester, QString configPath,
     AddressCommand = new MShPRCommand(m_deviceAddr, MShPR_COMMANDS::ADDRESS_CMD, CommandType::WRITE);
     BaudCommand = new MShPRCommand(m_deviceAddr, MShPR_COMMANDS::BAUD_CMD, CommandType::WRITE);
     m_requester->addCircularCommand(StatusCommand);
-    m_requester->startRequest();
 
-    connect(m_requester, SIGNAL(translateData(QByteArray)), m_parser, SLOT(parseReply(QByteArray)));
+    connect(m_requester.get(), SIGNAL(translateData(QByteArray)), m_parser, SLOT(parseReply(QByteArray)));
     connect(m_parser, SIGNAL(dataReady(QString, QMap)), this, SLOT(processData(QString, QMap)));
     connect(m_parser, SIGNAL(lastAnswer(QByteArray)), this, SLOT(LastAnswer(QByteArray)));
     connect(m_timer, SIGNAL(timeout()), this, SLOT(onTimer()));
+    m_requester->startRequest();
 }
 
 void MShPRDevice::loadConfig() {

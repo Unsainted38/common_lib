@@ -39,6 +39,9 @@ macx: {
     USERNAME = erikveraksich
     QMAKE_LFLAGS -= -single_module
     QMAKE_LFLAGS_SHLIB -= -single_module
+    QMAKE_CXXFLAGS += -fsanitize=address,undefined
+    QMAKE_CXXFLAGS += -fno-omit-frame-pointer
+    QMAKE_LFLAGS += -fsanitize=address,undefined
 }
 
 BUILD_FLAG = debug

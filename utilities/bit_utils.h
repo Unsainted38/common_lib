@@ -7,6 +7,7 @@
  * @brief Содержит операции над байтами, словами и регистрами Modbus.
  */
 class BitUtils {
+
 public:
     /**
      * @brief Содержит операции над байтами, словами и регистрами Modbus.
@@ -65,6 +66,16 @@ static float makeFloat(quint16 word1, quint16 word2) {
         cvt.data[1] = word2;
         return cvt.value;
     }
+    /**
+     * @brief Собирает 32-битное слово из двух 16-битных слов.
+     *
+     * @param low_word младшее 16-битное слово числа.
+     * @param high_word старшее 16-битное слово числа.
+     * @return Результат операции типа quint32.
+     */
+static quint32 makeQuint32(quint16 low_word, quint16 high_word) {
+    return (static_cast<quint32>(high_word) << 16) | static_cast<quint32>(low_word);
+}
 };
 
 #endif // BIT_UTILS_H

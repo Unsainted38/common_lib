@@ -39,6 +39,7 @@ SerialConnect::SerialConnect(QString nameport, int baundrate, int databits, QStr
     else
     {
        qDebug() << "[ERROR] -> " + nameport + " don't open!";
+        qDebug() << serial->errorString();
     }
 
 

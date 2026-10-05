@@ -7,6 +7,7 @@
 
 class Lir919dDevice : public AbstractModbusDevice
 {
+    Q_OBJECT
     struct Lir919dState
     {
         bool online;
@@ -17,7 +18,7 @@ class Lir919dDevice : public AbstractModbusDevice
 private slots:
     void onTimer();
 public:
-    explicit Lir919dDevice(SerialCircularRequester* requester, QString configPath, QString section, QObject *parent = nullptr);
+    explicit Lir919dDevice(std::shared_ptr<SerialCircularRequester> requester, QString configPath, QString section, QObject *parent = nullptr);
     quint32 descrete() const;
     bool is_online() const;
 

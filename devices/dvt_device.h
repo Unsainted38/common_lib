@@ -35,7 +35,7 @@ public:
      * @param section Имя секции с параметрами объекта.
      * @param parent Родительский QObject, управляющий временем жизни объекта.
      */
-explicit DvtDevice(SerialCircularRequester *requester, QString configPath, QString section, QObject *parent = nullptr);
+explicit DvtDevice(std::shared_ptr<SerialCircularRequester> requester, QString configPath, QString section, QObject *parent = nullptr);
     /**
      * @brief Возвращает код состояния датчика.
      *

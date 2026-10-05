@@ -1,14 +1,49 @@
 #include "compass_lcc5000_device.h"
-#include "cmd/compass_lcc5000_command.h"
-#include "algorithm/binary_coded_decimals_converter.h"
+#include "compass_lcc5000_command.h"
+#include <algorithm/binary_coded_decimals_converter.h>
+#include <algorithm/crc8.h>
 
-CompassLCC5000Device::CompassLCC5000Device(SerialCircularRequester *requester, QString configPath, QString section, QObject *parent)
+const quint8 CompassCommands::PITCH = 0x01;
+const quint8 CompassCommands::ROLL = 0x02;
+const quint8 CompassCommands::HEADING = 0x03;
+const quint8 CompassCommands::ALLANGLE = 0x04;
+const quint8 CompassCommands::SETMAGNETICDECLINATION = 0x06;
+const quint8 CompassCommands::MAGNETICDECLINATION = 0x07;
+const quint8 CompassCommands::BAUDRATE = 0x0B;
+const quint8 CompassCommands::SETMODULEADDRESS = 0x0F;
+const quint8 CompassCommands::MODULEADDRESS = 0x1F;
+const quint8 CompassCommands::SETOUTPUTANGLEMODE = 0x0C;
+const quint8 CompassCommands::SAVESETTINGS = 0x0A;
+const quint8 CompassCommands::SWITCHCALIBRATIONOUTPUT = 0xA3;
+
+const quint8 CompassResponces::PITCH = 0x81;
+const quint8 CompassResponces::ROLL = 0x82;
+const quint8 CompassResponces::HEADING = 0x83;
+const quint8 CompassResponces::ALLANGLE = 0x84;
+const quint8 CompassResponces::SETMAGNETICDECLINATION = 0x86;
+const quint8 CompassResponces::MAGNETICDECLINATION = 0x87;
+const quint8 CompassResponces::BAUDRATE = 0x8B;
+const quint8 CompassResponces::SETMODULEADDRESS = 0x8F;
+const quint8 CompassResponces::MODULEADDRESS = 0x1F;
+const quint8 CompassResponces::SETOUTPUTANGLEMODE = 0x8C;
+const quint8 CompassResponces::SAVESETTINGS = 0x8A;
+const quint8 CompassResponces::SWITCHCALIBRATIONOUTPUT = 0xA3;
+
+const quint32 CompassBaud::BAUD2400 = 2400;
+const quint32 CompassBaud::BAUD4800 = 4800;
+const quint32 CompassBaud::BAUD9600 = 9600;
+const quint32 CompassBaud::BAUD19200 = 19200;
+const quint32 CompassBaud::BAUD115200 = 115200;
+const quint32 CompassBaud::BAUD38400 = 38400;
+const quint32 CompassBaud::BAUD57600 = 57600;
+
+CompassLCC5000Device::CompassLCC5000Device(std::shared_ptr<SerialCircularRequester> requester, QString configPath, QString section, QObject *parent)
     : QObject(parent),
-      m_requester(requester),
-      m_section(section),
-      m_configPath(configPath) {
+    m_requester(std::move(requester)),
+    m_section(section),
+    m_configPath(configPath) {
     loadConfig();
-    m_parser = new CompassLCC5000Parser(m_deviceAddr, this);
+    m_parser = new CompassLCC5000Parser(m_deviceAddr);
     m_timer = new QTimer(this);
     m_timer->start(1000);
     AllAnglesRequest = new CompassLCC5000Command(m_deviceAddr, CompassCommands::ALLANGLE, 0x04, ValueType::DOUBLE, CommandType::READ);
@@ -26,12 +61,12 @@ CompassLCC5000Device::CompassLCC5000Device(SerialCircularRequester *requester, Q
 
     m_requester->addCircularCommand(AllAnglesRequest);
     m_requester->addCircularCommand(MagneticDeclinationRequest);
-    m_requester->startRequest();
 
-    connect(m_requester, SIGNAL(translateData(QByteArray)), m_parser, SLOT(parseReply(QByteArray)));
+    connect(m_requester.get(), SIGNAL(translateData(QByteArray)), m_parser, SLOT(parseReply(QByteArray)));
     connect(m_parser, SIGNAL(dataReady(QByteArray, quint8)), this, SLOT(processData(QByteArray, quint8)));
     connect(m_parser, SIGNAL(lastAnswer(QByteArray)), this, SLOT(onLastAnswer(QByteArray)));
     connect(m_timer, SIGNAL(timeout()), this, SLOT(onTimer()));
+    m_requester->startRequest();
 }
 
 double CompassLCC5000Device::getHeading() {
@@ -78,28 +113,6 @@ void CompassLCC5000Device::onTimer() {
 }
 
 void CompassLCC5000Device::processData(const QByteArray &data, quint8 cmdId) {
-    qsizetype requiredSize = 0;
-    if (cmdId == CompassResponces::ALLANGLE) {
-        requiredSize = 9;
-    } else if (cmdId == CompassResponces::ROLL ||
-               cmdId == CompassResponces::HEADING ||
-               cmdId == CompassResponces::PITCH) {
-        requiredSize = 3;
-    } else if (cmdId == CompassResponces::MAGNETICDECLINATION) {
-        requiredSize = 2;
-    } else if (cmdId == CompassResponces::SETMAGNETICDECLINATION ||
-               cmdId == CompassResponces::SETMODULEADDRESS ||
-               cmdId == CompassResponces::MODULEADDRESS ||
-               cmdId == CompassResponces::SAVESETTINGS ||
-               cmdId == CompassResponces::SWITCHCALIBRATIONOUTPUT) {
-        requiredSize = 1;
-    }
-
-    if (data.size() < requiredSize) {
-        qWarning() << "Compass response is too short for command:"
-                   << cmdId << data.size();
-        return;
-    }
 
     m_statusOnline = true;
 

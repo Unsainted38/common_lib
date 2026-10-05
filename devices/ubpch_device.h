@@ -21,7 +21,7 @@ public:
      * @param section Имя секции с параметрами объекта.
      * @param parent Родительский QObject, управляющий временем жизни объекта.
      */
-explicit UBPChDevice(SerialCircularRequester *requester, QString configPath, QString section, QObject *parent = nullptr);
+explicit UBPChDevice(std::shared_ptr<SerialCircularRequester> requester, QString configPath, QString section, QObject *parent = nullptr);
     /**
      * @brief Загружает параметры из указанной секции INI-файла.
      */
@@ -103,7 +103,7 @@ signals:
 private:
     QString m_configPath; /**< Путь к INI-файлу конфигурации. */
     QString m_section; /**< Секция INI-файла для этого объекта. */
-    SerialCircularRequester *m_requester; /**< Requester, выполняющий команды устройства. */
+    std::shared_ptr<SerialCircularRequester> m_requester; /**< Requester, выполняющий команды устройства. */
     UBPChParser *m_parser; /**< Потоковый парсер ответов устройства. */
     AbstractCommand *EnableCommand, *AttenuationCommand, *ErrorStatusCommand, *DeviceStatusCommand, /**< Команды циклического чтения основных параметров. */
                     *OutputPowerCommand, *EmpowerCommand, *TemperatureCommand, *VoltageCommand; /**< Команда или набор команд voltage command. */

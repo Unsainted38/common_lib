@@ -17,7 +17,7 @@ class PvtDevice : public AbstractModbusDevice {
 private slots:
     void onTimerUpdateData();
 public:
-    PvtDevice(SerialCircularRequester* requester, QString configPath, QString section);
+    PvtDevice(std::shared_ptr<SerialCircularRequester> requester, QString configPath, QString section);
     float getTemperature() {
         return state.temperature;
     }

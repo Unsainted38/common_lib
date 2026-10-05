@@ -43,7 +43,7 @@ public:
      * @param section Имя секции с параметрами объекта.
      * @param parent Родительский QObject, управляющий временем жизни объекта.
      */
-explicit MShPRDevice(SerialCircularRequester *requester, QString configPath, QString section, QObject *parent = nullptr);
+explicit MShPRDevice(std::shared_ptr<SerialCircularRequester> requester, QString configPath, QString section, QObject *parent = nullptr);
     /**
      * @brief Загружает параметры из указанной секции INI-файла.
      */
@@ -115,7 +115,7 @@ private:
 
     QString m_configPath; /**< Путь к INI-файлу конфигурации. */
     QString m_section; /**< Секция INI-файла для этого объекта. */
-    SerialCircularRequester *m_requester; /**< Requester, выполняющий команды устройства. */
+    std::shared_ptr<SerialCircularRequester> m_requester; /**< Requester, выполняющий команды устройства. */
     MShPRParser *m_parser; /**< Потоковый парсер ответов устройства. */
     AbstractCommand *StatusCommand, *AttenuationCommand, *GeterodinCommand, *AddressCommand, *BaudCommand; /**< Команда или набор команд baud command. */
     QString m_deviceAddr = "01"; /**< Адрес device addr. */

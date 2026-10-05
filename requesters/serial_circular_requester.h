@@ -18,8 +18,8 @@ class SerialCircularRequester : public QObject {
     Q_OBJECT
 public:
 #ifdef MYABSTRACTCONNECT_H
-    explicit SerialCircularRequester(MyAbstractConnect *transport, NetworkTransportLocker *locker, int pollIntervalMs = 50, QObject *parent = nullptr);
-    MyAbstractConnect* getTransport();
+    explicit SerialCircularRequester(std::unique_ptr<MyAbstractConnect> transport, std::unique_ptr<NetworkTransportLocker> locker, int pollIntervalMs = 50, QObject *parent = nullptr);
+    const MyAbstractConnect* getTransport();
 #else
     /**
      * @brief Последовательно выполняет циклические и одноразовые команды устройств.
@@ -29,13 +29,13 @@ public:
      * @param pollIntervalMs Интервал проверки очереди команд в миллисекундах.
      * @param parent Родительский QObject, управляющий временем жизни объекта.
      */
-explicit SerialCircularRequester(AbstractNetworkTransport *transport, NetworkTransportLocker *locker, int pollIntervalMs = 50, QObject *parent = nullptr);
+explicit SerialCircularRequester(std::unique_ptr<AbstractNetworkTransport> transport, std::unique_ptr<NetworkTransportLocker> locker, int pollIntervalMs = 50, QObject *parent = nullptr);
     /**
      * @brief Возвращает транспорт, используемый requester-ом.
      *
      * @return Текущее значение параметра.
      */
-AbstractNetworkTransport* getTransport();
+    const AbstractNetworkTransport* getTransport();
 #endif
     /**
      * @brief Добавляет переиспользуемую команду в циклический опрос.
@@ -89,28 +89,28 @@ enum class RequestState {
     };
 
 #ifdef MYABSTRACTCONNECT_H
-    MyAbstractConnect *m_connect;
+    std::unique_ptr<MyAbstractConnect> connect_;
 #else
-    AbstractNetworkTransport *m_transport; /**< Хранит transport. */
+    std::unique_ptr<AbstractNetworkTransport> transport_; /**< Хранит transport. */
 #endif
     QTimer *timer; /**< Таймер запуска следующей команды. */
-    NetworkTransportLocker *m_locker; /**< Хранит locker. */
-    QList<AbstractCommand *> m_circularCommands; /**< Команда или набор команд circular commands. */
-    QQueue<AbstractCommand *> m_disposableCommands; /**< Команда или набор команд disposable commands. */
-    QQueue<AbstractCommand *> m_noresponceCommands; /**< Команда или набор команд, не предполагающих ответа и его ожидания. */
-    QPointer<AbstractCommand> currentCmd; /**< Хранит current cmd. */
-    QByteArray m_pendingPacket; /**< Данные pending packet. */
-    QByteArray m_earlyResponseBuffer; /**< Хранит early response buffer. */
-    quint64 m_pendingPacketId = 0; /**< Данные pending packet id. */
-    RequestState m_state = RequestState::Idle; /**< Хранит state. */
-    QElapsedTimer m_responseTimer; /**< Таймер response timer. */
-    bool m_currentIsDisposable = false; /**< Хранит current is disposable. */
-    bool m_preferDisposable = true; /**< Хранит prefer disposable. */
-    bool m_deleteCurrentWhenIdle = false; /**< Хранит delete current when idle. */
-    bool m_currentIsNoResponse = false; /**< Хранит current is no responce. */
-    bool m_preferNoResponse = false; /**< Хранит prefer no responce. */
-    bool m_repeatCurrentNoResponse = false; /**< Показывает, изменилось ли значение команды, которая сформировалась, но пока она еще не отправилась. */
-    int m_readIndex = 0; /**< Хранит read index. */
+    std::unique_ptr<NetworkTransportLocker> locker_; /**< Хранит locker. */
+    QList<AbstractCommand *> circular_commands_; /**< Команда или набор команд circular commands. */
+    QQueue<AbstractCommand *> disposable_commands_; /**< Команда или набор команд disposable commands. */
+    QQueue<AbstractCommand *> noresponce_commands_; /**< Команда или набор команд, не предполагающих ответа и его ожидания. */
+    QPointer<AbstractCommand> current_cmd_; /**< Хранит current cmd. */
+    QByteArray pending_packet_; /**< Данные pending packet. */
+    QByteArray early_response_buffer_; /**< Хранит early response buffer. */
+    quint64 pending_packet_id_ = 0; /**< Данные pending packet id. */
+    RequestState state_ = RequestState::Idle; /**< Хранит state. */
+    QElapsedTimer response_timer_; /**< Таймер response timer. */
+    bool current_is_disposable_ = false; /**< Хранит current is disposable. */
+    bool prefer_disposable_ = true; /**< Хранит prefer disposable. */
+    bool delete_current_when_idle_ = false; /**< Хранит delete current when idle. */
+    bool current_is_no_response_ = false; /**< Хранит current is no responce. */
+    bool prefer_no_response_ = false; /**< Хранит prefer no responce. */
+    bool repeat_current_no_response_ = false; /**< Показывает, изменилось ли значение команды, которая сформировалась, но пока она еще не отправилась. */
+    int read_index_ = 0; /**< Хранит read index. */
     /**
      * @brief Отклоняет команду, которая не смогла сформировать пакет.
      */
