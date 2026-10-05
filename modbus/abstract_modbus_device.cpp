@@ -8,6 +8,7 @@ AbstractModbusDevice::AbstractModbusDevice(std::shared_ptr<SerialCircularRequest
     Q_ASSERT(protocol_);
     protocol_->setParent(this);
     device_id_ = protocol_->deviceID();
+    requester_->startRequest();
 }
 
 quint8 AbstractModbusDevice::deviceAddress()

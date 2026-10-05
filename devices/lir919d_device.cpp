@@ -14,7 +14,7 @@ void Lir919dDevice::onTimer()
 }
 
 Lir919dDevice::Lir919dDevice(std::shared_ptr<SerialCircularRequester> requester, QString configPath, QString section, QObject *parent)
-    : AbstractModbusDevice{requester, configPath, section, parent}
+    : AbstractModbusDevice{std::move(requester), configPath, section, parent}
 {
     descreteCmd = new ReadInputRegisters(0x10, 3, protocol_);
     addCircularCommand(descreteCmd);
@@ -22,7 +22,6 @@ Lir919dDevice::Lir919dDevice(std::shared_ptr<SerialCircularRequester> requester,
     m_timer = new QTimer(this);
     m_timer->start(100);
     connect(m_timer, SIGNAL(timeout()), this, SLOT(onTimer()));
-    requester->startRequest();
 }
 
 quint32 Lir919dDevice::descrete() const
