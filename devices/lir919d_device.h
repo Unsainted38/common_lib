@@ -10,7 +10,7 @@ class Lir919dDevice : public AbstractModbusDevice
     Q_OBJECT
     struct Lir919dState
     {
-        bool online;
+        bool online = false;
         quint32 encoder_descrete;
     } state;
     AbstractCommand *descreteCmd;
