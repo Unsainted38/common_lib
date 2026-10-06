@@ -12,7 +12,7 @@ INCLUDEPATH +=  \
                 $$PWD/uacs_network_transport \
 
 CONFIG(debug, debug|release) {
-    LIBS += -L$$PWD/lib/$${QT_PROFILE}/$${BUILD_FLAG} -lcommon_libd
+    LIBS += -L$$PWD/lib/$${QT_PROFILE}/debug -lcommon_libd
 } else {
-    LIBS += -L$$PWD/lib/$${QT_PROFILE}/$${BUILD_FLAG} -lcommon_lib
+    LIBS += -L$$PWD/lib/$${QT_PROFILE}/release -lcommon_lib
 }
