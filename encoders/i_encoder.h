@@ -3,6 +3,7 @@
 
 class IEncoder {
 public:
+    virtual ~IEncoder() = default;
     virtual unsigned int descrete() const = 0;
 };
 
