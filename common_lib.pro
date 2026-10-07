@@ -70,6 +70,7 @@ HEADERS += \
     $$COMMON_LIB_ROOT/devices/pvt_device.h \
     $$COMMON_LIB_ROOT/devices/ubpch_device.h \
     $$COMMON_LIB_ROOT/devices/um2_13_device.h \
+    $$COMMON_LIB_ROOT/devices/vesper_engine_device.h \
     $$COMMON_LIB_ROOT/drivers/i_driver.h \
     $$COMMON_LIB_ROOT/drivers/vesper_driver.h \
     $$COMMON_LIB_ROOT/encoders/i_encoder.h \
@@ -154,6 +155,7 @@ SOURCES += \
     $$COMMON_LIB_ROOT/devices/pvt_device.cpp \
     $$COMMON_LIB_ROOT/devices/ubpch_device.cpp \
     $$COMMON_LIB_ROOT/devices/um2_13_device.cpp \
+    $$COMMON_LIB_ROOT/devices/vesper_engine_device.cpp \
     $$COMMON_LIB_ROOT/drivers/vesper_driver.cpp \
     $$COMMON_LIB_ROOT/modbus/modbus_device.cpp \
     $$COMMON_LIB_ROOT/modbus/modbus_protocol_factory.cpp \
