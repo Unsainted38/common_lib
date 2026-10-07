@@ -1,6 +1,6 @@
-#include "abstract_modbus_device.h"
+#include "modbus_device.h"
 
-AbstractModbusDevice::AbstractModbusDevice(std::shared_ptr<SerialCircularRequester> requester, QString configPath, QString section, QObject *parent)
+ModbusDevice::ModbusDevice(std::shared_ptr<SerialCircularRequester> requester, QString configPath, QString section, QObject *parent)
     : QObject(parent),
     requester_(std::move(requester))
 {
@@ -11,22 +11,22 @@ AbstractModbusDevice::AbstractModbusDevice(std::shared_ptr<SerialCircularRequest
     requester_->startRequest();
 }
 
-quint8 AbstractModbusDevice::deviceAddress()
+quint8 ModbusDevice::deviceAddress() const
 {
     return device_id_;
 }
 
-void AbstractModbusDevice::addCircularCommand(AbstractCommand *cmd)
+void ModbusDevice::addCircularCommand(AbstractCommand *cmd)
 {
     requester_->addCircularCommand(cmd);
 }
 
-void AbstractModbusDevice::executeCommand(AbstractCommand *cmd)
+void ModbusDevice::executeCommand(AbstractCommand *cmd)
 {
     requester_->addDisposableCommand(cmd);
 }
 
-void AbstractModbusDevice::executeNoResponceCommand(AbstractCommand *cmd)
+void ModbusDevice::executeNoResponceCommand(AbstractCommand *cmd)
 {
     requester_->addNoResponceCommand(cmd);
 }

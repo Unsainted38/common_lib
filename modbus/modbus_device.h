@@ -1,5 +1,5 @@
-#ifndef ABSTRACT_MODBUS_DEVICE_H
-#define ABSTRACT_MODBUS_DEVICE_H
+#ifndef MODBUS_DEVICE_H
+#define MODBUS_DEVICE_H
 
 #include <QObject>
 #include <requesters/serial_circular_requester.h>
@@ -8,9 +8,9 @@
 #include <memory>
 
 /**
- * @brief Базовый класс Modbus-устройства с фабричным созданием протокола.
+ * @brief Представляет Modbus-устройство с фабричным созданием протокола.
  */
-class AbstractModbusDevice : public QObject
+class ModbusDevice : public QObject
 {
     Q_OBJECT
     quint8 device_id_; /**< Хранит device id. */
@@ -40,24 +40,24 @@ void executeNoResponceCommand(AbstractCommand *cmd);
 
 public:
     /**
-     * @brief Базовый класс Modbus-устройства с фабричным созданием протокола.
+     * @brief Представляет Modbus-устройство с фабричным созданием протокола.
      *
      * @param requester Requester, выполняющий команды устройства.
      * @param configPath Путь к INI-файлу конфигурации.
      * @param section Имя секции с параметрами объекта.
      * @param parent Родительский QObject, управляющий временем жизни объекта.
      */
-explicit AbstractModbusDevice(std::shared_ptr<SerialCircularRequester> requester, QString configPath, QString section, QObject *parent = nullptr);
+explicit ModbusDevice(std::shared_ptr<SerialCircularRequester> requester, QString configPath, QString section, QObject *parent = nullptr);
     /**
      * @brief Возвращает адрес устройства на шине Modbus.
      *
      * @return Адрес устройства.
      */
-quint8 deviceAddress();
+quint8 deviceAddress() const;
 
 signals:
 
 private slots:
 };
 
-#endif // ABSTRACT_MODBUS_DEVICE_H
+#endif // MODBUS_DEVICE_H

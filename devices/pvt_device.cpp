@@ -15,10 +15,9 @@ void PvtDevice::onTimerUpdateData() {
 }
 
 PvtDevice::PvtDevice(std::shared_ptr<SerialCircularRequester> requester, QString configPath, QString section)
-    : AbstractModbusDevice(std::move(requester), configPath, section) {
+    : ModbusDevice(std::move(requester), configPath, section) {
     TempHumidityCmd = new ReadHoldingRegisters(TempReg, 2, protocol_);
     addCircularCommand(TempHumidityCmd);
-    requester->startRequest();
     m_timer = new QTimer(this);
     m_timer->start(200);
     connect(m_timer, SIGNAL(timeout()), this, SLOT(onTimerUpdateData()));

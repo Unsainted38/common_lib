@@ -1,11 +1,11 @@
 #ifndef LIR919D_DEVICE_H
 #define LIR919D_DEVICE_H
 
-#include <modbus/abstract_modbus_device.h>
+#include <modbus/modbus_device.h>
 
 
 
-class Lir919dDevice : public AbstractModbusDevice
+class Lir919dDevice : public ModbusDevice
 {
     Q_OBJECT
     struct Lir919dState

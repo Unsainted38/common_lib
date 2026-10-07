@@ -1,6 +1,6 @@
 #ifndef PVT_DEVICE_H
 #define PVT_DEVICE_H
-#include <modbus/abstract_modbus_device.h>
+#include <modbus/modbus_device.h>
 
 struct PvtState {
     bool online = false;
@@ -8,7 +8,7 @@ struct PvtState {
     float humidity = 0.0;
 };
 
-class PvtDevice : public AbstractModbusDevice {
+class PvtDevice : public ModbusDevice {
     Q_OBJECT
     AbstractCommand *TempHumidityCmd;
     const quint16 TempReg = 0x0102;

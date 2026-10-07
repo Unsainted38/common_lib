@@ -75,7 +75,7 @@ HEADERS += \
     $$COMMON_LIB_ROOT/encoders/i_encoder.h \
     $$COMMON_LIB_ROOT/modbus/ModBusCmdTypes.h \
     $$COMMON_LIB_ROOT/modbus/ModBusDTO.h \
-    $$COMMON_LIB_ROOT/modbus/abstract_modbus_device.h \
+    $$COMMON_LIB_ROOT/modbus/modbus_device.h \
     $$COMMON_LIB_ROOT/modbus/abstract_modbus_protocol.h \
     $$COMMON_LIB_ROOT/modbus/modbus_protocol_factory.h \
     $$COMMON_LIB_ROOT/modbus/modbus_rtu.h \
@@ -155,7 +155,7 @@ SOURCES += \
     $$COMMON_LIB_ROOT/devices/ubpch_device.cpp \
     $$COMMON_LIB_ROOT/devices/um2_13_device.cpp \
     $$COMMON_LIB_ROOT/drivers/vesper_driver.cpp \
-    $$COMMON_LIB_ROOT/modbus/abstract_modbus_device.cpp \
+    $$COMMON_LIB_ROOT/modbus/modbus_device.cpp \
     $$COMMON_LIB_ROOT/modbus/modbus_protocol_factory.cpp \
     $$COMMON_LIB_ROOT/modbus/modbus_rtu.cpp \
     $$COMMON_LIB_ROOT/modbus/modbus_tcp.cpp \

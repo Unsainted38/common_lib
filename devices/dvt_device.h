@@ -3,7 +3,7 @@
 
 #include <QObject>
 #include <QTimer>
-#include <modbus/abstract_modbus_device.h>
+#include <modbus/modbus_device.h>
 
 /**
  * @brief Содержит последний измеренный набор параметров датчика ДВТ.
@@ -18,7 +18,7 @@ struct DvtState {
 /**
  * @brief Предоставляет значения состояния датчика ДВТ через Modbus.
  */
-class DvtDevice : public AbstractModbusDevice
+class DvtDevice : public ModbusDevice
 {
 
     AbstractCommand *dvtStateCommand; /**< Команда или набор команд dvt state command. */

@@ -14,7 +14,7 @@ void Lir919dDevice::onTimer()
 }
 
 Lir919dDevice::Lir919dDevice(std::shared_ptr<SerialCircularRequester> requester, QString configPath, QString section, QObject *parent)
-    : AbstractModbusDevice{std::move(requester), configPath, section, parent}
+    : ModbusDevice{std::move(requester), configPath, section, parent}
 {
     descreteCmd = new ReadInputRegisters(0x10, 3, protocol_);
     addCircularCommand(descreteCmd);
