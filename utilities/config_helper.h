@@ -4,6 +4,24 @@
 #include <QObject>
 #include <QSettings>
 
+template<typename T, typename M>
+struct ConfigField
+{
+    QString key;
+    M T::* member;
+};
+
+template<typename T, typename M>
+ConfigField<T, M> field(
+    QString key,
+    M T::* member)
+{
+    return {
+        std::move(key),
+        member
+    };
+}
+
 /**
  * @brief Читает общие параметры устройства из INI-файла.
  */
@@ -33,8 +51,26 @@ static void loadTransportConfig(QString path, QString section);
      */
 static quint8 loadModBusDeviceAddress(QString path, QString section);
 
+template<typename T, typename... Fields>
+static T loadConfig(QSettings& settings, Fields&&... fields) {
+    T result{};
 
-signals:
+    (loadField(settings, result, std::forward<Fields>(fields)), ...);
+
+    return result;
+}
+
+private:
+
+template<typename T, typename Field>
+static void loadField(
+    QSettings& settings,
+    T& result,
+    const Field&& field)
+{
+    using ValueType = std::remove_cvref_t<decltype(result.*(field.member))>;
+    result.*(field.member) = settings.value(field.key).template value<ValueType>();
+}
 
 };
 
