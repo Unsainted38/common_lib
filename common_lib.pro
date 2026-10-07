@@ -14,6 +14,7 @@ INCLUDEPATH += \
             $$PWD \
             $$PWD/cmd \
             $$PWD/algorithm \
+            $$PWD/modbus \
             $$PWD/network_transport \
             $$PWD/requesters \
             $$PWD/devices \
@@ -110,7 +111,8 @@ HEADERS += \
     $$COMMON_LIB_ROOT/utilities/bit_utils.h \
     $$COMMON_LIB_ROOT/utilities/config_helper.h \
     $$COMMON_LIB_ROOT/utilities/console_utilities.h \
-    $$COMMON_LIB_ROOT/utilities/random_utils.h
+    $$COMMON_LIB_ROOT/utilities/random_utils.h \
+    devices/pr102_device.h
 
 SOURCES += \
     $$COMMON_LIB_ROOT/algorithm/binary_coded_decimals_converter.cpp \
@@ -183,7 +185,8 @@ SOURCES += \
     $$COMMON_LIB_ROOT/uacs_network_transport/serialconnect.cpp \
     $$COMMON_LIB_ROOT/uacs_network_transport/tcpconnect.cpp \
     $$COMMON_LIB_ROOT/utilities/config_helper.cpp \
-    $$COMMON_LIB_ROOT/utilities/console_utilities.cpp
+    $$COMMON_LIB_ROOT/utilities/console_utilities.cpp \
+    devices/pr102_device.cpp
 
 
 DEFINES += COMMON_LIBRARY
