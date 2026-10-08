@@ -138,7 +138,7 @@ void SerialCircularRequester::processNext() {
             return;
         }
 
-        qWarning() << "Command response timeout";
+        qWarning() << "Command response timeout: " << current_cmd_->debugInfo();
         locker_->unlock();
         finishCurrentCommand();
     }
@@ -203,7 +203,7 @@ void SerialCircularRequester::processNext() {
     pending_packet_ = current_cmd_->makeCommand();
     early_response_buffer_.clear();
     if (pending_packet_.isEmpty()) {
-        qWarning() << "Command produced an empty packet";
+        qWarning() << "Command produced an empty packet: " << std::remove_cvref_t<decltype(current_cmd_)>();
         rejectCurrentCommand();
         return;
     }
