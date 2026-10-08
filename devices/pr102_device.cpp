@@ -17,6 +17,8 @@ Pr102Device::Pr102Device(std::shared_ptr<SerialCircularRequester> requester, QSt
     settings.endGroup();
     getRegisters_ = std::make_unique<ReadHoldingRegisters>(registers.get_registers_, registers.get_count_, protocol_);
     setRegisters_ = std::make_unique<WriteMultipleRegisters>(registers.set_registers_, registers.set_count_, protocol_);
+    QVector<quint16> regs({0});
+    setRegisters_->setValue(QVariant::fromValue(regs));
 
     addCircularCommand(getRegisters_.get());
     addCircularCommand(setRegisters_.get());
