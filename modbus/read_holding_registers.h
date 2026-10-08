@@ -42,7 +42,6 @@ public:
      */
 const QByteArray &makeCommand() override;
 
-    // AbstractCommand interface
 public:
     /**
      * @brief Возвращает последнее принятое или установленное значение команды.
@@ -57,8 +56,13 @@ QVariant getValue() override;
      * @return true, если найден и обработан полный корректный кадр.
      */
 bool tryParse(const QByteArray &data) override;
+    /**
+     * @brief Добавляет отладочную информацию о команде.
+     *
+     * @return QString с информацией о типе команды, адресе регистра, количестве регистров.
+     */
+QString debugInfo() const override;
 
-public slots:
 };
 
 #endif // READ_HOLDING_REGISTERS_H

@@ -41,3 +41,11 @@ bool AbstractCommand::tryParse(const QByteArray &data)
     qDebug() << "[WARNING!!!] In AbstractCommand class tryParse() [WARNING!!!]";
     return false;
 }
+
+QString AbstractCommand::debugInfo() const
+{
+    return QString(
+               "type=%1"
+               )
+        .arg(metaObject()->className());
+}

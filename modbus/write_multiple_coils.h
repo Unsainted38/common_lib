@@ -60,6 +60,12 @@ bool isSuccess() override;
      * @return true, если найден и обработан полный корректный кадр.
      */
 bool tryParse(const QByteArray &data) override;
+    /**
+     * @brief Добавляет отладочную информацию о команде.
+     *
+     * @return QString с информацией о типе команды, адресе регистра, количестве регистров.
+     */
+QString debugInfo() const override;
 };
 
 #endif // WRITE_MULTIPLE_COILS_H

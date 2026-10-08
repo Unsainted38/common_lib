@@ -107,3 +107,16 @@ bool ReadCoils::tryParse(const QByteArray &data)
         return true;
     }
 }
+
+
+QString ReadCoils::debugInfo() const
+{
+    return QString(
+               "type=%1 slaveId=%2 function=0x%3 coils address=%4 count=%5"
+               )
+        .arg(metaObject()->className())
+        .arg(protocol->deviceID())
+        .arg(cmdID, 2, 16, QChar('0'))
+        .arg(coilAddress)
+        .arg(coilsCount);
+}

@@ -80,6 +80,13 @@ virtual bool isSuccess();
      */
 virtual bool tryParse(const QByteArray &data);
 
+    /**
+     * @brief Добавляет отладочную информацию о команде.
+     *
+     * @return QString с информацией о типе команды.
+     */
+virtual QString debugInfo() const;
+
 public slots:
     /**
      * @brief Декодирует полезную нагрузку ответа и обновляет значение команды.

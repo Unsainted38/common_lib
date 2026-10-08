@@ -101,3 +101,16 @@ bool ReadInputRegisters::tryParse(const QByteArray &data)
         return true;
     }
 }
+
+
+QString ReadInputRegisters::debugInfo() const
+{
+    return QString(
+               "type=%1 slaveId=%2 function=0x%3 register adress=%4 register count=%5"
+               )
+        .arg(metaObject()->className())
+        .arg(protocol->deviceID())
+        .arg(cmdID)
+        .arg(registerAddress)
+        .arg(registersCount);
+}

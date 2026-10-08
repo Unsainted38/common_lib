@@ -31,8 +31,6 @@ public:
      */
 explicit ReadDescreteInputs(quint16 inputAddress, quint16 inputsCount, AbstractModBusProtocol *protocol, QObject *parent = nullptr);
 
-    // AbstractCommand interface
-public:
     /**
      * @brief Формирует пакет команды и сбрасывает буфер ожидаемого ответа.
      *
@@ -52,6 +50,13 @@ QVariant getValue() override;
      * @return true, если найден и обработан полный корректный кадр.
      */
 bool tryParse(const QByteArray &data) override;
+
+    /**
+     * @brief Добавляет отладочную информацию о команде.
+     *
+     * @return QString с информацией о типе команды, адресе дискретных инпутов, количество инпутов.
+     */
+QString debugInfo() const override;
 };
 
 #endif // READ_DESCRETE_INPUTS_H

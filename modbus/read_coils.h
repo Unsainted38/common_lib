@@ -58,6 +58,10 @@ QVariant getValue() override;
 bool tryParse(const QByteArray &data) override;
 
 
+
+// AbstractCommand interface
+public:
+QString debugInfo() const override;
 };
 
 #endif // READ_COILS_H
