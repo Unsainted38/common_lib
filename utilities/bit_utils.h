@@ -2,6 +2,7 @@
 #define BIT_UTILS_H
 
 #include <QObject>
+#include <concepts>
 
 /**
  * @brief Содержит операции над байтами, словами и регистрами Modbus.
@@ -73,8 +74,23 @@ static float makeFloat(quint16 word1, quint16 word2) {
      * @param high_word старшее 16-битное слово числа.
      * @return Результат операции типа quint32.
      */
-static quint32 makeQuint32(quint16 low_word, quint16 high_word) {
-    return (static_cast<quint32>(high_word) << 16) | static_cast<quint32>(low_word);
+static quint32 makeQuint32(quint16 lowWord, quint16 highWord) {
+    return (static_cast<quint32>(highWord) << 16) | static_cast<quint32>(lowWord);
+}
+template <std::unsigned_integral T>
+static bool bitCheck(T value, quint8 bit) {
+    return (value & (T{1} << bit)) != 0;
+}
+template <std::unsigned_integral T>
+static void setBit(T& value, quint8 bit, bool state)
+{
+    const T mask = T{1} << bit;
+
+    if (state) {
+        value |= mask;   // установить бит в 1
+    } else {
+        value &= ~mask;  // сбросить бит в 0
+    }
 }
 };
 
