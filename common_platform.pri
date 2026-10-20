@@ -19,6 +19,11 @@ debian13_x86_64-g++ {
     HTRA_SDK_PATH = /opt/sdk/sysroot/opt/htraapi
 }
 
+linux-agava-g++ {
+    BUILD_PLATFORM = Agava_ARMv7
+    USERNAME = root
+}
+
 linux-moxa-g++ {
     BUILD_PLATFORM = Moxa_ARMv7
     USERNAME = moxa
