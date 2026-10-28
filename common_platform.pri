@@ -22,6 +22,9 @@ debian13_x86_64-g++ {
 linux-agava-g++ {
     BUILD_PLATFORM = Agava_ARMv7
     USERNAME = root
+    QMAKE_RPATHDIR += /opt/agava/runtime/lib
+    QMAKE_RPATHDIR += /opt/agava/lib
+    QMAKE_RPATHDIR += /opt/agava/qt/lib
 }
 
 linux-moxa-g++ {
@@ -43,13 +46,18 @@ macx {
     USERNAME = erikveraksich
     QMAKE_LFLAGS -= -single_module
     QMAKE_LFLAGS_SHLIB -= -single_module
-    QMAKE_CXXFLAGS += -fsanitize=address,undefined
     QMAKE_CXXFLAGS += -fno-omit-frame-pointer
-    QMAKE_LFLAGS += -fsanitize=address,undefined
+    contains(CONFIG, enable_sanitizers) {
+        QMAKE_CFLAGS += -fsanitize=address,undefined -fno-omit-frame-pointer
+        QMAKE_CXXFLAGS += -fsanitize=address,undefined
+        QMAKE_LFLAGS += -fsanitize=address,undefined
+    }
+    QMAKE_SONAME_PREFIX = @rpath
 }
 
 isEmpty(BUILD_PLATFORM) {
-    error("BUILD_PLATFORM is not defined by SDK")
+    warning("BUILD_PLATFORM is not defined by SDK, BUILD_PLATFORM is default")
+    BUILD_PLATFORM = default
 }
 
 QT_VERSION_SAFE = $$replace(QT_VERSION, \\., _)
