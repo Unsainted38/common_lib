@@ -1,15 +1,19 @@
 #ifndef I_DRIVER_H
 #define I_DRIVER_H
 
-enum class MoveDirection {
-    FORWARD = 1,
-    BACKWARD = -1
+enum class DriverType {
+    Single,
+    Broadband
 };
 
 class IDriver {
 
 public:
-    virtual void move(float speed, MoveDirection direction = MoveDirection::FORWARD) const = 0;
+    virtual ~IDriver() = default;
+
+    virtual DriverType type() = 0;
+
+    virtual void move(double speed) const = 0;
     virtual void stop() const = 0;
 };
 
