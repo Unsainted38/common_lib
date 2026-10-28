@@ -56,7 +56,8 @@ macx {
 }
 
 isEmpty(BUILD_PLATFORM) {
-    error("BUILD_PLATFORM is not defined by SDK")
+    warning("BUILD_PLATFORM is not defined by SDK, BUILD_PLATFORM is default")
+    BUILD_PLATFORM = default
 }
 
 QT_VERSION_SAFE = $$replace(QT_VERSION, \\., _)
