@@ -4,8 +4,6 @@
 #include <core/state_machine/state/i_state.h>
 #include <core/state_machine/state/operational_state.h>
 
-
-
 class MovingToPointState : public IState
 {
 public:
@@ -23,10 +21,6 @@ public:
 
 private:
     IState* parent_;
-    struct Target {
-        double azimuth{};
-        double elevation{};
-    } target_;
 };
 
 #endif // MOVING_TO_POINT_STATE_H

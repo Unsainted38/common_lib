@@ -3,17 +3,20 @@
 
 #include <core/event/i_event.h>
 
+struct TargetPoint {
+    double azimuth{};
+    double elevation{};
+};
+
 class StartMovingToPointEvent : public IEvent
 {
 public:
-    explicit StartMovingToPointEvent(double azimuth, double elevation);
+    explicit StartMovingToPointEvent(const TargetPoint& target);
     EventPriority priority() const override;
     EventType type() const override;
-    double azimuth() const;
-    double elevation() const;
+    const TargetPoint target() const;
 private:
-    double azimuth_;
-    double elevation_;
+    TargetPoint target_;
 };
 
 #endif // START_MOVING_TO_POINT_EVENT_H
