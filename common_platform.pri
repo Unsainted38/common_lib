@@ -41,6 +41,7 @@ macx {
     QMAKE_CXXFLAGS += -fsanitize=address,undefined
     QMAKE_CXXFLAGS += -fno-omit-frame-pointer
     QMAKE_LFLAGS += -fsanitize=address,undefined
+    QMAKE_SONAME_PREFIX = @rpath
 }
 
 isEmpty(BUILD_PLATFORM) {
