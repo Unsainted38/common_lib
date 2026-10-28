@@ -8,7 +8,7 @@ include($$PWD/common_build.pri)
 include($$PWD/common_deploy.pri)
 
 QT += core network
-CONFIG += c++20
+CONFIG += c++23
 
 INCLUDEPATH += \
             $$PWD \
@@ -112,7 +112,15 @@ HEADERS += \
     $$COMMON_LIB_ROOT/utilities/config_helper.h \
     $$COMMON_LIB_ROOT/utilities/console_utilities.h \
     $$COMMON_LIB_ROOT/utilities/random_utils.h \
-    devices/pr102_device.h
+    core/control/modes/i_control_mode.h \
+    core/control/modes/pointing_mode.h \
+    devices/pr102_device.h \
+    sensors/encoders/i_position_sensor.h \
+    sensors/encoders/lir_encoder_sensor.h \
+    sensors/limiters/i_limiters_sensor.h \
+    sensors/limiters/kzik_limiters_sensor.h \
+    sensors/measurement.h \
+    utilities/angle_utils.h
 
 SOURCES += \
     $$COMMON_LIB_ROOT/algorithm/binary_coded_decimals_converter.cpp \
@@ -186,7 +194,10 @@ SOURCES += \
     $$COMMON_LIB_ROOT/uacs_network_transport/tcpconnect.cpp \
     $$COMMON_LIB_ROOT/utilities/config_helper.cpp \
     $$COMMON_LIB_ROOT/utilities/console_utilities.cpp \
-    devices/pr102_device.cpp
+    core/control/modes/pointing_mode.cpp \
+    devices/pr102_device.cpp \
+    sensors/encoders/lir_encoder_sensor.cpp \
+    sensors/limiters/kzik_limiters_sensor.cpp
 
 
 DEFINES += COMMON_LIBRARY
