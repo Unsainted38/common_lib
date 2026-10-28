@@ -15,21 +15,21 @@ Pr102Device::Pr102Device(std::shared_ptr<SerialCircularRequester> requester, QSt
         field("SetRegisters", &Registers::set_registers_),
         field("SetCount", &Registers::set_count_));
     settings.endGroup();
-    getRegisters_ = std::make_unique<ReadHoldingRegisters>(registers.get_registers_, registers.get_count_, protocol_);
-    setRegisters_ = std::make_unique<WriteMultipleRegisters>(registers.set_registers_, registers.set_count_, protocol_);
+    getRegistersCmd_ = std::make_unique<ReadHoldingRegisters>(registers.get_registers_, registers.get_count_, protocol_);
+    setRegistersCmd_ = std::make_unique<WriteMultipleRegisters>(registers.set_registers_, registers.set_count_, protocol_);
     QVector<quint16> regs({0});
-    setRegisters_->setValue(QVariant::fromValue(regs));
+    setRegistersCmd_->setValue(QVariant::fromValue(regs));
 
-    addCircularCommand(getRegisters_.get());
-    addCircularCommand(setRegisters_.get());
+    addCircularCommand(getRegistersCmd_.get());
+    addCircularCommand(setRegistersCmd_.get());
 }
 
 QVector<quint16> Pr102Device::getRegisters()
 {
-    return getRegisters_->getValue().value<QVector<quint16>>();
+    return getRegistersCmd_->getValue().value<QVector<quint16>>();
 }
 
 void Pr102Device::setRegisters(QVector<quint16> registers)
 {
-    setRegisters_->setValue(QVariant::fromValue(registers));
+    setRegistersCmd_->setValue(QVariant::fromValue(registers));
 }
