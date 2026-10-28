@@ -22,6 +22,9 @@ debian13_x86_64-g++ {
 linux-agava-g++ {
     BUILD_PLATFORM = Agava_ARMv7
     USERNAME = root
+    QMAKE_RPATHDIR += /opt/agava/runtime/lib
+    QMAKE_RPATHDIR += /opt/agava/lib
+    QMAKE_RPATHDIR += /opt/agava/qt/lib
 }
 
 linux-moxa-g++ {
