@@ -1,5 +1,7 @@
 include(common_platform.pri)
 
+QT += network core
+
 INCLUDEPATH +=  \
                 $$PWD \
                 $$PWD/cmd \

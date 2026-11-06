@@ -74,7 +74,6 @@ HEADERS += \
     $$COMMON_LIB_ROOT/devices/vesper_engine_device.h \
     $$COMMON_LIB_ROOT/drivers/i_driver.h \
     $$COMMON_LIB_ROOT/drivers/vesper_driver.h \
-    $$COMMON_LIB_ROOT/encoders/i_encoder.h \
     $$COMMON_LIB_ROOT/modbus/ModBusCmdTypes.h \
     $$COMMON_LIB_ROOT/modbus/ModBusDTO.h \
     $$COMMON_LIB_ROOT/modbus/modbus_device.h \
