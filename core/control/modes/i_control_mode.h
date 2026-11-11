@@ -5,13 +5,11 @@
 #include <core/axis.h>
 
 struct ControlOutput {
-    double azVelocity = 0.0;
-    double elVelocity = 0.0;
+    std::vector<double> velocities;
 };
 
 struct ControlInput {
-    AxisState az;
-    AxisState el;
+    std::vector<AxisState> axes;
     Measurement<double> signal_power;
     double dt = 0.0;
 };
