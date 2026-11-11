@@ -1,4 +1,5 @@
 #include "control_service.h"
+#include <cmath>
 
 ControlService::ControlService() {}
 
@@ -46,18 +47,20 @@ void ControlService::update(double dt)
 
 ControlInput ControlService::collectTelemetry(double dt)
 {
-    return {
-        .az = axis_az_->state(),
-        .el = axis_el_->state(),
-        .signal_power = Measurement<double>{0.0},
-        .dt = dt
-    };
+    ControlInput input;
+    for (const Axis& axis : axes_) {
+        input.axes.push_back(axis.state());
+    }
+    input.dt = dt;
+    input.signal_power = Measurement<double>{0.0};
+    return input;
 }
 
 void ControlService::apply(const ControlOutput &output)
 {
-    axis_az_->move(output.azVelocity);
-    axis_el_->move(output.elVelocity);
+    for (std::size_t i = 0; i < output.velocities.size(); ++i) {
+        axes_[i].move(output.velocities[i]);
+    }
 }
 
 
@@ -82,32 +85,21 @@ ControlService::validate_input(
         return std::unexpected(InputError::InvalidDt);
     }
 
-    // Положение азимута
-    if (!isFresh(input.az.position, now, maxSensorAge)
-        || !std::isfinite(input.az.position.value.angle))
-    {
-        return std::unexpected(
-            InputError::InvalidAzPosition);
-    }
-
-    // Положение угла места
-    if (!isFresh(input.el.position, now, maxSensorAge)
-        || !std::isfinite(input.el.position.value.angle))
-    {
-        return std::unexpected(
-            InputError::InvalidElPosition);
-    }
-
-    // Концевики обеих осей
     auto limitersValid = [&](const AxisState& axis) {
         return isFresh(axis.limiters, now, maxLimitersAge);
     };
 
-    if (!limitersValid(input.az))
-        return std::unexpected(InputError::InvalidAzLimiters);
-
-    if (!limitersValid(input.el))
-        return std::unexpected(InputError::InvalidElLimiters);
+    // Положение осей
+    for (const auto& axis : input.axes) {
+        if (!isFresh(axis.position, now, maxSensorAge)
+            || !std::isfinite(axis.position.value.angle)) {
+            return std::unexpected(
+                InputError::InvalidAxisPosition);
+        }
+        if (!limitersValid(axis)) {
+            return std::unexpected(InputError::InvalidAxisLimiters);
+        }
+    }
 
     // Мощность сигнала нужна не каждому алгоритму
     if (requires_signal &&
@@ -124,39 +116,26 @@ ControlService::validate_input(
 std::expected<ControlOutput, OutputError> ControlService::limit_out(const ControlInput &input, const ControlOutput &output)
 {
     // 1. Проверяем результат вычислений
-    if (!std::isfinite(output.azVelocity)) {
-        return std::unexpected(
-            OutputError::InvalidAzVelocity);
-    }
-
-    if (!std::isfinite(output.elVelocity)) {
-        return std::unexpected(
-            OutputError::InvalidElVelocity);
+    for (const auto& velocity : output.velocities) {
+        if (!std::isfinite(velocity)) {
+            return std::unexpected(
+                OutputError::InvalidAxisVelocity);
+        }
     }
 
     // 2. Создаём копию управляющего воздействия
     auto safe = output;
 
-    // 3. Проверяем концевики азимута
-    const auto& az_limits = input.az.limiters.value;
+    // 3. Проверяем концевики
+    for (std::size_t i = 0; i < input.axes.size(); ++i) {
+        const auto& limits = input.axes[i].limiters.value;
+        if (limits.BO_plus && safe.velocities[i] > 0.0) {
+            safe.velocities[i] = 0.0;
+        }
 
-    if (az_limits.BO_plus && safe.azVelocity > 0.0) {
-        safe.azVelocity = 0.0;
-    }
-
-    if (az_limits.BO_minus && safe.azVelocity < 0.0) {
-        safe.azVelocity = 0.0;
-    }
-
-    // 4. Проверяем концевики угла места
-    const auto& el_limits = input.el.limiters.value;
-
-    if (el_limits.BO_plus && safe.elVelocity > 0.0) {
-        safe.elVelocity = 0.0;
-    }
-
-    if (el_limits.BO_minus && safe.elVelocity < 0.0) {
-        safe.elVelocity = 0.0;
+        if (limits.BO_minus && safe.velocities[i] < 0.0) {
+            safe.velocities[i] = 0.0;
+        }
     }
 
     return safe;
@@ -165,6 +144,7 @@ std::expected<ControlOutput, OutputError> ControlService::limit_out(const Contro
 
 void ControlService::stop_drives()
 {
-    axis_az_->stop();
-    axis_el_->stop();
+    for (auto& axis : axes_) {
+        axis.stop();
+    }
 }

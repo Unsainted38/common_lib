@@ -14,16 +14,13 @@ struct ControlServiceTelemetry {
 
 enum class InputError {
     InvalidDt,
-    InvalidAzPosition,
-    InvalidElPosition,
-    InvalidAzLimiters,
-    InvalidElLimiters,
+    InvalidAxisPosition,
+    InvalidAxisLimiters,
     InvalidSignalPower
 };
 
 enum class OutputError {
-    InvalidAzVelocity,
-    InvalidElVelocity
+    InvalidAxisVelocity
 };
 
 class ControlService
@@ -39,8 +36,7 @@ public:
 
 private:
     std::unique_ptr<IControlMode> active_mode_;
-    std::shared_ptr<Axis> axis_az_;
-    std::shared_ptr<Axis> axis_el_;
+    std::vector<Axis> axes_;
 
     void apply(const ControlOutput& output);
     std::expected<void, InputError> validate_input(const ControlInput& input, bool requires_signal) const;
