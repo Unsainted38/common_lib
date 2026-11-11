@@ -119,7 +119,8 @@ HEADERS += \
     sensors/limiters/i_limiters_sensor.h \
     sensors/limiters/kzik_limiters_sensor.h \
     sensors/measurement.h \
-    utilities/angle_utils.h
+    utilities/angle_utils.h \
+    utilities/pid.h
 
 SOURCES += \
     $$COMMON_LIB_ROOT/algorithm/binary_coded_decimals_converter.cpp \
