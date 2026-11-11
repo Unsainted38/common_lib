@@ -10,7 +10,7 @@ struct PositionRange {
 
 struct PositionMeasurement {
     double angle = 0.0;
-    std::optional<int32_t> turns;
+    std::optional<uint32_t> turns;
 };
 
 struct IPositionSensor {
