@@ -98,6 +98,7 @@ bool ReadHoldingRegisters::tryParse(const QByteArray &data)
         }
 
         regs = std::move(parsedRegs);
+        notify_callback_();
         return true;
     }
 }
@@ -113,4 +114,9 @@ QString ReadHoldingRegisters::debugInfo() const
         .arg(cmdID)
         .arg(registerAddress)
         .arg(registersCount);
+}
+
+void ReadHoldingRegisters::set_callback(std::function<void ()> callback)
+{
+    notify_callback_ = callback;
 }

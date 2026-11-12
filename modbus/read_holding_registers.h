@@ -21,6 +21,7 @@ class ReadHoldingRegisters : public AbstractCommand
     QByteArray buffer; /**< Накопительный буфер входных данных. */
     QVector<quint16> regs; /**< Последние прочитанные или заданные значения регистров. */
     const quint8 cmdID = 0x03; /**< Код функции протокола. */
+    std::function<void()> notify_callback_= []{};
 public:
     /**
      * @brief Реализует Modbus-функцию 0x03 Read Holding Registers.
@@ -62,7 +63,12 @@ bool tryParse(const QByteArray &data) override;
      * @return QString с информацией о типе команды, адресе регистра, количестве регистров.
      */
 QString debugInfo() const override;
-
+    /**
+     * @brief Добавляет callback в команду для реакции на обновление значения.
+     *
+     * @return void
+     */
+void set_callback(std::function<void ()> callback) override;
 };
 
 #endif // READ_HOLDING_REGISTERS_H

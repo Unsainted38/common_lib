@@ -35,6 +35,12 @@ void AbstractCommand::processData(const QByteArray &data)
     qDebug() << "[WARNING!!!] In AbstractCommand class processData() [WARNING!!!]";
 }
 
+void AbstractCommand::set_callback(std::function<void()> callback)
+{
+    Q_UNUSED(callback);
+    qDebug() << "[WARNING!!!] In AbstractCommand class set_callback() [WARNING!!!]";
+}
+
 bool AbstractCommand::tryParse(const QByteArray &data)
 {
     Q_UNUSED(data);

@@ -101,6 +101,8 @@ virtual void processData(const QByteArray &data, quint16 regAddr);
      * @param data Входные данные или полезная нагрузка ответа.
      */
 virtual void processData(const QByteArray &data);
+
+virtual void set_callback(std::function<void()> callback);
 signals:
 protected:
 };
