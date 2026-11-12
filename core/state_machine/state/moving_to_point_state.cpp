@@ -30,7 +30,6 @@ HandleResult MovingToPointState::handle(const IEvent &event)
 {
     switch (event.type()) {
     case EventType::StartMovingToPoint: {
-        const auto& current_event = dynamic_cast<const StartMovingToPointEvent&>(event);
         return HandleResult::handled();
     }
     default:
