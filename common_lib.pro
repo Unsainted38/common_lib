@@ -8,7 +8,6 @@ include($$PWD/common_build.pri)
 include($$PWD/common_deploy.pri)
 
 QT += core network
-CONFIG += c++23
 
 INCLUDEPATH += \
             $$PWD \

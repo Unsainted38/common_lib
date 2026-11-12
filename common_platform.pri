@@ -30,8 +30,8 @@ linux-agava-g++ {
 linux-moxa-g++ {
     BUILD_PLATFORM = Moxa_ARMv7
     USERNAME = moxa
-    QT -= gui widgets
-    QMAKE_CXXFLAGS += -std=gnu++20
+    #QT -= gui widgets
+    CONFIG += c++23
 }
 
 win32-g++ {
@@ -53,6 +53,7 @@ macx {
         QMAKE_LFLAGS += -fsanitize=address,undefined
     }
     QMAKE_SONAME_PREFIX = @rpath
+    CONFIG += c++23
 }
 
 isEmpty(BUILD_PLATFORM) {
