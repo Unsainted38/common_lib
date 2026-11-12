@@ -15,7 +15,6 @@ public:
 
 private:
     std::unique_ptr<Lir919dDevice> device_;
-    Measurement<PositionMeasurement> measurement_;
 };
 
 #endif // LIR_ENCODER_SENSOR_H
